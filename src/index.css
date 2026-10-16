@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------
+   THEME DESIGN TOKENS (Sepia, Obsidian, Clean White)
+------------------------------------------------------------- */
+:root {
+  /* Default: کاغذ (Sepia / Warm Parchment) */
+  --bg-canvas: #faf6ee;
+  --bg-card: #ffffff;
+  --bg-surface: #f5efe3;
+  --bg-subtle: #eee5d3;
+  --text-primary: #27211b;
+  --text-secondary: #52473c;
+  --text-muted: #7c6f62;
+  --accent-gold: #9d6825;
+  --accent-gold-hover: #b87c32;
+  --border-subtle: #e2d7c3;
+  --border-focus: #c29b4e;
+}
+
+[data-theme="dark"] {
+  /* شبینہ (Obsidian / Dark Ink) */
+  --bg-canvas: #0c0e12;
+  --bg-card: #151820;
+  --bg-surface: #1b202a;
+  --bg-subtle: #242a37;
+  --text-primary: #f6f2e9;
+  --text-secondary: #c2c7d4;
+  --text-muted: #858d9f;
+  --accent-gold: #e2b45f;
+  --accent-gold-hover: #f1c574;
+  --border-subtle: #2b3242;
+  --border-focus: #e2b45f;
+}
+
+[data-theme="white"] {
+  /* سادہ (Minimal White / Clean Canvas) */
+  --bg-canvas: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-surface: #f1f3f5;
+  --bg-subtle: #e9ecef;
+  --text-primary: #1a1a1a;
+  --text-secondary: #495057;
+  --text-muted: #6c757d;
+  --accent-gold: #855823;
+  --accent-gold-hover: #9c682c;
+  --border-subtle: #dee2e6;
+  --border-focus: #855823;
+}
+
+/* -------------------------------------------------------------
+   NASTALIQ TYPOGRAPHY & FONT CONFIGURATIONS
+------------------------------------------------------------- */
+@font-face {
+  font-family: 'Jameel Noori Nastaliq';
+  src: local('Jameel Noori Nastaliq'), local('JameelNooriNastaliq'), url('https://fonts.gstatic.com/ea/notonastaliqurdu/v4/NotoNastaliqUrdu-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mehr Nastaliq Web';
+  src: local('Mehr Nastaliq Web'), local('MehrNastaliqWeb'), url('https://fonts.gstatic.com/ea/notonastaliqurdu/v4/NotoNastaliqUrdu-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+.font-nastaliq {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaliq", "Mehr Nastaliq Web", "Gulzar", "Amiri", "Scheherazade New", serif;
+  font-feature-settings: "kern" 1, "calt" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* -------------------------------------------------------------
+   STRICT LINE-HEIGHT & RESETS TO PREVENT GLYPH / ERAB CLIPPING
+------------------------------------------------------------- */
+textarea.leading-\[2\.4\],
+.leading-\[2\.4\] {
+  line-height: 2.4 !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+/* Global input anti-clipping resets for Nastaliq text */
+input.font-nastaliq,
+.font-nastaliq input {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  overflow: visible !important;
+}
+
+/* Unclipped ContentEditable Title styling for Nastaliq calligraphy */
+.title-editable {
+  overflow: visible !important;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.title-editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  cursor: text;
+  pointer-events: none;
+}
+
+/* Custom scrollbars that match literary parchment */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
+}
+
+/* -------------------------------------------------------------
+   PRINT & HIGH-RES PDF STYLESHEET
+------------------------------------------------------------- */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  header,
+  nav,
+  button,
+  .resizable-divider,
+  [role="separator"],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Full-bleed print poetry layout */
+  .print-poetry-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 40px auto !important;
+    padding: 40px !important;
+    border: 3px double #9d6825 !important;
+    text-align: center !important;
+    direction: rtl !important;
+  }
+
+  .print-poetry-title {
+    font-size: 28pt !important;
+    font-weight: bold !important;
+    color: #9d6825 !important;
+    margin-bottom: 12px !important;
+    font-family: "Noto Nastaliq Urdu", "Gulzar", serif !important;
+  }
+
+  .print-poetry-poet {
+    font-size: 16pt !important;
+    color: #555555 !important;
+    margin-bottom: 30px !important;
+    font-family: "Noto Nastaliq Urdu", "Gulzar", serif !important;
+  }
+
+  .print-poetry-body {
+    font-size: 20pt !important;
+    line-height: 2.8 !important;
+    white-space: pre-line !important;
+    font-family: "Noto Nastaliq Urdu", "Gulzar", serif !important;
+  }
+}

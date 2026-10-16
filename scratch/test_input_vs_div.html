@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ur">
+<head>
+  <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #faf6ee;
+      font-family: "Noto Nastaliq Urdu", serif;
+      padding: 40px;
+      direction: rtl;
+    }
+    .box {
+      background: white;
+      border: 1px solid #c29b4e;
+      border-radius: 12px;
+      padding: 16px 24px;
+      margin-bottom: 30px;
+      width: 600px;
+    }
+    input.test-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: "Noto Nastaliq Urdu", serif;
+      font-size: 26px;
+      font-weight: bold;
+      text-align: right;
+      line-height: 2.8;
+      background: transparent;
+      padding: 0;
+    }
+    input.test-input-padded {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: "Noto Nastaliq Urdu", serif;
+      font-size: 26px;
+      font-weight: bold;
+      text-align: right;
+      line-height: 2.8;
+      background: transparent;
+      padding-right: 20px;
+      padding-left: 20px;
+    }
+    div.test-div {
+      width: 100%;
+      outline: none;
+      font-family: "Noto Nastaliq Urdu", serif;
+      font-size: 26px;
+      font-weight: bold;
+      text-align: right;
+      line-height: 2.8;
+      background: transparent;
+      overflow: visible;
+    }
+  </style>
+</head>
+<body>
+  <h2>1. Standard Input in Box</h2>
+  <div class="box">
+    <input class="test-input" value="تازہ کلام">
+  </div>
+
+  <h2>2. Input with padding-right: 20px</h2>
+  <div class="box">
+    <input class="test-input-padded" value="تازہ کلام">
+  </div>
+
+  <h2>3. ContentEditable Div</h2>
+  <div class="box">
+    <div class="test-div" contenteditable="true">تازہ کلام</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,95 @@
+import { PoeticMeter } from '../types/editor';
+
+export const CLASSICAL_METERS: PoeticMeter[] = [
+  {
+    id: 'hazaj-musamman-akhrab-salim',
+    nameUrdu: 'بحرِ ہزج مثمن اخرب سالم',
+    nameEnglish: 'Bahr-e-Hazaj Musamman Akhrab Salim',
+    pattern: 'مفعول مفاعیلن مفعول مفاعیلن',
+    syllabicCode: '--v / v--- / --v / v---',
+    description: 'غالب اور میر کی مقبول ترین بحور میں سے ایک، جس میں روانی اور پرشکوہ نغمگی پائی جاتی ہے۔',
+    famousVerse: {
+      misra1: 'دلِ ناداں تجھے ہوا کیا ہے',
+      misra2: 'آخر اس درد کی دوا کیا ہے',
+      poet: 'مرزا اسد اللہ خان غالب',
+    },
+  },
+  {
+    id: 'ramal-musamman-mahzoof',
+    nameUrdu: 'بحرِ رمل مثمن محذوف',
+    nameEnglish: 'Bahr-e-Ramal Musamman Mahzoof',
+    pattern: 'فاعلاتن فاعلاتن فاعلاتن فاعلن',
+    syllabicCode: '-v-- / -v-- / -v-- / -v-',
+    description: 'انتہائی رواں اور دھیمی بحر، جس میں وارداتِ قلب اور فلسفیانہ مضامین کثرت سے باندھے جاتے ہیں۔',
+    famousVerse: {
+      misra1: 'ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے',
+      misra2: 'بہت نکلے مرے ارمان لیکن پھر بھی کم نکلے',
+      poet: 'مرزا اسد اللہ خان غالب',
+    },
+  },
+  {
+    id: 'mutaqarib-musamman-salim',
+    nameUrdu: 'بحرِ متقارب مثمن سالم',
+    nameEnglish: 'Bahr-e-Mutaqarib Musamman Salim',
+    pattern: 'فعولن فعولن فعولن فعولن',
+    syllabicCode: 'v-- / v-- / v-- / v--',
+    description: 'رزمیہ اور حماسی شاعری (جیسے شاہنامہ)، نیز چست اور تیز رفتار غزلوں کے لیے مخصوص بحر۔',
+    famousVerse: {
+      misra1: 'کبھی اے حقیقتِ منتظر نظر آ لباسِ مجاز میں',
+      misra2: 'کہ ہزاروں سجدے تڑپ رہے ہیں مری جبینِ نیاز میں',
+      poet: 'علامہ محمد اقبال',
+    },
+  },
+  {
+    id: 'rajaz-musamman-salim',
+    nameUrdu: 'بحرِ رجز مثمن سالم',
+    nameEnglish: 'Bahr-e-Rajaz Musamman Salim',
+    pattern: 'مستفعلن مستفعلن مستفعلن مستفعلن',
+    syllabicCode: '--v- / --v- / --v- / --v-',
+    description: 'طاقتور اور ضرب دار نغمگی کی حامل بحر، جو جوش و جذبے اور فکر انگیز بیانیہ کے لیے موزوں ہے۔',
+    famousVerse: {
+      misra1: 'گلوں میں رنگ بھرے بادِ نو بہار چلے',
+      misra2: 'چلے بھی آؤ کہ گلشن کا کاروبار چلے',
+      poet: 'فیض احمد فیض',
+    },
+  },
+  {
+    id: 'muzara-musamman-akhrab-makfoof-mahzoof',
+    nameUrdu: 'بحرِ مضارع مثمن اخرب مکفوف محذوف',
+    nameEnglish: 'Bahr-e-Muzara Musamman Akhrab Makfoof Mahzoof',
+    pattern: 'مفعول فاعلات مفاعیل فاعلن',
+    syllabicCode: '--v / -v-v / v--v / -v-',
+    description: 'کلاسیکی اردو غزل کی سب سے پرلطف اور محبوب بحروں میں شمار ہوتی ہے۔',
+    famousVerse: {
+      misra1: 'اب کے ہم بچھڑے تو شاید کبھی خوابوں میں ملیں',
+      misra2: 'جس طرح سوکھے ہوئے پھول کتابوں میں ملیں',
+      poet: 'احمد فراز',
+    },
+  },
+  {
+    id: 'khafeef-musaddas-makhboon-mahzoof',
+    nameUrdu: 'بحرِ خفیف مسدس مخبون محذوف',
+    nameEnglish: 'Bahr-e-Khafeef Musaddas Makhboon Mahzoof',
+    pattern: 'فاعلاتن مفاعلن فعلن',
+    syllabicCode: '-v-- / v-v- / vv-',
+    description: 'ہلکی پھلکی، مختصر اور لطیف ترین بحر، جس میں سوز و گداز کا اثر دوچند ہو جاتا ہے۔',
+    famousVerse: {
+      misra1: 'ابتدائے عشق ہے روتا ہے کیا',
+      misra2: 'آگے آگے دیکھیے ہوتا ہے کیا',
+      poet: 'میر تقی میر',
+    },
+  },
+  {
+    id: 'mutadarak-musamman-salim',
+    nameUrdu: 'بحرِ متدارک مثمن سالم',
+    nameEnglish: 'Bahr-e-Mutadarak Musamman Salim',
+    pattern: 'فاعلن فاعلن فاعلن فاعلن',
+    syllabicCode: '-v- / -v- / -v- / -v-',
+    description: 'رقص کرتی ہوئی تال، جس میں بندش کی چستی اور الفاظ کی نغمگی نمایاں ہوتی ہے۔',
+    famousVerse: {
+      misra1: 'یادِ ماضی عذاب ہے یا رب',
+      misra2: 'چھین لے مجھ سے حافظہ میرا',
+      poet: 'اختر شیرانی',
+    },
+  },
+];
