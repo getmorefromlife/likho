@@ -1,0 +1,40 @@
+[
+  {
+    "type": "after",
+    "callId": "tkpk@66",
+    "endTime": 88981.032,
+    "attachments": [
+      {
+        "name": "draft-storage.json",
+        "contentType": "application/json",
+        "file": "attachments/082cd5655a47bd8e6c8438817d8e649ccb2ea459"
+      }
+    ],
+    "annotations": []
+  },
+  {
+    "type": "after",
+    "callId": "tkpk@82",
+    "endTime": 89077.221,
+    "attachments": [
+      {
+        "name": "error-context",
+        "contentType": "text/markdown",
+        "file": "attachments/975e2e3694bf0d0e3559acf9c76aa0d7d1a97dc0"
+      }
+    ]
+  },
+  {
+    "type": "after",
+    "callId": "tkpk@61",
+    "endTime": 89083.338,
+    "attachments": [
+      {
+        "name": "screenshot",
+        "contentType": "image/png",
+        "file": "attachments/837a3b4ce4022888118ad086098709abef16cb27"
+      }
+    ],
+    "annotations": []
+  }
+]

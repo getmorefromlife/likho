@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "source": "sayedzeeshan/Aruuz",
+  "license": "GPL-2.0",
+  "revision": "058fcd6010fb0ef030f79b10466c43aa20b0d4b9",
+  "url": "https://github.com/sayedzeeshan/Aruuz/blob/058fcd6010fb0ef030f79b10466c43aa20b0d4b9/Aruuz.Website/DB/AruuzDB.sql",
+  "sha256": "fce73b822453c412ed79a3071486341ffb38e61d9a1d4bb689ede245d9f2d9f8",
+  "words": 40434,
+  "records": 43556,
+  "tables": {
+    "mastertable": {
+      "total": 79943,
+      "accepted": 34832,
+      "rejected": 860,
+      "multiword": 44251
+    },
+    "plurals": {
+      "total": 12361,
+      "accepted": 8918,
+      "rejected": 62,
+      "multiword": 3381
+    },
+    "variations": {
+      "total": 3206,
+      "accepted": 2387,
+      "rejected": 73,
+      "multiword": 746
+    },
+    "exceptions": {
+      "total": 838,
+      "accepted": 818
+    }
+  },
+  "rejected": {
+    "complex-coda-requires-lexical-reading": 842,
+    "conflicting-vowel-marks": 12,
+    "unsupported-letter": 103,
+    "invalid-key": 13,
+    "aspirate-without-onset": 18,
+    "invalid-shadda": 4,
+    "nonterminal-tanwin": 3,
+    "impossible-exception": 12
+  },
+  "quarantinedRecords": 1007,
+  "quarantineFile": "aruuz-quarantine.json",
+  "note": "Source-attributed lexical readings, not independent scholarly certification. Unsupported pronunciations are rejected; no spelling-length fallback."
+}

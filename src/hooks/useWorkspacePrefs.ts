@@ -1,7 +1,42 @@
 import { useState, useEffect, useCallback } from 'react';
-import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont, MarkerOption } from '../types/workspace';
+import {
+  WorkspacePrefs,
+  LayoutPreset,
+  ThemeId,
+  NastaliqFont,
+  MarkerOption,
+  CustomViewConfig,
+} from '../types/workspace';
 
 const STORAGE_KEY = 'qalam_workspace_prefs';
+
+export const DEFAULT_CUSTOM_CONFIG: CustomViewConfig = {
+  configVersion: 2,
+  division: 'single',
+  colSplitPct: 68,
+  rowSplitPct: 60,
+  pane1: 'editor',
+  pane2: 'qafiya_search',
+  pane3: 'prosody',
+  pane4: 'scratchpad',
+  paperWidth: 'book',
+  // Default in من پسند / Writing Only: NOTHING selected (all checkboxes false)
+  // so the poet starts with a clean writing sheet and checks only what they wish to see.
+  showTopNavBar: false,
+  showQafiyaTray: false,
+  rhymePlacement: 'top',
+  showSlotRhymeBuilder: false,
+  showTitleAndMetadata: false,
+  showWordProcessorToolbar: false,
+  showErabToolbar: false,
+  showAutoRhymeBanner: false,
+  showLiveScansionCards: false,
+  showLineNumbers: false,
+  showCoupletDiwanLayout: false,
+  showBottomStatsBar: false,
+  showRuledLines: false,
+  showFloatingQuickBar: false,
+};
 
 const DEFAULT_PREFS: WorkspacePrefs = {
   theme: 'sepia',
@@ -19,6 +54,7 @@ const DEFAULT_PREFS: WorkspacePrefs = {
   companionOpen: true,
   qafiyaTrayOpen: true,
   showLiveScansion: true,
+  customConfig: DEFAULT_CUSTOM_CONFIG,
 };
 
 export function useWorkspacePrefs() {
@@ -26,7 +62,16 @@ export function useWorkspacePrefs() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return { ...DEFAULT_PREFS, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved);
+        const savedCustom = parsed?.customConfig;
+        return {
+          ...DEFAULT_PREFS,
+          ...parsed,
+          customConfig:
+            savedCustom && savedCustom.configVersion === 2
+              ? { ...DEFAULT_CUSTOM_CONFIG, ...savedCustom }
+              : DEFAULT_CUSTOM_CONFIG,
+        };
       }
     } catch (e) {
       console.error('Failed to parse workspace prefs:', e);
@@ -93,6 +138,15 @@ export function useWorkspacePrefs() {
   const applyPreset = useCallback((preset: LayoutPreset) => {
     setPrefs((prev) => {
       switch (preset) {
+        case 'custom':
+          return {
+            ...prev,
+            activePreset: 'custom',
+            isZenMode: false,
+          };
+        case 'quiet':
+        case 'quiet_rhymes':
+          return { ...prev, activePreset: preset, isZenMode: true, companionOpen: false, qafiyaTrayOpen: false };
         case 'zen':
           return {
             ...prev,
@@ -161,6 +215,16 @@ export function useWorkspacePrefs() {
     setPrefs((prev) => ({ ...prev, showLiveScansion: !prev.showLiveScansion }));
   }, []);
 
+  const updateCustomConfig = useCallback((patch: Partial<CustomViewConfig>) => {
+    setPrefs((prev) => ({
+      ...prev,
+      customConfig: {
+        ...prev.customConfig,
+        ...patch,
+      },
+    }));
+  }, []);
+
   return {
     prefs,
     setTheme,
@@ -177,5 +241,6 @@ export function useWorkspacePrefs() {
     toggleCompanion,
     toggleQafiyaTray,
     toggleLiveScansion,
+    updateCustomConfig,
   };
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import {
   Undo2,
   Redo2,
@@ -7,13 +7,19 @@ import {
   Feather,
   Activity,
   Plus,
+  Keyboard,
+  HelpCircle,
 } from 'lucide-react';
 import { PoemDraft, PoeticForm } from '../../types/editor';
 import { WorkspacePrefs } from '../../types/workspace';
 import { ErabToolbar } from './ErabToolbar';
-import { ScansionCard } from './ScansionCard';
 import { WordProcessorToolbar, TextAlignment } from './WordProcessorToolbar';
-import { scanPoetryLine } from '../../services/aroozEngine';
+import type { detectPoemRhymeScheme as DetectPoemRhymeSchemeFn } from '../../services/qafiyaEngine';
+import { translateKeyToUrdu } from '../../utils/phoneticKeymap';
+import { useLineBoxSelection } from '../../hooks/useLineBoxSelection';
+import { PhoneticKeyboardGuideModal } from './PhoneticKeyboardGuideModal';
+
+const LazyScansionCard = React.lazy(() => import('./ScansionCard'));
 
 interface PoetryCanvasProps {
   currentDraft: PoemDraft;
@@ -63,27 +69,95 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
 }) => {
   const [textAlign, setTextAlign] = useState<TextAlignment>('center');
   const [showErabToolbar, setShowErabToolbar] = useState(true);
-  const titleEditableRef = useRef<HTMLDivElement>(null);
+  const [isPhoneticEnabled, setIsPhoneticEnabled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('likho_phonetic_keyboard') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [isKeyboardGuideOpen, setIsKeyboardGuideOpen] = useState(false);
 
   const isProseMode = currentDraft.form === 'prose';
+  const isCustomMode = prefs.activePreset === 'custom';
+  const cc = prefs.customConfig;
+  const showMetadataHeader = !isCustomMode || cc.showTitleAndMetadata;
+  const showFormattingBar = !isCustomMode || cc.showWordProcessorToolbar;
+  const effectiveShowErab = isCustomMode ? cc.showErabToolbar && showErabToolbar : showErabToolbar;
+  const effectiveShowAutoRhyme = !isCustomMode || cc.showAutoRhymeBanner;
+  const effectiveShowLiveScansion = isCustomMode ? cc.showLiveScansionCards : prefs.showLiveScansion;
+  const effectiveShowLineNumbers = !isCustomMode || cc.showLineNumbers;
+  const effectiveDiwanCouplets = isCustomMode && cc.showCoupletDiwanLayout && !isProseMode;
+  const effectiveShowBottomStats = !isCustomMode || cc.showBottomStatsBar;
+  const effectiveRuledLines = !isCustomMode || cc.showRuledLines;
+  const paperWidthClass = !isCustomMode
+    ? 'max-w-4xl'
+    : cc.paperWidth === 'narrow'
+    ? 'max-w-2xl'
+    : cc.paperWidth === 'wide'
+    ? 'max-w-6xl'
+    : cc.paperWidth === 'full'
+    ? 'max-w-full'
+    : 'max-w-4xl';
 
-  // Synchronize title into contentEditable whenever draft title updates externally
-  useEffect(() => {
-    if (titleEditableRef.current && titleEditableRef.current.innerText !== currentDraft.title) {
-      if (document.activeElement !== titleEditableRef.current) {
-        titleEditableRef.current.innerText = currentDraft.title || '';
+  const selection = useLineBoxSelection(currentDraft.content, currentDraft.id, onContentChange);
+
+  const togglePhoneticKeyboard = () => {
+    setIsPhoneticEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('likho_phonetic_keyboard', String(next));
+      } catch {
+        // ignore
       }
-    }
-  }, [currentDraft.title]);
+      return next;
+    });
+  };
+
+  // Global hotkey listener: Ctrl + Space or Alt + K toggles phonetic mode
+  useEffect(() => {
+    const handleGlobalShortcuts = (e: KeyboardEvent) => {
+      if ((e.ctrlKey && e.code === 'Space') || (e.altKey && (e.key === 'k' || e.key === 'K'))) {
+        e.preventDefault();
+        togglePhoneticKeyboard();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalShortcuts);
+    return () => window.removeEventListener('keydown', handleGlobalShortcuts);
+  }, []);
 
   // Split lines for per-line scansion mode
   const lines = currentDraft.content.split('\n');
+  const linesRef = useRef(lines);
+  linesRef.current = lines;
 
-  const handleLineChange = (index: number, newText: string) => {
-    const newLines = [...lines];
-    newLines[index] = newText;
-    onContentChange(newLines.join('\n'));
-  };
+  const [rhymeDetectorFn, setRhymeDetectorFn] = useState<
+    typeof DetectPoemRhymeSchemeFn | null
+  >(null);
+
+  useEffect(() => {
+    let active = true;
+    void import('../../services/qafiyaEngine').then((mod) => {
+      if (active) setRhymeDetectorFn(() => mod.detectPoemRhymeScheme);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const detectedRhymeScheme = useMemo(
+    () => (isProseMode || !rhymeDetectorFn ? null : rhymeDetectorFn(lines)),
+    [currentDraft.content, isProseMode, rhymeDetectorFn]
+  );
+
+  const handleLineChange = useCallback(
+    (index: number, newText: string) => {
+      const newLines = [...linesRef.current];
+      newLines[index] = newText;
+      onContentChange(newLines.join('\n'));
+    },
+    [onContentChange]
+  );
 
   const handleLineKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -95,6 +169,7 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
         const nextInput = document.getElementById(`misra-input-${index + 1}`);
         nextInput?.focus();
       }, 50);
+      return;
     } else if (e.key === 'Backspace' && lines[index] === '' && lines.length > 1) {
       e.preventDefault();
       const newLines = lines.filter((_, i) => i !== index);
@@ -103,6 +178,87 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
         const prevInput = document.getElementById(`misra-input-${Math.max(0, index - 1)}`);
         prevInput?.focus();
       }, 50);
+      return;
+    }
+
+    // In-App Urdu Phonetic Keyboard Interceptor
+    if (isPhoneticEnabled) {
+      const urduChar = translateKeyToUrdu(e);
+      if (urduChar) {
+        e.preventDefault();
+        const input = e.currentTarget;
+        const start = input.selectionStart ?? lines[index].length;
+        const end = input.selectionEnd ?? lines[index].length;
+        const currentText = lines[index];
+        const nextText = currentText.substring(0, start) + urduChar + currentText.substring(end);
+        handleLineChange(index, nextText);
+        const nextCursor = start + urduChar.length;
+        requestAnimationFrame(() => {
+          input.setSelectionRange(nextCursor, nextCursor);
+        });
+      }
+    }
+  };
+
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isPhoneticEnabled) {
+      const urduChar = translateKeyToUrdu(e);
+      if (urduChar) {
+        e.preventDefault();
+        const textarea = e.currentTarget;
+        const start = textarea.selectionStart ?? currentDraft.content.length;
+        const end = textarea.selectionEnd ?? currentDraft.content.length;
+        const currentText = currentDraft.content;
+        const nextText = currentText.substring(0, start) + urduChar + currentText.substring(end);
+        onContentChange(nextText);
+        const nextCursor = start + urduChar.length;
+        requestAnimationFrame(() => {
+          textarea.setSelectionRange(nextCursor, nextCursor);
+        });
+      }
+    }
+  };
+
+  const handlePoetKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isPhoneticEnabled) {
+      const urduChar = translateKeyToUrdu(e);
+      if (urduChar) {
+        e.preventDefault();
+        const input = e.currentTarget;
+        const start = input.selectionStart ?? currentDraft.poet.length;
+        const end = input.selectionEnd ?? currentDraft.poet.length;
+        const currentText = currentDraft.poet;
+        const nextText = currentText.substring(0, start) + urduChar + currentText.substring(end);
+        onPoetChange(nextText);
+        const nextCursor = start + urduChar.length;
+        requestAnimationFrame(() => {
+          input.setSelectionRange(nextCursor, nextCursor);
+        });
+      }
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('misra-input-0')?.focus();
+      return;
+    }
+    if (isPhoneticEnabled) {
+      const urduChar = translateKeyToUrdu(e);
+      if (urduChar) {
+        e.preventDefault();
+        const input = e.currentTarget;
+        const start = input.selectionStart ?? currentDraft.title.length;
+        const end = input.selectionEnd ?? currentDraft.title.length;
+        const currentText = currentDraft.title;
+        const nextText = currentText.substring(0, start) + urduChar + currentText.substring(end);
+        onTitleChange(nextText);
+        const nextCursor = start + urduChar.length;
+        requestAnimationFrame(() => {
+          input.setSelectionRange(nextCursor, nextCursor);
+        });
+      }
     }
   };
 
@@ -201,39 +357,29 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-card)] overflow-hidden select-text">
+    <div className="relative flex flex-col h-full min-h-0 min-w-0 bg-[var(--bg-card)] overflow-hidden select-text">
       {/* Top Header / Metadata Bar */}
+      {showMetadataHeader && (
       <div className="p-5 md:p-6 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/70">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           {/* Title and Poet Inputs with Ample Nastaliq Breathing Space */}
           <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {/* Title: Unclipped ContentEditable container so Nastaliq dots (ت کے نقطے) never clip */}
-            <div className="flex-1 relative flex items-center px-6 py-2 min-h-[74px] rounded-xl border border-[var(--border-subtle)]/70 hover:border-[var(--accent-gold)] focus-within:border-[var(--accent-gold)] focus-within:ring-2 focus-within:ring-[var(--accent-gold)]/20 bg-[var(--bg-card)]/80 transition-all shadow-2xs">
-              <div
-                ref={titleEditableRef}
-                contentEditable
-                suppressContentEditableWarning
-                role="textbox"
-                aria-multiline="false"
+            {/* Title Input with Ample Nastaliq Breathing Space */}
+            <div className="flex-1 relative flex items-center px-4 py-2 min-h-[74px] rounded-xl border border-[var(--border-subtle)]/70 hover:border-[var(--accent-gold)] focus-within:border-[var(--accent-gold)] focus-within:ring-2 focus-within:ring-[var(--accent-gold)]/20 bg-[var(--bg-card)]/80 transition-all shadow-2xs">
+              <input
+                id="poem-title-input"
+                type="text"
+                value={currentDraft.title}
+                onChange={(e) => onTitleChange(e.target.value)}
+                onKeyDown={handleTitleKeyDown}
+                placeholder={isProseMode ? 'عنوانِ مقالہ یا مضمون درج فرمائیں...' : 'عنوانِ کلام یا مطلع درج فرمائیں...'}
                 dir="rtl"
-                onInput={(e) => onTitleChange(e.currentTarget.innerText || '')}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    document.getElementById('misra-input-0')?.focus();
-                  }
-                }}
-                data-placeholder={isProseMode ? 'عنوانِ مقالہ یا مضمون درج فرمائیں...' : 'عنوانِ کلام یا مطلع درج فرمائیں...'}
                 style={{
                   fontFamily: prefs.fontFamily,
                   lineHeight: 2.8,
-                  paddingRight: '1rem',
-                  paddingLeft: '1rem',
                 }}
-                className="title-editable w-full bg-transparent border-none outline-none text-xl md:text-2xl font-bold text-[var(--text-primary)] text-right font-nastaliq cursor-text select-text"
-              >
-                {currentDraft.title}
-              </div>
+                className="w-full bg-transparent border-none outline-none text-xl md:text-2xl font-bold text-[var(--text-primary)] text-right font-nastaliq placeholder-[var(--text-muted)]/40"
+              />
             </div>
 
             {/* Poet / Author Input with Ample Breathing Space */}
@@ -243,6 +389,7 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                 type="text"
                 value={currentDraft.poet}
                 onChange={(e) => onPoetChange(e.target.value)}
+                onKeyDown={handlePoetKeyDown}
                 placeholder={isProseMode ? 'مصنف کا نام...' : 'شاعر کا نام...'}
                 style={{ fontFamily: prefs.fontFamily, lineHeight: 2.4 }}
                 className="w-full bg-transparent border-none outline-none text-sm md:text-base text-[var(--text-secondary)] placeholder-[var(--text-muted)] text-right font-nastaliq px-2"
@@ -277,8 +424,8 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
         </div>
 
         {/* Active Meter & Radif Pill Tags (Only in poetry mode) */}
-        {!isProseMode && (currentDraft.meterName || currentDraft.radif) && (
-          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[var(--border-subtle)]/40 text-xs">
+        {!isProseMode && effectiveShowAutoRhyme && (currentDraft.meterName || currentDraft.radif || detectedRhymeScheme) && (
+          <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-[var(--border-subtle)]/40 text-xs">
             {currentDraft.meterName && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] border border-[var(--accent-gold)]/20 font-nastaliq">
                 <BookOpen className="w-3 h-3" />
@@ -288,17 +435,28 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                 )}
               </span>
             )}
-            {currentDraft.radif && (
+            {(currentDraft.radif || detectedRhymeScheme?.detectedRadif) && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)] font-nastaliq text-[11px]">
                 <span>ردیف:</span>
-                <span className="font-bold text-[var(--text-primary)]">{currentDraft.radif}</span>
+                <span className="font-bold text-[var(--text-primary)]">{currentDraft.radif || detectedRhymeScheme?.detectedRadif}</span>
+              </span>
+            )}
+            {detectedRhymeScheme?.detectedQafiyaWord && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 font-nastaliq text-[11px]">
+                <span>قافیہ اساس:</span>
+                <span className="font-bold">{detectedRhymeScheme.detectedQafiyaWord}</span>
+                {detectedRhymeScheme.secondQafiyaWord && detectedRhymeScheme.secondQafiyaWord !== detectedRhymeScheme.detectedQafiyaWord && (
+                  <span>/ {detectedRhymeScheme.secondQafiyaWord}</span>
+                )}
               </span>
             )}
           </div>
         )}
       </div>
+      )}
 
       {/* Editor Secondary Formatting Toolbar */}
+      {showFormattingBar && (
       <div className="px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-2 select-none">
         {/* Modular Word Processor Toolbar */}
         <div className="flex flex-wrap items-center gap-2">
@@ -397,43 +555,116 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
           >
             اعراب تختی
           </button>
+
+          <div className="h-4 w-px bg-[var(--border-subtle)] mx-0.5"></div>
+
+          {/* Urdu Phonetic Keyboard Toggle & Guide */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              id="phonetic-keyboard-toggle-btn"
+              onClick={togglePhoneticKeyboard}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-nastaliq transition-all border ${
+                isPhoneticEnabled
+                  ? 'bg-[var(--accent-gold)] text-white border-[var(--accent-gold)] font-bold shadow-[0_0_12px_rgba(230,175,46,0.35)]'
+                  : 'border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+              }`}
+              title="صوتی کی بورڈ آن / آف (شارٹ کٹ: Ctrl + Space یا Alt + K)"
+            >
+              <Keyboard className="w-3.5 h-3.5" />
+              <span>{isPhoneticEnabled ? 'صوتی کی بورڈ: آن' : 'صوتی کی بورڈ: آف'}</span>
+            </button>
+
+            <button
+              type="button"
+              id="phonetic-keyboard-guide-btn"
+              onClick={() => setIsKeyboardGuideOpen(true)}
+              className="p-1.5 rounded-lg border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--accent-gold)] hover:bg-[var(--bg-subtle)] transition-colors"
+              title="کی بورڈ گائیڈ (نقشہ)"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
+      )}
 
       {/* Erab Toolbar Component */}
-      {showErabToolbar && <ErabToolbar onInsertErab={onInsertErab} />}
+      {effectiveShowErab && <ErabToolbar onInsertErab={onInsertErab} />}
 
       {/* Main Canvas Area */}
-      <div className="flex-1 relative overflow-auto p-4 md:p-8 bg-[var(--bg-canvas)] flex justify-center">
-        {!isProseMode && prefs.showLiveScansion ? (
-          /* Live Per-Line Scansion Display (Poetry Mode only) */
-          <div className="w-full max-w-4xl min-h-full flex flex-col space-y-3 pb-8">
+      {selection.selected.length > 0 && <div data-testid="line-selection-actions" role="toolbar" aria-label="منتخب مصرعے" className="absolute bottom-10 inset-x-4 z-30 flex flex-wrap items-center gap-3 px-4 py-2 text-xs bg-[var(--bg-card)] shadow-lg rounded-xl border border-[var(--accent-gold)] font-nastaliq">
+        <span role="status">{selection.selected.length} مصرعے منتخب</span>
+        <button onClick={() => void selection.copy()} className="underline">منتخب مصرعے نقل کریں</button>
+        <button onClick={selection.remove} className="underline text-red-600">منتخب مصرعے حذف کریں</button>
+        <button onClick={selection.clear} className="underline">انتخاب ختم کریں</button>
+        {selection.notice && <span role="status">{selection.notice}</span>}
+      </div>}
+      {selection.box && <div data-testid="line-selection-box" aria-hidden="true" style={{ position: 'fixed', ...selection.box, pointerEvents: 'none', zIndex: 40, border: '1px solid var(--accent-gold)', background: 'rgba(180, 130, 40, .12)' }} />}
+      <div
+        ref={selection.container}
+        tabIndex={0}
+        aria-label="مصرعوں کا انتخاب — خالی جگہ سے ماؤس کھینچیں"
+        onPointerDown={selection.onPointerDown}
+        onPointerMove={selection.onPointerMove}
+        onPointerUp={selection.onPointerUp}
+        onPointerCancel={selection.onPointerCancel}
+        onKeyDown={selection.onKeyDown}
+        id="poetry-canvas-scroll-container"
+        className="flex-1 min-h-0 relative overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain p-4 md:p-8 bg-[var(--bg-canvas)]"
+      >
+        {!isProseMode && (effectiveShowLiveScansion || effectiveDiwanCouplets) ? (
+          /* Live Per-Line / Couplet Display (Poetry Mode only) */
+          <div
+            className={`w-full ${paperWidthClass} mx-auto pb-12 ${
+              effectiveDiwanCouplets
+                ? 'grid grid-cols-1 xl:grid-cols-2 gap-3 items-start content-start'
+                : 'flex flex-col space-y-3'
+            }`}
+          >
             {lines.map((line, idx) => {
               const trimmed = line.trim();
               const isBlank = !trimmed;
               const isSectionMarker = trimmed.startsWith('—');
-              const scansion = !isBlank && !isSectionMarker ? scanPoetryLine(trimmed) : null;
+              const showScansionForLine = effectiveShowLiveScansion && !isBlank && !isSectionMarker;
               const isCoupletSecond = idx % 2 === 1;
+              const activeRadif =
+                idx === 0 || isCoupletSecond
+                  ? currentDraft.radif || detectedRhymeScheme?.detectedRadif
+                  : undefined;
+              const activeRhymeAnchor =
+                idx === 0 || isCoupletSecond
+                  ? detectedRhymeScheme?.detectedQafiyaWord
+                  : undefined;
 
               return (
                 <div
                   key={idx}
-                  className={`flex flex-col transition-all rounded-xl p-3 border ${
+                  data-line-index={idx}
+                  data-selected={selection.selected.includes(idx)}
+                  style={selection.selected.includes(idx) ? { outline: '2px solid var(--accent-gold)', outlineOffset: '-2px', background: 'var(--bg-subtle)' } : undefined}
+                  className={`flex flex-col transition-all rounded-xl p-3 ${
                     isSectionMarker
-                      ? 'bg-[var(--bg-subtle)]/50 border-dashed border-[var(--border-subtle)] text-center py-2'
+                      ? 'bg-[var(--bg-subtle)]/50 border border-dashed border-[var(--border-subtle)] text-center py-2 xl:col-span-2'
+                      : !effectiveRuledLines
+                      ? 'bg-transparent border border-transparent hover:border-[var(--border-subtle)]/40'
                       : isCoupletSecond
-                      ? 'bg-[var(--bg-card)]/80 border-[var(--border-subtle)]/80 mb-4'
-                      : 'bg-[var(--bg-surface)]/60 border-[var(--border-subtle)]/90'
+                      ? `bg-[var(--bg-card)]/80 border border-[var(--border-subtle)]/80 ${effectiveDiwanCouplets ? '' : 'mb-4'}`
+                      : 'bg-[var(--bg-surface)]/60 border border-[var(--border-subtle)]/90'
                   }`}
                 >
                   {/* Line Meta Header */}
-                  {!isSectionMarker && (
+                  {!isSectionMarker && effectiveShowLineNumbers && (
                     <div className="flex items-center justify-between text-[11px] font-nastaliq text-[var(--text-muted)] mb-1">
                       <span className="flex items-center gap-1.5">
                         <span className="w-4 h-4 rounded-full bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] flex items-center justify-center font-mono text-[10px] font-bold">
                           {idx + 1}
                         </span>
-                        <span>{isCoupletSecond ? 'دوسرا مصرع' : 'پہلا مصرع'}</span>
+                        <span>
+                          {isCoupletSecond
+                            ? `مصرع ثانیہ (شعر ${Math.floor(idx / 2) + 1})`
+                            : `مصرع اولیٰ (شعر ${Math.floor(idx / 2) + 1})`}
+                        </span>
                       </span>
                       {trimmed.length > 0 && (
                         <span className="text-[10px] font-mono text-[var(--text-muted)]">
@@ -461,16 +692,31 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                     className="w-full bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)]/40 font-nastaliq py-2.5 px-4 leading-[2.6]"
                   />
 
-                  {/* Per-Line Scansion Card */}
-                  {scansion && (
-                    <ScansionCard scansion={scansion} fontFamily={prefs.fontFamily} />
+                  {/* Per-Line Scansion Card with Interactive Syllable Repair */}
+                  {showScansionForLine && (
+                    <Suspense
+                      fallback={
+                        <div className="my-2 py-2.5 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/60 text-xs font-nastaliq text-[var(--text-muted)]">
+                          عروضی لغت اور تقطیع لوڈ ہو رہی ہے...
+                        </div>
+                      }
+                    >
+                      <LazyScansionCard
+                        fontFamily={prefs.fontFamily}
+                        lineText={line}
+                        lineIndex={idx}
+                        radif={activeRadif}
+                        rhymeAnchorWord={activeRhymeAnchor}
+                        onApplyLineChange={handleLineChange}
+                      />
+                    </Suspense>
                   )}
                 </div>
               );
             })}
 
             {/* Quick Add Misra Button */}
-            <div className="flex items-center justify-center pt-2">
+            <div className={`flex items-center justify-center pt-2 ${effectiveDiwanCouplets ? 'xl:col-span-2' : ''}`}>
               <button
                 type="button"
                 onClick={handleAddMisra}
@@ -483,11 +729,12 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
           </div>
         ) : (
           /* Continuous Manuscript & Prose Textarea Mode */
-          <div className="w-full max-w-4xl min-h-full flex flex-col">
+          <div className={`w-full ${paperWidthClass} mx-auto min-h-full flex flex-col`}>
             <textarea
               ref={textareaRef}
               value={currentDraft.content}
               onChange={(e) => onContentChange(e.target.value)}
+              onKeyDown={handleTextareaKeyDown}
               onPaste={onPaste}
               onSelect={onSelect}
               placeholder={
@@ -502,7 +749,7 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                 lineHeight: prefs.lineHeight,
                 textAlign: textAlign,
               }}
-              className="w-full flex-1 bg-transparent border-none outline-none resize-none text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:ring-0 leading-[2.6] px-6 py-4 font-nastaliq custom-scrollbar"
+              className="w-full flex-1 min-h-[65vh] bg-transparent border-none outline-none resize-none text-[var(--text-primary)] placeholder-[var(--text-muted)]/50 focus:ring-0 leading-[2.6] px-6 py-4 font-nastaliq custom-scrollbar"
               rows={20}
               spellCheck={false}
             />
@@ -511,6 +758,7 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
       </div>
 
       {/* Bottom Live Statistics Bar */}
+      {effectiveShowBottomStats && (
       <div className="h-9 px-4 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] flex items-center justify-between text-xs text-[var(--text-muted)] select-none">
         <div className="flex items-center gap-4 font-nastaliq">
           {isProseMode ? (
@@ -558,9 +806,18 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
 
         <div className="flex items-center gap-1.5 text-[11px] font-nastaliq text-[var(--text-muted)]">
           <Sparkles className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
-          <span>کسی بھی لفظ کو منتخب کر کے لغت و مترادفات ملاحظہ فرمائیں</span>
+          <span>مصرعے منتخب کرنے کے لیے خالی کنارے سے ماؤس کھینچیں</span>
         </div>
       </div>
+      )}
+
+      {/* Phonetic Keyboard Interactive Guide Modal */}
+      <PhoneticKeyboardGuideModal
+        isOpen={isKeyboardGuideOpen}
+        onClose={() => setIsKeyboardGuideOpen(false)}
+        isEnabled={isPhoneticEnabled}
+        onToggle={togglePhoneticKeyboard}
+      />
     </div>
   );
 };

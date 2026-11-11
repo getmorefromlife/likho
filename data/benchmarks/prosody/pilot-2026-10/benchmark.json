@@ -1,0 +1,2680 @@
+{
+  "schemaVersion": "1.0.0",
+  "benchmark": {
+    "id": "lkh-prosody-pilot-2026-10",
+    "version": "0.1.0",
+    "title": "Likho Urdu prosody annotation pilot, October 2026",
+    "status": "internal-pilot",
+    "createdAt": "2026-10-29",
+    "protocol": {
+      "id": "LKH-PRO-PROTOCOL",
+      "version": "0.1.0",
+      "path": "docs/PROSODY_BENCHMARK_PROTOCOL.md"
+    },
+    "scope": {
+      "purpose": "Exercise the annotation schema and review protocol on ten source-exact public-domain lines before corpus scale-up.",
+      "language": "ur",
+      "script": "Arab",
+      "formCoverage": "Ten positive Ghalib lines across ramal, hazaj, rajaz, and khafeef. No rubai, no invalid variants, no repair tasks, and no contemporary writing.",
+      "limitations": [
+        "One internal process prepared the annotations with engine output visible.",
+        "No independent qualified prosody reviewer or adjudicator has participated.",
+        "The pilot cannot support accuracy, coverage, or gold-benchmark claims.",
+        "Human minutes per item were not measured.",
+        "Current scan output exposes scansion patterns but not independent syllable-text segmentation."
+      ]
+    },
+    "engine": {
+      "appCommit": "5ae5519",
+      "workingTreeDirty": true,
+      "lexicon": {
+        "source": "sayedzeeshan/Aruuz",
+        "revision": "058fcd6010fb0ef030f79b10466c43aa20b0d4b9",
+        "sha256": "937765161e60f1efb8fb9c0bfe56568825c0dd19f61d399b30e9746d5fd9188a",
+        "sourceSha256": "fce73b822453c412ed79a3071486341ffb38e61d9a1d4bb689ede245d9f2d9f8",
+        "license": "GPL-2.0",
+        "words": 40434
+      },
+      "meterTable": {
+        "path": "src/data/prosodyMeters.ts",
+        "sha256": "7772929bb120fb8894cad48ada07cc3eec3e9d68852e0d7199ba3b9e3cb1f9f0"
+      },
+      "sourceDigest": {
+        "algorithm": "sha256",
+        "files": [
+          {
+            "path": "src/data/prosodyMeters.ts",
+            "sha256": "7772929bb120fb8894cad48ada07cc3eec3e9d68852e0d7199ba3b9e3cb1f9f0"
+          },
+          {
+            "path": "src/services/aroozEngine.ts",
+            "sha256": "5945002c7b379c8eaf2cb1a54ba9d6718dcdb0cf0385fd47ebe7418097ec8e04"
+          },
+          {
+            "path": "src/services/meterRepairEngine.ts",
+            "sha256": "9d6cdc41938f6366fbf99c30fa946b7ab512d6ea56763cacea7445b092f19b3a"
+          },
+          {
+            "path": "src/services/prosodicReadings.ts",
+            "sha256": "bac640014b40532b5575bb59f21e99ac223c4d18c5ff7ed4469a651cd4c9fd0b"
+          },
+          {
+            "path": "src/services/urduPhonology.ts",
+            "sha256": "0253cc6e1174fbf64435c844c51970bdae258c3839090157585c3f2a72ac3ebe"
+          }
+        ],
+        "digest": "f60aa01fdf6730cc4c3d492060365832dc54d057709be76fe19d969867b1eb57"
+      }
+    },
+    "review": {
+      "mode": "single-annotator",
+      "reviewers": [
+        {
+          "id": "rev-internal-1",
+          "role": "annotator-verifier",
+          "qualification": "internal-engine-author",
+          "independent": false,
+          "notes": "Prepared the pilot with engine output visible; not a qualified independent prosody reviewer."
+        }
+      ],
+      "adjudicator": null,
+      "adjudicationStatus": "pending",
+      "blindToEngineOutput": false,
+      "annotationBasis": "engine-assisted-internal",
+      "independenceStatement": "No independent annotation or adjudication has occurred. One internal process prepared and checked every item with engine output visible. This pilot validates schema and tooling mechanics only.",
+      "limitations": [
+        "Not an independent or double annotation.",
+        "No qualified prosody reviewer has signed the readings or meter assignments.",
+        "No item is a frozen gold answer.",
+        "Effort per item is unmeasured and must not be estimated from this pilot."
+      ],
+      "effortObservation": {
+        "measured": false,
+        "minutesPerItem": null,
+        "note": "No independent human timing was performed. Do not infer minutes per item from this engine-assisted pilot."
+      }
+    }
+  },
+  "items": [
+    {
+      "id": "LKH-PRO-0001",
+      "text": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "split": "pilot",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "ramal-musamman-mahzoof",
+        "meterNameUrdu": "بحرِ رمل مثمن محذوف",
+        "meterNameEnglish": "Bahr-e-Ramal Musamman Mahzoof",
+        "family": "ramal",
+        "targetPattern": "=-===-===-===-=",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "ramal-musamman-mahzoof",
+          "targetPattern": "=-===-===-===-=",
+          "actualPattern": "=-===-===-===-=",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "نقش",
+              "normalizedText": "نقش",
+              "charStart": 0,
+              "charEnd": 3,
+              "pronunciation": "نَقْش",
+              "readingPattern": "=-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:60800"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 1,
+              "text": "فریادی",
+              "normalizedText": "فریادی",
+              "charStart": 4,
+              "charEnd": 10,
+              "pronunciation": "فَرْیادی",
+              "readingPattern": "===",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:38926"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "==-",
+                  "pronunciation": "فَرْیادی",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:38926"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 2,
+              "text": "ہے",
+              "normalizedText": "ہے",
+              "charStart": 11,
+              "charEnd": 13,
+              "pronunciation": "ہے",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:ہے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "ہے",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:ہے"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "کس",
+              "normalizedText": "کس",
+              "charStart": 14,
+              "charEnd": 16,
+              "pronunciation": "کَس",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:75170"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 4,
+              "text": "کی",
+              "normalizedText": "کی",
+              "charStart": 17,
+              "charEnd": 19,
+              "pronunciation": "کی",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:کی"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "کی",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:کی"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 5,
+              "text": "شوخیِ",
+              "normalizedText": "شوخی",
+              "charStart": 20,
+              "charEnd": 25,
+              "pronunciation": "شوخی",
+              "readingPattern": "=-=",
+              "rules": [
+                "izafat-yeh"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:33504"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=--",
+                  "pronunciation": "شوخی",
+                  "rules": [
+                    "izafat-yeh"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:33504"
+                  ]
+                },
+                {
+                  "pattern": "==-",
+                  "pronunciation": "شوخی",
+                  "rules": [
+                    "izafat-vowel"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:33504"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 6,
+              "text": "تحریر",
+              "normalizedText": "تحریر",
+              "charStart": 26,
+              "charEnd": 31,
+              "pronunciation": "تَحْرِیر",
+              "readingPattern": "==-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:11323"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 7,
+              "text": "کا",
+              "normalizedText": "کا",
+              "charStart": 32,
+              "charEnd": 34,
+              "pronunciation": "کا",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:کا"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "کا",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:کا"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "izafat"
+        ],
+        "note": "Izafat on شوخیِ is licensed by the izafat-yeh rule; the source preserves the mark."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10301."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0002",
+      "text": "کاغذی ہے پیرہن ہر پیکرِ تصویر کا",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "split": "pilot",
+        "verseLineIndex": 2,
+        "coupletIndex": 1,
+        "half": "second",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "ramal-musamman-mahzoof",
+        "meterNameUrdu": "بحرِ رمل مثمن محذوف",
+        "meterNameEnglish": "Bahr-e-Ramal Musamman Mahzoof",
+        "family": "ramal",
+        "targetPattern": "=-===-===-===-=",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "ramal-musamman-mahzoof",
+          "targetPattern": "=-===-===-===-=",
+          "actualPattern": "=-===-===-===-=",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "کاغذی",
+              "normalizedText": "کاغذی",
+              "charStart": 0,
+              "charEnd": 5,
+              "pronunciation": "کاغَذی",
+              "readingPattern": "=-=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:74622"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=--",
+                  "pronunciation": "کاغَذی",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:74622"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 1,
+              "text": "ہے",
+              "normalizedText": "ہے",
+              "charStart": 6,
+              "charEnd": 8,
+              "pronunciation": "ہے",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:ہے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "ہے",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:ہے"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 2,
+              "text": "پیرہن",
+              "normalizedText": "پیرہن",
+              "charStart": 9,
+              "charEnd": 14,
+              "pronunciation": null,
+              "readingPattern": "=-=",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:67"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 3,
+              "text": "ہر",
+              "normalizedText": "ہر",
+              "charStart": 15,
+              "charEnd": 17,
+              "pronunciation": "ہَر",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:79741"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 4,
+              "text": "پیکرِ",
+              "normalizedText": "پیکر",
+              "charStart": 18,
+              "charEnd": 23,
+              "pronunciation": "پَیکَر",
+              "readingPattern": "=-=",
+              "rules": [
+                "izafat-consonant"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:70415"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=--",
+                  "pronunciation": "پَیکَر",
+                  "rules": [
+                    "izafat-consonant"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:70415"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 5,
+              "text": "تصویر",
+              "normalizedText": "تصویر",
+              "charStart": 24,
+              "charEnd": 29,
+              "pronunciation": "تَصْوِیر",
+              "readingPattern": "==-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:12603"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 6,
+              "text": "کا",
+              "normalizedText": "کا",
+              "charStart": 30,
+              "charEnd": 32,
+              "pronunciation": "کا",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:کا"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "کا",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:کا"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "izafat"
+        ],
+        "note": "Izafat on پیکرِ is licensed by the izafat-consonant rule; the source preserves the mark."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10301."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0003",
+      "text": "جذبۂ بے اختیارِ شوق دیکھا چاہیے",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "split": "pilot",
+        "verseLineIndex": 7,
+        "coupletIndex": 4,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "ramal-musamman-mahzoof",
+        "meterNameUrdu": "بحرِ رمل مثمن محذوف",
+        "meterNameEnglish": "Bahr-e-Ramal Musamman Mahzoof",
+        "family": "ramal",
+        "targetPattern": "=-===-===-===-=",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "ramal-musamman-mahzoof",
+          "targetPattern": "=-===-===-===-=",
+          "actualPattern": "=-===-===-===-=",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "جذبۂ",
+              "normalizedText": "جذبہء",
+              "charStart": 0,
+              "charEnd": 4,
+              "pronunciation": "جَذْبَہ",
+              "readingPattern": "=-=",
+              "rules": [
+                "izafat-consonant"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:15654"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=--",
+                  "pronunciation": "جَذْبَہ",
+                  "rules": [
+                    "izafat-consonant"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:15654"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 1,
+              "text": "بے",
+              "normalizedText": "بے",
+              "charStart": 5,
+              "charEnd": 7,
+              "pronunciation": null,
+              "readingPattern": "=",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:795"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 2,
+              "text": "اختیارِ",
+              "normalizedText": "اختیار",
+              "charStart": 8,
+              "charEnd": 15,
+              "pronunciation": "اِخْتِیار",
+              "readingPattern": "=-==",
+              "rules": [
+                "izafat-consonant"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:2101"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=-=-",
+                  "pronunciation": "اِخْتِیار",
+                  "rules": [
+                    "izafat-consonant"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:2101"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "شوق",
+              "normalizedText": "شوق",
+              "charStart": 16,
+              "charEnd": 19,
+              "pronunciation": "شَوق",
+              "readingPattern": "=-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:33583"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 4,
+              "text": "دیکھا",
+              "normalizedText": "دیکھا",
+              "charStart": 20,
+              "charEnd": 25,
+              "pronunciation": "دیکھا",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:24784"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=-",
+                  "pronunciation": "دیکھا",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:24784"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 5,
+              "text": "چاہیے",
+              "normalizedText": "چاہیے",
+              "charStart": 26,
+              "charEnd": 31,
+              "pronunciation": "چاہِیے",
+              "readingPattern": "=-=",
+              "rules": [
+                "polite-verb-ending"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:70933",
+                "aruuz:mastertable:70956"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=--",
+                  "pronunciation": "چاہِیے",
+                  "rules": [
+                    "polite-verb-ending"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:70933",
+                    "aruuz:mastertable:70956"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "izafat",
+          "hamza"
+        ],
+        "note": "The hamza-bearing ۂ in جذبۂ and the izafat on اختیارِ are both present in the source text."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10301."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0004",
+      "text": "سینۂ شمشیر سے باہر ہے دم شمشیر کا",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "split": "pilot",
+        "verseLineIndex": 8,
+        "coupletIndex": 4,
+        "half": "second",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "ramal-musamman-mahzoof",
+        "meterNameUrdu": "بحرِ رمل مثمن محذوف",
+        "meterNameEnglish": "Bahr-e-Ramal Musamman Mahzoof",
+        "family": "ramal",
+        "targetPattern": "=-===-===-===-=",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "ramal-musamman-mahzoof",
+          "targetPattern": "=-===-===-===-=",
+          "actualPattern": "=-===-===-===-=",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "سینۂ",
+              "normalizedText": "سینہء",
+              "charStart": 0,
+              "charEnd": 4,
+              "pronunciation": "سِینَہ",
+              "readingPattern": "=-=",
+              "rules": [
+                "izafat-consonant"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:32101"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=--",
+                  "pronunciation": "سِینَہ",
+                  "rules": [
+                    "izafat-consonant"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:32101"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 1,
+              "text": "شمشیر",
+              "normalizedText": "شمشیر",
+              "charStart": 5,
+              "charEnd": 10,
+              "pronunciation": "شَمْشِیر",
+              "readingPattern": "==-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:33382"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 2,
+              "text": "سے",
+              "normalizedText": "سے",
+              "charStart": 11,
+              "charEnd": 13,
+              "pronunciation": "سے",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:سے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "سے",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:سے"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "باہر",
+              "normalizedText": "باہر",
+              "charStart": 14,
+              "charEnd": 18,
+              "pronunciation": "باہَر",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:7274"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 4,
+              "text": "ہے",
+              "normalizedText": "ہے",
+              "charStart": 19,
+              "charEnd": 21,
+              "pronunciation": "ہے",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:ہے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "ہے",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:ہے"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 5,
+              "text": "دم",
+              "normalizedText": "دم",
+              "charStart": 22,
+              "charEnd": 24,
+              "pronunciation": "دَم",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:23436"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 6,
+              "text": "شمشیر",
+              "normalizedText": "شمشیر",
+              "charStart": 25,
+              "charEnd": 30,
+              "pronunciation": "شَمْشِیر",
+              "readingPattern": "==-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:33382"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 7,
+              "text": "کا",
+              "normalizedText": "کا",
+              "charStart": 31,
+              "charEnd": 33,
+              "pronunciation": "کا",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:کا"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "کا",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:کا"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "izafat",
+          "hamza"
+        ],
+        "note": "The hamza-bearing ۂ in سینۂ is preserved; the reading is dictionary-attested."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10301."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0005",
+      "text": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%DB%81%D8%B2%D8%A7%D8%B1%D9%88%DA%BA%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%DB%8C%DA%BA%20%D8%A7%DB%8C%D8%B3%DB%8C%20%DA%A9%DB%81%20%DB%81%D8%B1%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%20%D9%BE%DB%81%20%D8%AF%D9%85%20%D9%86%DA%A9%D9%84%DB%92&oldid=10421",
+        "revisionId": 10421,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-hazaron-khwahishen",
+        "poemTitle": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "split": "pilot",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "hazaj-musamman-salim",
+        "meterNameUrdu": "بحرِ ہزج مثمن سالم",
+        "meterNameEnglish": "Bahr-e-Hazaj Musamman Salim",
+        "family": "hazaj",
+        "targetPattern": "-===-===-===-===",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "hazaj-musamman-salim",
+          "targetPattern": "-===-===-===-===",
+          "actualPattern": "-===-===-===-===",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "ہزاروں",
+              "normalizedText": "ہزاروں",
+              "charStart": 0,
+              "charEnd": 6,
+              "pronunciation": "ہَزاروں",
+              "readingPattern": "-==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:plurals:79749"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 1,
+              "text": "خواہشیں",
+              "normalizedText": "خواہشیں",
+              "charStart": 7,
+              "charEnd": 14,
+              "pronunciation": "خواہِشیں",
+              "readingPattern": "=-=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:plurals:21221"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 2,
+              "text": "ایسی",
+              "normalizedText": "ایسی",
+              "charStart": 15,
+              "charEnd": 19,
+              "pronunciation": "اَیسی",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:5932"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=-",
+                  "pronunciation": "اَیسی",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:5932"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "کہ",
+              "normalizedText": "کہ",
+              "charStart": 20,
+              "charEnd": 22,
+              "pronunciation": "کہ",
+              "readingPattern": "-",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:کہ"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 4,
+              "text": "ہر",
+              "normalizedText": "ہر",
+              "charStart": 23,
+              "charEnd": 25,
+              "pronunciation": "ہَر",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:79741"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 5,
+              "text": "خواہش",
+              "normalizedText": "خواہش",
+              "charStart": 26,
+              "charEnd": 31,
+              "pronunciation": null,
+              "readingPattern": "==",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:119"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 6,
+              "text": "پہ",
+              "normalizedText": "پہ",
+              "charStart": 32,
+              "charEnd": 34,
+              "pronunciation": "پہ",
+              "readingPattern": "-",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:پہ"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 7,
+              "text": "دم",
+              "normalizedText": "دم",
+              "charStart": 35,
+              "charEnd": 37,
+              "pronunciation": "دَم",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:23436"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 8,
+              "text": "نکلے",
+              "normalizedText": "نکلے",
+              "charStart": 38,
+              "charEnd": 42,
+              "pronunciation": "نِکْلے",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:63187"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=-",
+                  "pronunciation": "نِکْلے",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:63187"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "nasalization"
+        ],
+        "note": "خواہشیں ends in noon ghunna; the dictionary reading supplies the nasalized pronunciation."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10421."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0006",
+      "text": "بہت نکلے مرے ارمان لیکن پھر بھی کم نکلے",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%DB%81%D8%B2%D8%A7%D8%B1%D9%88%DA%BA%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%DB%8C%DA%BA%20%D8%A7%DB%8C%D8%B3%DB%8C%20%DA%A9%DB%81%20%DB%81%D8%B1%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%20%D9%BE%DB%81%20%D8%AF%D9%85%20%D9%86%DA%A9%D9%84%DB%92&oldid=10421",
+        "revisionId": 10421,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-hazaron-khwahishen",
+        "poemTitle": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "split": "pilot",
+        "verseLineIndex": 2,
+        "coupletIndex": 1,
+        "half": "second",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "hazaj-musamman-salim",
+        "meterNameUrdu": "بحرِ ہزج مثمن سالم",
+        "meterNameEnglish": "Bahr-e-Hazaj Musamman Salim",
+        "family": "hazaj",
+        "targetPattern": "-===-===-===-===",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "hazaj-musamman-salim",
+          "targetPattern": "-===-===-===-===",
+          "actualPattern": "-===-===-===-===",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "بہت",
+              "normalizedText": "بہت",
+              "charStart": 0,
+              "charEnd": 3,
+              "pronunciation": null,
+              "readingPattern": "-=",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:43"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 1,
+              "text": "نکلے",
+              "normalizedText": "نکلے",
+              "charStart": 4,
+              "charEnd": 8,
+              "pronunciation": "نِکْلے",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:63187"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=-",
+                  "pronunciation": "نِکْلے",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:63187"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 2,
+              "text": "مرے",
+              "normalizedText": "مرے",
+              "charStart": 9,
+              "charEnd": 12,
+              "pronunciation": null,
+              "readingPattern": "-=",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:289"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "--",
+                  "pronunciation": null,
+                  "rules": [
+                    "dictionary-exception"
+                  ],
+                  "sourceIds": [
+                    "aruuz:exceptions:289"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "ارمان",
+              "normalizedText": "ارمان",
+              "charStart": 13,
+              "charEnd": 18,
+              "pronunciation": "اَرْمان",
+              "readingPattern": "==-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:2430"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 4,
+              "text": "لیکن",
+              "normalizedText": "لیکن",
+              "charStart": 19,
+              "charEnd": 23,
+              "pronunciation": null,
+              "readingPattern": "==",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:264"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 5,
+              "text": "پھر",
+              "normalizedText": "پھر",
+              "charStart": 24,
+              "charEnd": 27,
+              "pronunciation": "پھِر",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:69152"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 6,
+              "text": "بھی",
+              "normalizedText": "بھی",
+              "charStart": 28,
+              "charEnd": 31,
+              "pronunciation": "بھی",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:بھی"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "بھی",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:بھی"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 7,
+              "text": "کم",
+              "normalizedText": "کم",
+              "charStart": 32,
+              "charEnd": 34,
+              "pronunciation": "کَم",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:75546"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 8,
+              "text": "نکلے",
+              "normalizedText": "نکلے",
+              "charStart": 35,
+              "charEnd": 39,
+              "pronunciation": "نِکْلے",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:63187"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=-",
+                  "pronunciation": "نِکْلے",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:63187"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [],
+        "note": "No unresolved ambiguity was observed in the internal pass."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10421."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0007",
+      "text": "دل ہی تو ہے نہ سنگ و خشت، درد سے بھر نہ آئے کیوں؟",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "دل ہی تو ہے نہ سنگ و خشت درد سے بھر نہ آئے کیوں",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D8%AF%D9%84%20%DB%81%DB%8C%20%D8%AA%D9%88%20%DB%81%DB%92%20%D9%86%DB%81%20%D8%B3%D9%86%DA%AF%20%D9%88%20%D8%AE%D8%B4%D8%AA%20%D8%AF%D8%B1%D8%AF%20%D8%B3%DB%92%20%D8%A8%DA%BE%D8%B1%20%D9%86%DB%81%20%D8%A2%D8%A6%DB%92%20%DA%A9%DB%8C%D9%88%DA%BA&oldid=10491",
+        "revisionId": 10491,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-dil-hi-to-hai",
+        "poemTitle": "دل ہی تو ہے نہ سنگ و خشت درد سے بھر نہ آئے کیوں",
+        "split": "pilot",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "rajaz-musamman-matwi-makhboon",
+        "meterNameUrdu": "بحرِ رجز مثمن مطوی مخبون",
+        "meterNameEnglish": "Bahr-e-Rajaz Musamman Matwi Makhboon",
+        "family": "rajaz",
+        "targetPattern": "=--=-=-=-=--=-=-=",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "rajaz-musamman-matwi-makhboon",
+          "targetPattern": "=--=-=-=-=--=-=-=",
+          "actualPattern": "=--=-=-=-=--=-=-=",
+          "distance": 0,
+          "meterNotes": [
+            "caesura-short"
+          ],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "دل",
+              "normalizedText": "دل",
+              "charStart": 0,
+              "charEnd": 2,
+              "pronunciation": "دِل",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:23099"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 1,
+              "text": "ہی",
+              "normalizedText": "ہی",
+              "charStart": 3,
+              "charEnd": 5,
+              "pronunciation": "ہی",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:ہی"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "ہی",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:ہی"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 2,
+              "text": "تو",
+              "normalizedText": "تو",
+              "charStart": 6,
+              "charEnd": 8,
+              "pronunciation": "تو",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:تو"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "تو",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:تو"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "ہے",
+              "normalizedText": "ہے",
+              "charStart": 9,
+              "charEnd": 11,
+              "pronunciation": "ہے",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:ہے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "ہے",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:ہے"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 4,
+              "text": "نہ",
+              "normalizedText": "نہ",
+              "charStart": 12,
+              "charEnd": 14,
+              "pronunciation": "نہ",
+              "readingPattern": "-",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:نہ"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 5,
+              "text": "سنگ",
+              "normalizedText": "سنگ",
+              "charStart": 15,
+              "charEnd": 18,
+              "pronunciation": "سَنْگ",
+              "readingPattern": "=",
+              "rules": [
+                "conjunction-o"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:30852"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 6,
+              "text": "و",
+              "normalizedText": "و",
+              "charStart": 19,
+              "charEnd": 20,
+              "pronunciation": "و",
+              "readingPattern": "-",
+              "rules": [
+                "conjunction-o"
+              ],
+              "sourceIds": [
+                "handbook:3.3"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "و",
+                  "rules": [
+                    "conjunction-o"
+                  ],
+                  "sourceIds": [
+                    "handbook:3.3"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 7,
+              "text": "خشت",
+              "normalizedText": "خشت",
+              "charStart": 21,
+              "charEnd": 24,
+              "pronunciation": "خِشْت",
+              "readingPattern": "=-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:20335"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 8,
+              "text": "درد",
+              "normalizedText": "درد",
+              "charStart": 26,
+              "charEnd": 29,
+              "pronunciation": "دَرْد",
+              "readingPattern": "=-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:22475"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 9,
+              "text": "سے",
+              "normalizedText": "سے",
+              "charStart": 30,
+              "charEnd": 32,
+              "pronunciation": "سے",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:سے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "سے",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:سے"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 10,
+              "text": "بھر",
+              "normalizedText": "بھر",
+              "charStart": 33,
+              "charEnd": 36,
+              "pronunciation": "بھَر",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:9909"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 11,
+              "text": "نہ",
+              "normalizedText": "نہ",
+              "charStart": 37,
+              "charEnd": 39,
+              "pronunciation": "نہ",
+              "readingPattern": "-",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:نہ"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 12,
+              "text": "آئے",
+              "normalizedText": "آئے",
+              "charStart": 40,
+              "charEnd": 43,
+              "pronunciation": null,
+              "readingPattern": "=-",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:539"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "==",
+                  "pronunciation": null,
+                  "rules": [
+                    "dictionary-exception"
+                  ],
+                  "sourceIds": [
+                    "aruuz:exceptions:539"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 13,
+              "text": "کیوں",
+              "normalizedText": "کیوں",
+              "charStart": 44,
+              "charEnd": 48,
+              "pronunciation": null,
+              "readingPattern": "=",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:236"
+              ],
+              "source": "dictionary"
+            }
+          ],
+          "notes": "Selected documented meter variant: caesura-short."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "word-boundary",
+          "caesura"
+        ],
+        "note": "Source punctuation and the conjunction و are preserved; the selected meter uses a caesura-short variant at the mid-line boundary."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10491."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0008",
+      "text": "یہ نہ تھی ہماری قسمت کہ وصال یار ہوتا",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "یہ نہ تھی ہماری قسمت کہ وصال یار ہوتا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%DB%8C%DB%81%20%D9%86%DB%81%20%D8%AA%DA%BE%DB%8C%20%DB%81%D9%85%D8%A7%D8%B1%DB%8C%20%D9%82%D8%B3%D9%85%D8%AA%20%DA%A9%DB%81%20%D9%88%D8%B5%D8%A7%D9%84%20%DB%8C%D8%A7%D8%B1%20%DB%81%D9%88%D8%AA%D8%A7&oldid=8985",
+        "revisionId": 8985,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-yeh-na-thi",
+        "poemTitle": "یہ نہ تھی ہماری قسمت کہ وصال یار ہوتا",
+        "split": "pilot",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "ramal-musamman-mashkool",
+        "meterNameUrdu": "بحرِ رمل مثمن مشکول",
+        "meterNameEnglish": "Bahr-e-Ramal Musamman Mashkool",
+        "family": "ramal",
+        "targetPattern": "--=-=-==--=-=-==",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "ramal-musamman-mashkool",
+          "targetPattern": "--=-=-==--=-=-==",
+          "actualPattern": "--=-=-==--=-=-==",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "یہ",
+              "normalizedText": "یہ",
+              "charStart": 0,
+              "charEnd": 2,
+              "pronunciation": "یہ",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:یہ"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "یہ",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:یہ"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 1,
+              "text": "نہ",
+              "normalizedText": "نہ",
+              "charStart": 3,
+              "charEnd": 5,
+              "pronunciation": "نہ",
+              "readingPattern": "-",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:نہ"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 2,
+              "text": "تھی",
+              "normalizedText": "تھی",
+              "charStart": 6,
+              "charEnd": 9,
+              "pronunciation": "تھی",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:تھی"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "تھی",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:تھی"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "ہماری",
+              "normalizedText": "ہماری",
+              "charStart": 10,
+              "charEnd": 15,
+              "pronunciation": null,
+              "readingPattern": "-=-",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:397"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-==",
+                  "pronunciation": null,
+                  "rules": [
+                    "dictionary-exception"
+                  ],
+                  "sourceIds": [
+                    "aruuz:exceptions:397"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 4,
+              "text": "قسمت",
+              "normalizedText": "قسمت",
+              "charStart": 16,
+              "charEnd": 20,
+              "pronunciation": "قِسْمَت",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:40414"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 5,
+              "text": "کہ",
+              "normalizedText": "کہ",
+              "charStart": 21,
+              "charEnd": 23,
+              "pronunciation": "کہ",
+              "readingPattern": "-",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:کہ"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 6,
+              "text": "وصال",
+              "normalizedText": "وصال",
+              "charStart": 24,
+              "charEnd": 28,
+              "pronunciation": "وِصال",
+              "readingPattern": "-=-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:64448"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 7,
+              "text": "یار",
+              "normalizedText": "یار",
+              "charStart": 29,
+              "charEnd": 32,
+              "pronunciation": "یار",
+              "readingPattern": "=-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:79841"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 8,
+              "text": "ہوتا",
+              "normalizedText": "ہوتا",
+              "charStart": 33,
+              "charEnd": 37,
+              "pronunciation": null,
+              "readingPattern": "==",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:360"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=-",
+                  "pronunciation": null,
+                  "rules": [
+                    "dictionary-exception"
+                  ],
+                  "sourceIds": [
+                    "aruuz:exceptions:360"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "word-boundary",
+          "source-orthography"
+        ],
+        "note": "The Wikisource line omits the izafat mark on وصال; the source-exact unvocalized form scans at distance 0."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 8985."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0009",
+      "text": "دلِ ناداں تجھے ہوا کیا ہے؟",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "دل ناداں تجھے ہوا کیا ہے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D8%AF%D9%84%20%D9%86%D8%A7%D8%AF%D8%A7%DA%BA%20%D8%AA%D8%AC%DA%BE%DB%92%20%DB%81%D9%88%D8%A7%20%DA%A9%DB%8C%D8%A7%20%DB%81%DB%92&oldid=10487",
+        "revisionId": 10487,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-dil-nadan",
+        "poemTitle": "دل ناداں تجھے ہوا کیا ہے",
+        "split": "pilot",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "khafeef-musaddas-variant",
+        "meterNameUrdu": "بحرِ خفیف مسدس مخبون محذوف مقطوع",
+        "meterNameEnglish": "Bahr-e-Khafeef Musaddas Makhboon Mahzoof Maqtoo",
+        "family": "khafeef",
+        "targetPattern": "--==-=-===",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "khafeef-musaddas-variant",
+          "targetPattern": "--==-=-===",
+          "actualPattern": "--==-=-===",
+          "distance": 0,
+          "meterNotes": [
+            "initial-short"
+          ],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "دلِ",
+              "normalizedText": "دل",
+              "charStart": 0,
+              "charEnd": 3,
+              "pronunciation": "دِل",
+              "readingPattern": "--",
+              "rules": [
+                "izafat-consonant"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:23099"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-=",
+                  "pronunciation": "دِل",
+                  "rules": [
+                    "izafat-consonant"
+                  ],
+                  "sourceIds": [
+                    "aruuz:mastertable:23099"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 1,
+              "text": "ناداں",
+              "normalizedText": "ناداں",
+              "charStart": 4,
+              "charEnd": 9,
+              "pronunciation": "نادان",
+              "readingPattern": "==",
+              "rules": [
+                "nasal-spelling"
+              ],
+              "sourceIds": [
+                "aruuz:mastertable:56298"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 2,
+              "text": "تجھے",
+              "normalizedText": "تجھے",
+              "charStart": 10,
+              "charEnd": 14,
+              "pronunciation": "تُجھے",
+              "readingPattern": "-=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:variations:11264"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "--",
+                  "pronunciation": "تُجھے",
+                  "rules": [
+                    "final-vowel-flexibility"
+                  ],
+                  "sourceIds": [
+                    "aruuz:variations:11264"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 3,
+              "text": "ہوا",
+              "normalizedText": "ہوا",
+              "charStart": 15,
+              "charEnd": 18,
+              "pronunciation": null,
+              "readingPattern": "-=",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:363"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "--",
+                  "pronunciation": null,
+                  "rules": [
+                    "dictionary-exception"
+                  ],
+                  "sourceIds": [
+                    "aruuz:exceptions:363"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 4,
+              "text": "کیا",
+              "normalizedText": "کیا",
+              "charStart": 19,
+              "charEnd": 22,
+              "pronunciation": "کْیا",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:kya"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-=",
+                  "pronunciation": null,
+                  "rules": [
+                    "dictionary-exception"
+                  ],
+                  "sourceIds": [
+                    "aruuz:exceptions:17"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 5,
+              "text": "ہے",
+              "normalizedText": "ہے",
+              "charStart": 23,
+              "charEnd": 25,
+              "pronunciation": "ہے",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "handbook:2.1:ہے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-",
+                  "pronunciation": "ہے",
+                  "rules": [
+                    "monosyllable-flexibility"
+                  ],
+                  "sourceIds": [
+                    "handbook:2.1:ہے"
+                  ]
+                }
+              ]
+            }
+          ],
+          "notes": "Selected documented meter variant: initial-short."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [
+          "izafat",
+          "nasalization",
+          "meter-variant"
+        ],
+        "note": "The initial-short khafeef variant is used; دلِ carries izafat and ناداں carries nasalization."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10487."
+      ]
+    },
+    {
+      "id": "LKH-PRO-0010",
+      "text": "ہم کو معلوم ہے جنت کی حقیقت لیکن",
+      "language": "ur",
+      "script": "Arab",
+      "unicodeNormalization": "NFC",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "حسن مہ گرچہ بہ ہنگام کمال اچھا ہے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D8%AD%D8%B3%D9%86%20%D9%85%DB%81%20%DA%AF%D8%B1%DA%86%DB%81%20%D8%A8%DB%81%20%DB%81%D9%86%DA%AF%D8%A7%D9%85%20%DA%A9%D9%85%D8%A7%D9%84%20%D8%A7%DA%86%DA%BE%D8%A7%20%DB%81%DB%92&oldid=10403",
+        "revisionId": 10403,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-husn-mah-garche",
+        "poemTitle": "حسن مہ گرچہ بہ ہنگام کمال اچھا ہے",
+        "split": "pilot",
+        "verseLineIndex": 19,
+        "coupletIndex": 10,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "target": {
+        "meterId": "ramal-musamman-makhboon-maqtoo",
+        "meterNameUrdu": "بحرِ رمل مثمن مخبون محذوف مقطوع",
+        "meterNameEnglish": "Bahr-e-Ramal Musamman Makhboon Mahzoof Maqtoo",
+        "family": "ramal",
+        "targetPattern": "=-==--==--====",
+        "supported": false,
+        "supportNote": "Pilot has fewer than ten adjudicated examples for this form; it is not benchmark-supported."
+      },
+      "expectation": {
+        "classification": "admissible",
+        "goldStatus": "pilot-unadjudicated",
+        "admissibleAnalysisIds": [
+          "A1"
+        ]
+      },
+      "analyses": [
+        {
+          "id": "A1",
+          "status": "admissible",
+          "meterId": "ramal-musamman-makhboon-maqtoo",
+          "targetPattern": "=-==--==--====",
+          "actualPattern": "=-==--==--====",
+          "distance": 0,
+          "meterNotes": [],
+          "readings": [
+            {
+              "tokenIndex": 0,
+              "text": "ہم",
+              "normalizedText": "ہم",
+              "charStart": 0,
+              "charEnd": 2,
+              "pronunciation": "ہَم",
+              "readingPattern": "=",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:79759"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 1,
+              "text": "کو",
+              "normalizedText": "کو",
+              "charStart": 3,
+              "charEnd": 5,
+              "pronunciation": "کو",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:کو"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "کو",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:کو"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 2,
+              "text": "معلوم",
+              "normalizedText": "معلوم",
+              "charStart": 6,
+              "charEnd": 11,
+              "pronunciation": "مَعْلُوم",
+              "readingPattern": "==-",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:48273"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 3,
+              "text": "ہے",
+              "normalizedText": "ہے",
+              "charStart": 12,
+              "charEnd": 14,
+              "pronunciation": "ہے",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:ہے"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "ہے",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:ہے"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 4,
+              "text": "جنت",
+              "normalizedText": "جنت",
+              "charStart": 15,
+              "charEnd": 18,
+              "pronunciation": "جَنَّت",
+              "readingPattern": "==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:16191"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "-=",
+                  "pronunciation": "جَنَت",
+                  "rules": [],
+                  "sourceIds": [
+                    "aruuz:mastertable:16190"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 5,
+              "text": "کی",
+              "normalizedText": "کی",
+              "charStart": 19,
+              "charEnd": 21,
+              "pronunciation": "کی",
+              "readingPattern": "-",
+              "rules": [
+                "monosyllable-flexibility"
+              ],
+              "sourceIds": [
+                "handbook:2.1:کی"
+              ],
+              "source": "dictionary",
+              "alternativeReadings": [
+                {
+                  "pattern": "=",
+                  "pronunciation": "کی",
+                  "rules": [],
+                  "sourceIds": [
+                    "handbook:2.1:کی"
+                  ]
+                }
+              ]
+            },
+            {
+              "tokenIndex": 6,
+              "text": "حقیقت",
+              "normalizedText": "حقیقت",
+              "charStart": 22,
+              "charEnd": 27,
+              "pronunciation": "حَقِیقَت",
+              "readingPattern": "-==",
+              "rules": [],
+              "sourceIds": [
+                "aruuz:mastertable:18737"
+              ],
+              "source": "dictionary"
+            },
+            {
+              "tokenIndex": 7,
+              "text": "لیکن",
+              "normalizedText": "لیکن",
+              "charStart": 28,
+              "charEnd": 32,
+              "pronunciation": null,
+              "readingPattern": "==",
+              "rules": [
+                "dictionary-exception"
+              ],
+              "sourceIds": [
+                "aruuz:exceptions:264"
+              ],
+              "source": "dictionary"
+            }
+          ],
+          "notes": "Matches the base target pattern with no meter variant."
+        }
+      ],
+      "reviewerDecisions": [
+        {
+          "reviewerId": "rev-internal-1",
+          "decision": "accept",
+          "analysisId": "A1",
+          "note": "Internal consistency check only; engine output was visible. This is not independent review.",
+          "decidedAt": "2026-10-29"
+        }
+      ],
+      "adjudication": {
+        "status": "pending",
+        "adjudicatorId": null,
+        "selectedAnalysisId": null,
+        "rationale": "Independent annotation and adjudication have not been performed; this is an internal pilot.",
+        "decidedAt": null
+      },
+      "uncertainty": {
+        "codes": [],
+        "note": "No unresolved ambiguity was observed in the internal pass."
+      },
+      "notes": [
+        "Public-domain source transcription pinned by Wikisource revision 10403."
+      ]
+    }
+  ]
+}

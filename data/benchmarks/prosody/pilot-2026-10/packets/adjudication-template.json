@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "1.0.0",
+  "adjudication": {
+    "id": "lkh-prosody-pilot-2026-10-freeze-adjudication",
+    "status": "awaiting-submissions",
+    "createdAt": "2026-10-29",
+    "freeze": {
+      "id": "lkh-prosody-pilot-2026-10-freeze",
+      "version": "1.0.0",
+      "sha256": "6e0af8ca31a059926cce865c3ed0457bd914864c840f64fa1bd9bb44b2203c97"
+    },
+    "protocol": {
+      "id": "LKH-PRO-PROTOCOL",
+      "version": "0.1.1",
+      "path": "docs/PROSODY_BENCHMARK_PROTOCOL.md"
+    },
+    "adjudicator": null,
+    "note": "Do not fill this record until both reviewer packets are submitted. The adjudicator must not be either annotator and must not have seen engine output before reviewing both worksheets."
+  },
+  "items": [
+    {
+      "id": "LKH-PRO-0001",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0002",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0003",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0004",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0005",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0006",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0007",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0008",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0009",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0010",
+      "reviewerA": null,
+      "reviewerB": null,
+      "agreement": null,
+      "resolution": {
+        "status": "pending",
+        "selectedWorksheet": null,
+        "finalMetreId": null,
+        "finalPattern": null,
+        "rationale": null,
+        "residualUncertainty": null,
+        "decidedAt": null,
+        "adjudicatorSignature": null
+      }
+    }
+  ]
+}

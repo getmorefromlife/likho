@@ -1,0 +1,40 @@
+[
+  {
+    "type": "after",
+    "callId": "raqp@69",
+    "endTime": 79591.104,
+    "attachments": [
+      {
+        "name": "draft-storage.json",
+        "contentType": "application/json",
+        "file": "attachments/de13d37f3183fc5a307a381aacdc4e8440fd0784"
+      }
+    ],
+    "annotations": []
+  },
+  {
+    "type": "after",
+    "callId": "raqp@84",
+    "endTime": 79670.59,
+    "attachments": [
+      {
+        "name": "error-context",
+        "contentType": "text/markdown",
+        "file": "attachments/be6940ad51296c3b6aaee4fd40c87be0df37f40a"
+      }
+    ]
+  },
+  {
+    "type": "after",
+    "callId": "raqp@64",
+    "endTime": 79675.673,
+    "attachments": [
+      {
+        "name": "screenshot",
+        "contentType": "image/png",
+        "file": "attachments/980ad55dcb7918db73f00a8ba8005871329555ef"
+      }
+    ],
+    "annotations": []
+  }
+]

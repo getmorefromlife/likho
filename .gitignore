@@ -28,3 +28,11 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Browser test artifacts
+/playwright-report/
+/test-results/
+tsconfig.tsbuildinfo
+/scratch/
+/dictionaryqaafiya app/
+/qaafiyah 2/

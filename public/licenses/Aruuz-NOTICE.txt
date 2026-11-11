@@ -1,0 +1,14 @@
+Likho includes adapted lexical data from Aruuz by Sayed Zeeshan Asghar and contributors.
+Repository: https://github.com/sayedzeeshan/Aruuz
+Revision: 058fcd6010fb0ef030f79b10466c43aa20b0d4b9
+Source: Aruuz.Website/DB/AruuzDB.sql (lexical tables only)
+License: GNU General Public License version 2; see Aruuz-GPL-2.0.txt.
+Adaptation: lexical tables extracted, normalized, pronunciation divisions compiled,
+unsupported records rejected, and original record identifiers retained by Likho (2026).
+Reproducible importer: scripts/import-aruuz-lexicon.mjs.
+No account, report, contact, poetry-submission, or access-log tables are included.
+No upstream engine source code has been copied.
+
+The editable adapted dictionary, metadata, and conversion sources are supplied in
+likho-prosody-source.tar.gz next to this notice. The complete original database is
+available at the pinned repository URL; its non-lexical tables are not distributed here.

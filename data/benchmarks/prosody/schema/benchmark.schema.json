@@ -1,0 +1,950 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/getmorefromlife/likho/schemas/prosody-benchmark-1.0.0.json",
+  "title": "Likho Urdu prosody benchmark item set",
+  "description": "Versioned structure for adjudicated Urdu prosody benchmark items. This schema validates shape only. scripts/validate-benchmark.mjs performs cross-field checks that JSON Schema cannot express: meter-pattern variants, source revision matching, token spans, reading-pattern concatenation, duplicate items, reviewer references, and frozen-status support thresholds.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "benchmark", "items"],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "benchmark": {
+      "$ref": "#/$defs/benchmark"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    }
+  },
+  "$defs": {
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableItemId": {
+      "type": "string",
+      "pattern": "^LKH-PRO-[0-9]{4}$"
+    },
+    "scansionPattern": {
+      "type": "string",
+      "pattern": "^[-=]+$"
+    },
+    "dateString": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "benchmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "title",
+        "status",
+        "createdAt",
+        "protocol",
+        "scope",
+        "engine",
+        "review"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^lkh-prosody-[a-z0-9-]+$"
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["internal-pilot", "draft", "frozen", "retired"]
+        },
+        "createdAt": {
+          "$ref": "#/$defs/dateString"
+        },
+        "protocol": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "version", "path"],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "$ref": "#/$defs/semver"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["purpose", "language", "script", "formCoverage", "limitations"],
+          "properties": {
+            "purpose": {
+              "type": "string",
+              "minLength": 1
+            },
+            "language": {
+              "const": "ur"
+            },
+            "script": {
+              "const": "Arab"
+            },
+            "formCoverage": {
+              "type": "string",
+              "minLength": 1
+            },
+            "limitations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "engine": {
+          "$ref": "#/$defs/enginePin"
+        },
+        "review": {
+          "$ref": "#/$defs/review"
+        }
+      }
+    },
+    "enginePin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["appCommit", "workingTreeDirty", "lexicon", "meterTable", "sourceDigest"],
+      "properties": {
+        "appCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "workingTreeDirty": {
+          "type": "boolean"
+        },
+        "lexicon": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "revision", "sha256", "sourceSha256", "license", "words"],
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "revision": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "sourceSha256": {
+              "$ref": "#/$defs/sha256",
+              "description": "SHA-256 of the upstream source artefact recorded in the lexicon metadata, distinct from the runtime dictionary file hash."
+            },
+            "license": {
+              "type": "string",
+              "minLength": 1
+            },
+            "words": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "meterTable": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            }
+          }
+        },
+        "sourceDigest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "files", "digest"],
+          "properties": {
+            "algorithm": {
+              "const": "sha256"
+            },
+            "files": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["path", "sha256"],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "$ref": "#/$defs/sha256"
+                  }
+                }
+              }
+            },
+            "digest": {
+              "$ref": "#/$defs/sha256"
+            }
+          }
+        }
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "qualification", "independent"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^rev-[a-z0-9-]+$"
+        },
+        "role": {
+          "enum": ["annotator", "annotator-verifier", "adjudicator", "verifier"]
+        },
+        "qualification": {
+          "enum": ["internal-engine-author", "qualified-prosody-reviewer", "editorial-reviewer"]
+        },
+        "independent": {
+          "type": "boolean"
+        },
+        "organization": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "reviewers",
+        "adjudicator",
+        "adjudicationStatus",
+        "blindToEngineOutput",
+        "annotationBasis",
+        "independenceStatement",
+        "limitations",
+        "effortObservation"
+      ],
+      "properties": {
+        "mode": {
+          "enum": ["unreviewed", "single-annotator", "independent-double"]
+        },
+        "reviewers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reviewer"
+          }
+        },
+        "adjudicator": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/reviewer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "adjudicationStatus": {
+          "enum": ["not-required", "pending", "complete"]
+        },
+        "blindToEngineOutput": {
+          "type": "boolean"
+        },
+        "annotationBasis": {
+          "enum": ["engine-assisted-internal", "blind-human", "mixed"]
+        },
+        "independenceStatement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "effortObservation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["measured", "minutesPerItem", "note"],
+          "properties": {
+            "measured": {
+              "type": "boolean"
+            },
+            "minutesPerItem": {
+              "type": ["number", "null"],
+              "exclusiveMinimum": 0
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "unreviewed"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "reviewers": {
+                "maxItems": 0
+              },
+              "adjudicationStatus": {
+                "const": "pending"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "single-annotator"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "reviewers": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "independent-double"
+              }
+            },
+            "required": ["mode"]
+          },
+          "then": {
+            "properties": {
+              "reviewers": {
+                "minItems": 2
+              },
+              "adjudicator": {
+                "$ref": "#/$defs/reviewer"
+              }
+            },
+            "required": ["adjudicator"]
+          }
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "title",
+        "author",
+        "authorDeathYear",
+        "publicationYear",
+        "rightsStatus",
+        "rightsBasis",
+        "license"
+      ],
+      "properties": {
+        "kind": {
+          "enum": ["wikisource-revision", "print-edition", "consented-contemporary", "constructed"]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorDeathYear": {
+          "type": ["integer", "null"],
+          "minimum": 1000,
+          "maximum": 2100
+        },
+        "publicationYear": {
+          "type": ["integer", "null"],
+          "minimum": 1000,
+          "maximum": 2100
+        },
+        "url": {
+          "type": ["string", "null"],
+          "pattern": "^https://"
+        },
+        "revisionId": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "edition": {
+          "type": ["string", "null"]
+        },
+        "page": {
+          "type": ["string", "null"]
+        },
+        "consentRecord": {
+          "type": ["string", "null"]
+        },
+        "retrievedAt": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "rightsStatus": {
+          "enum": ["public-domain", "licensed", "consented", "constructed"]
+        },
+        "rightsBasis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "wikisource-revision"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "revisionId": {
+                "type": "integer"
+              },
+              "retrievedAt": {
+                "type": "string"
+              }
+            },
+            "required": ["url", "revisionId", "retrievedAt"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "print-edition"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "edition": {
+                "type": "string"
+              }
+            },
+            "required": ["edition"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "consented-contemporary"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "consentRecord": {
+                "type": "string"
+              }
+            },
+            "required": ["consentRecord"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "rightsStatus": {
+                "const": "public-domain"
+              }
+            },
+            "required": ["rightsStatus"]
+          },
+          "then": {
+            "properties": {
+              "authorDeathYear": {
+                "type": "integer"
+              }
+            },
+            "required": ["authorDeathYear"]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["poemId", "poemTitle", "split", "verseLineIndex", "coupletIndex", "half", "textStatus"],
+      "properties": {
+        "poemId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "poemTitle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "split": {
+          "enum": ["pilot", "dev", "locked", "challenge"]
+        },
+        "verseLineIndex": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coupletIndex": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "half": {
+          "enum": ["first", "second"]
+        },
+        "textStatus": {
+          "enum": ["source-exact", "source-normalized", "constructed", "unfinished"]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["meterId", "meterNameUrdu", "meterNameEnglish", "family", "targetPattern", "supported"],
+      "properties": {
+        "meterId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "meterNameUrdu": {
+          "type": "string",
+          "minLength": 1
+        },
+        "meterNameEnglish": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+$"
+        },
+        "targetPattern": {
+          "$ref": "#/$defs/scansionPattern"
+        },
+        "supported": {
+          "type": "boolean"
+        },
+        "supportNote": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "goldStatus", "admissibleAnalysisIds"],
+      "properties": {
+        "classification": {
+          "enum": [
+            "admissible",
+            "invalid-against-target",
+            "invalid-against-all-supported-meters",
+            "unresolved",
+            "out-of-scope"
+          ]
+        },
+        "goldStatus": {
+          "enum": ["pilot-unadjudicated", "adjudicated-gold", "disputed", "rejected"]
+        },
+        "admissibleAnalysisIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^A[0-9]+$"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "alternativeReading": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pattern", "rules", "sourceIds"],
+      "properties": {
+        "pattern": {
+          "$ref": "#/$defs/scansionPattern"
+        },
+        "pronunciation": {
+          "type": ["string", "null"]
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        },
+        "sourceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "reading": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tokenIndex",
+        "text",
+        "normalizedText",
+        "charStart",
+        "charEnd",
+        "readingPattern",
+        "rules",
+        "sourceIds",
+        "source"
+      ],
+      "properties": {
+        "tokenIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "normalizedText": {
+          "type": "string",
+          "minLength": 1
+        },
+        "charStart": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "charEnd": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pronunciation": {
+          "type": ["string", "null"]
+        },
+        "readingPattern": {
+          "$ref": "#/$defs/scansionPattern"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        },
+        "sourceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source": {
+          "enum": ["dictionary", "vocalized", "user-entry", "reviewed-entry", "unresolved"]
+        },
+        "alternativeReadings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/alternativeReading"
+          }
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "meterId",
+        "targetPattern",
+        "actualPattern",
+        "distance",
+        "meterNotes",
+        "readings"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^A[0-9]+$"
+        },
+        "status": {
+          "enum": ["admissible", "rejected", "disputed"]
+        },
+        "meterId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "targetPattern": {
+          "$ref": "#/$defs/scansionPattern"
+        },
+        "actualPattern": {
+          "$ref": "#/$defs/scansionPattern"
+        },
+        "distance": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "meterNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        },
+        "readings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/reading"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "reviewerDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewerId", "decision", "analysisId", "note", "decidedAt"],
+      "properties": {
+        "reviewerId": {
+          "type": "string",
+          "pattern": "^rev-[a-z0-9-]+$"
+        },
+        "decision": {
+          "enum": ["accept", "reject", "dispute", "abstain"]
+        },
+        "analysisId": {
+          "type": ["string", "null"],
+          "pattern": "^A[0-9]+$"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decidedAt": {
+          "$ref": "#/$defs/dateString"
+        }
+      }
+    },
+    "adjudication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "adjudicatorId", "selectedAnalysisId", "rationale", "decidedAt"],
+      "properties": {
+        "status": {
+          "enum": ["not-required", "pending", "agreed", "resolved", "disputed"]
+        },
+        "adjudicatorId": {
+          "type": ["string", "null"],
+          "pattern": "^rev-[a-z0-9-]+$"
+        },
+        "selectedAnalysisId": {
+          "type": ["string", "null"],
+          "pattern": "^A[0-9]+$"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decidedAt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/dateString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codes", "note"],
+      "properties": {
+        "codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "none",
+              "word-boundary",
+              "izafat",
+              "hamza",
+              "shadda",
+              "nasalization",
+              "aspiration",
+              "consonant-cluster",
+              "terminal-pause",
+              "caesura",
+              "meter-variant",
+              "meter-ambiguity",
+              "source-orthography",
+              "punctuation",
+              "unsupported-vocabulary",
+              "script-variant",
+              "other"
+            ]
+          }
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "text",
+        "language",
+        "script",
+        "unicodeNormalization",
+        "source",
+        "provenance",
+        "target",
+        "expectation",
+        "analyses",
+        "reviewerDecisions",
+        "adjudication",
+        "uncertainty"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/stableItemId"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "const": "ur"
+        },
+        "script": {
+          "const": "Arab"
+        },
+        "unicodeNormalization": {
+          "const": "NFC"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "expectation": {
+          "$ref": "#/$defs/expectation"
+        },
+        "analyses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/analysis"
+          }
+        },
+        "reviewerDecisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reviewerDecision"
+          }
+        },
+        "adjudication": {
+          "$ref": "#/$defs/adjudication"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/uncertainty"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

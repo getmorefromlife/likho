@@ -32,7 +32,7 @@ export interface PoeticMeter {
   pattern: string; // e.g. فعولن فعولن فعولن فعولن
   syllabicCode: string; // e.g. v - - / v - -
   description: string;
-  famousVerse: {
+  famousVerse?: {
     misra1: string;
     misra2: string;
     poet: string;

@@ -1,0 +1,573 @@
+{
+  "schemaVersion": "1.0.0",
+  "packet": {
+    "id": "lkh-prosody-pilot-2026-10-freeze-reviewer-a",
+    "reviewerSlot": "reviewer-a",
+    "status": "awaiting-review",
+    "createdAt": "2026-10-29",
+    "freeze": {
+      "id": "lkh-prosody-pilot-2026-10-freeze",
+      "version": "1.0.0",
+      "sha256": "6e0af8ca31a059926cce865c3ed0457bd914864c840f64fa1bd9bb44b2203c97",
+      "frozenAt": "2026-10-29"
+    },
+    "protocol": {
+      "id": "LKH-PRO-PROTOCOL",
+      "version": "0.1.1",
+      "path": "docs/PROSODY_BENCHMARK_PROTOCOL.md"
+    },
+    "instructionsPath": "docs/PROSODY_BENCHMARK_REVIEW_2026-10.md",
+    "reviewer": {
+      "id": null,
+      "name": null,
+      "qualification": null,
+      "independent": null,
+      "conflictStatement": null,
+      "assignedAt": null
+    },
+    "task": {
+      "mode": "metre-blind-first-pass",
+      "description": "Analyse each line independently. Record the metre and scansion you can defend, word readings and licensed rules, your verdict, uncertainty and elapsed minutes. Do not consult the pilot benchmark file, engine output, the other reviewer, or any prior result.",
+      "timeUnit": "minutes",
+      "requiredPerItem": [
+        "metre",
+        "pattern",
+        "wordReadings",
+        "verdict",
+        "uncertaintyCodes",
+        "minutes",
+        "decidedAt"
+      ]
+    },
+    "withheld": [
+      "Engine metre assignment and target pattern",
+      "Engine scansion distance and actual pattern",
+      "Engine word readings and alternative readings",
+      "Engine acceptance classification and admissible-analysis ids",
+      "Engine uncertainty codes and notes",
+      "Adjudication state and the other reviewer worksheet"
+    ],
+    "uncertaintyCodes": [
+      {
+        "code": "none",
+        "useWhen": "No unresolved ambiguity remains. Appears alone."
+      },
+      {
+        "code": "word-boundary",
+        "useWhen": "The reading depends on how adjacent words are joined or separated."
+      },
+      {
+        "code": "izafat",
+        "useWhen": "An izafat mark, or its absence, changes the reading."
+      },
+      {
+        "code": "hamza",
+        "useWhen": "A hamza-bearing form affects the syllable or weight."
+      },
+      {
+        "code": "shadda",
+        "useWhen": "A shadda affects the consonant length or weight."
+      },
+      {
+        "code": "nasalization",
+        "useWhen": "A noon ghunna or nasalized vowel affects the reading."
+      },
+      {
+        "code": "aspiration",
+        "useWhen": "An aspirated consonant affects the onset or weight."
+      },
+      {
+        "code": "consonant-cluster",
+        "useWhen": "A cluster is metrically ambiguous or requires a lexical reading."
+      },
+      {
+        "code": "terminal-pause",
+        "useWhen": "The line ending is read with a pause or terminal shortening."
+      },
+      {
+        "code": "caesura",
+        "useWhen": "The mid-line boundary permits a documented caesura variant."
+      },
+      {
+        "code": "meter-variant",
+        "useWhen": "A named variant such as initial-short, caesura-short or terminal-short is used."
+      },
+      {
+        "code": "meter-ambiguity",
+        "useWhen": "More than one supported metre or analysis is admissible."
+      },
+      {
+        "code": "source-orthography",
+        "useWhen": "The source spelling differs from the usual or normalized form."
+      },
+      {
+        "code": "punctuation",
+        "useWhen": "Source punctuation affects tokenization or line boundaries."
+      },
+      {
+        "code": "unsupported-vocabulary",
+        "useWhen": "A word lacks attested pronunciation evidence."
+      },
+      {
+        "code": "script-variant",
+        "useWhen": "Unicode, script or character-form variation affects the text."
+      },
+      {
+        "code": "other",
+        "useWhen": "A specific uncertainty not covered above; explain in the note."
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "LKH-PRO-0001",
+      "text": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0002",
+      "text": "کاغذی ہے پیرہن ہر پیکرِ تصویر کا",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "verseLineIndex": 2,
+        "coupletIndex": 1,
+        "half": "second",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0003",
+      "text": "جذبۂ بے اختیارِ شوق دیکھا چاہیے",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "verseLineIndex": 7,
+        "coupletIndex": 4,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0004",
+      "text": "سینۂ شمشیر سے باہر ہے دم شمشیر کا",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D9%86%D9%82%D8%B4%20%D9%81%D8%B1%DB%8C%D8%A7%D8%AF%DB%8C%20%DB%81%DB%92%20%DA%A9%D8%B3%20%DA%A9%DB%8C%20%D8%B4%D9%88%D8%AE%DB%8C%D9%90%20%D8%AA%D8%AD%D8%B1%DB%8C%D8%B1%20%DA%A9%D8%A7&oldid=10301",
+        "revisionId": 10301,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-naqsh-faryadi",
+        "poemTitle": "نقش فریادی ہے کس کی شوخیِ تحریر کا",
+        "verseLineIndex": 8,
+        "coupletIndex": 4,
+        "half": "second",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0005",
+      "text": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%DB%81%D8%B2%D8%A7%D8%B1%D9%88%DA%BA%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%DB%8C%DA%BA%20%D8%A7%DB%8C%D8%B3%DB%8C%20%DA%A9%DB%81%20%DB%81%D8%B1%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%20%D9%BE%DB%81%20%D8%AF%D9%85%20%D9%86%DA%A9%D9%84%DB%92&oldid=10421",
+        "revisionId": 10421,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-hazaron-khwahishen",
+        "poemTitle": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0006",
+      "text": "بہت نکلے مرے ارمان لیکن پھر بھی کم نکلے",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%DB%81%D8%B2%D8%A7%D8%B1%D9%88%DA%BA%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%DB%8C%DA%BA%20%D8%A7%DB%8C%D8%B3%DB%8C%20%DA%A9%DB%81%20%DB%81%D8%B1%20%D8%AE%D9%88%D8%A7%DB%81%D8%B4%20%D9%BE%DB%81%20%D8%AF%D9%85%20%D9%86%DA%A9%D9%84%DB%92&oldid=10421",
+        "revisionId": 10421,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-hazaron-khwahishen",
+        "poemTitle": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+        "verseLineIndex": 2,
+        "coupletIndex": 1,
+        "half": "second",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0007",
+      "text": "دل ہی تو ہے نہ سنگ و خشت، درد سے بھر نہ آئے کیوں؟",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "دل ہی تو ہے نہ سنگ و خشت درد سے بھر نہ آئے کیوں",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D8%AF%D9%84%20%DB%81%DB%8C%20%D8%AA%D9%88%20%DB%81%DB%92%20%D9%86%DB%81%20%D8%B3%D9%86%DA%AF%20%D9%88%20%D8%AE%D8%B4%D8%AA%20%D8%AF%D8%B1%D8%AF%20%D8%B3%DB%92%20%D8%A8%DA%BE%D8%B1%20%D9%86%DB%81%20%D8%A2%D8%A6%DB%92%20%DA%A9%DB%8C%D9%88%DA%BA&oldid=10491",
+        "revisionId": 10491,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-dil-hi-to-hai",
+        "poemTitle": "دل ہی تو ہے نہ سنگ و خشت درد سے بھر نہ آئے کیوں",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0008",
+      "text": "یہ نہ تھی ہماری قسمت کہ وصال یار ہوتا",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "یہ نہ تھی ہماری قسمت کہ وصال یار ہوتا",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%DB%8C%DB%81%20%D9%86%DB%81%20%D8%AA%DA%BE%DB%8C%20%DB%81%D9%85%D8%A7%D8%B1%DB%8C%20%D9%82%D8%B3%D9%85%D8%AA%20%DA%A9%DB%81%20%D9%88%D8%B5%D8%A7%D9%84%20%DB%8C%D8%A7%D8%B1%20%DB%81%D9%88%D8%AA%D8%A7&oldid=8985",
+        "revisionId": 8985,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-yeh-na-thi",
+        "poemTitle": "یہ نہ تھی ہماری قسمت کہ وصال یار ہوتا",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0009",
+      "text": "دلِ ناداں تجھے ہوا کیا ہے؟",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "دل ناداں تجھے ہوا کیا ہے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D8%AF%D9%84%20%D9%86%D8%A7%D8%AF%D8%A7%DA%BA%20%D8%AA%D8%AC%DA%BE%DB%92%20%DB%81%D9%88%D8%A7%20%DA%A9%DB%8C%D8%A7%20%DB%81%DB%92&oldid=10487",
+        "revisionId": 10487,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-dil-nadan",
+        "poemTitle": "دل ناداں تجھے ہوا کیا ہے",
+        "verseLineIndex": 1,
+        "coupletIndex": 1,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    },
+    {
+      "id": "LKH-PRO-0010",
+      "text": "ہم کو معلوم ہے جنت کی حقیقت لیکن",
+      "language": "ur",
+      "script": "Arab",
+      "source": {
+        "kind": "wikisource-revision",
+        "title": "حسن مہ گرچہ بہ ہنگام کمال اچھا ہے",
+        "author": "مرزا غالب",
+        "authorDeathYear": 1869,
+        "publicationYear": 1841,
+        "url": "https://ur.wikisource.org/w/index.php?title=%D8%AD%D8%B3%D9%86%20%D9%85%DB%81%20%DA%AF%D8%B1%DA%86%DB%81%20%D8%A8%DB%81%20%DB%81%D9%86%DA%AF%D8%A7%D9%85%20%DA%A9%D9%85%D8%A7%D9%84%20%D8%A7%DA%86%DA%BE%D8%A7%20%DB%81%DB%92&oldid=10403",
+        "revisionId": 10403,
+        "retrievedAt": "2026-10-29",
+        "rightsStatus": "public-domain",
+        "rightsBasis": "Mirza Asadullah Khan Ghalib died in 1869; the Urdu diwan was published in 1841. The Wikisource page is tagged {{PD-old}}.",
+        "license": "Public domain (PD-old); Wikisource terms of use apply to the transcription."
+      },
+      "provenance": {
+        "poemId": "ghalib-ghazal-husn-mah-garche",
+        "poemTitle": "حسن مہ گرچہ بہ ہنگام کمال اچھا ہے",
+        "verseLineIndex": 19,
+        "coupletIndex": 10,
+        "half": "first",
+        "textStatus": "source-exact"
+      },
+      "itemCategory": "natural-line",
+      "response": {
+        "status": "awaiting-review",
+        "metre": {
+          "id": null,
+          "nameUrdu": null,
+          "nameEnglish": null,
+          "pattern": null
+        },
+        "wordReadings": [],
+        "verdict": null,
+        "uncertaintyCodes": [],
+        "uncertaintyNote": null,
+        "minutes": null,
+        "notes": null,
+        "decidedAt": null,
+        "reviewerSignature": null
+      }
+    }
+  ]
+}

@@ -1,16 +1,44 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import { AlertTriangle, Download, Copy, X } from 'lucide-react';
 import { TopNavBar } from './components/navbar/TopNavBar';
 import { QafiyaTray } from './components/qafiya/QafiyaTray';
+import { QuietWorkspace } from './components/editor/QuietWorkspace';
 import { PoetryCanvas } from './components/editor/PoetryCanvas';
-import { LiteraryCompanion } from './components/companion/LiteraryCompanion';
 import { ResizableDivider } from './components/common/ResizableDivider';
-import { ExportModal } from './components/export/ExportModal';
-import { CalligraphyCardModal } from './components/export/CalligraphyCardModal';
+import { CreatorCredit } from './components/common/CreatorCredit';
 import { useWorkspacePrefs } from './hooks/useWorkspacePrefs';
 import { usePoemEditor } from './hooks/usePoemEditor';
 import { useQafiyaTracker } from './hooks/useQafiyaTracker';
+import type { PoemDraft } from './types/editor';
+
+const LazyLiteraryCompanion = lazy(() =>
+  import('./components/companion/LiteraryCompanion').then((m) => ({
+    default: m.LiteraryCompanion,
+  }))
+);
+const LazyExportModal = lazy(() =>
+  import('./components/export/ExportModal').then((m) => ({
+    default: m.ExportModal,
+  }))
+);
+const LazyCalligraphyCardModal = lazy(() =>
+  import('./components/export/CalligraphyCardModal').then((m) => ({
+    default: m.CalligraphyCardModal,
+  }))
+);
+const LazyCustomStudioWorkspace = lazy(() =>
+  import('./components/custom/CustomStudioWorkspace').then((m) => ({
+    default: m.CustomStudioWorkspace,
+  }))
+);
 
 export function App() {
+  // Preload and cache offline Arooz Lexicon asynchronously after initial shell mount
+  useEffect(() => {
+    void import('./services/aroozLexiconService').then(({ AroozLexiconService }) => {
+      void AroozLexiconService.initialize();
+    });
+  }, []);
   const {
     prefs,
     setTheme,
@@ -26,6 +54,7 @@ export function App() {
     toggleCompanion,
     toggleQafiyaTray,
     toggleLiveScansion,
+    updateCustomConfig,
   } = useWorkspacePrefs();
 
   const {
@@ -41,6 +70,7 @@ export function App() {
     setPoet,
     setForm,
     setMeter,
+    setQafiyaList,
     updateContent,
     insertErab,
     insertCoupletTemplate,
@@ -48,9 +78,17 @@ export function App() {
     handleSelect,
     startNewPoem,
     loadDraft,
+    deleteDraft,
+    reloadPortfolio,
+    saveState,
+    saveError,
+    retrySave,
+    storageIssue,
+    dismissStorageIssue,
   } = usePoemEditor();
 
   const {
+    chips,
     filteredChips,
     searchFilter,
     setSearchFilter,
@@ -61,7 +99,7 @@ export function App() {
     resyncWithText,
     usedCount,
     totalCount,
-  } = useQafiyaTracker(currentDraft.qafiyaList, currentDraft.content);
+  } = useQafiyaTracker(currentDraft.qafiyaList, currentDraft.content, setQafiyaList, currentDraft.id);
 
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
@@ -74,9 +112,46 @@ export function App() {
     loadWords(words, false);
   };
 
+  const handlePortfolioRestored = (drafts: PoemDraft[]) => {
+    reloadPortfolio(drafts);
+  };
+
+  const handleDownloadRecovery = () => {
+    if (storageIssue?.raw == null) return;
+    const blob = new Blob([storageIssue.raw], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `qalam_recovery_drafts_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyRecovery = () => {
+    if (storageIssue?.raw == null) return;
+    void navigator.clipboard?.writeText(storageIssue.raw).catch(() => {
+      console.error('Copy failed; use the download recovery action instead.');
+    });
+  };
+
   // Determine column arrangement (Classic: 70% Right Canvas / 30% Left Companion; Swapped: 30% Right Companion / 70% Left Canvas)
   const isSwapped = prefs.activePreset === 'swapped';
+  const isCustomMode = prefs.activePreset === 'custom';
   const showCompanion = prefs.companionOpen && !prefs.isZenMode;
+  const showTopNav = !isCustomMode || prefs.customConfig.showTopNavBar;
+  const showQafiyaBar = !isCustomMode && !prefs.isZenMode;
+
+  if (prefs.activePreset === 'quiet' || prefs.activePreset === 'quiet_rhymes') {
+    return <QuietWorkspace draft={currentDraft} prefs={prefs} textareaRef={textareaRef}
+      onChange={updateContent} onRhymesChange={setQafiyaList} onExit={() => {
+        if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+        applyPreset('classic');
+      }}
+      onToggleSplit={() => applyPreset(prefs.activePreset === 'quiet' ? 'quiet_rhymes' : 'quiet')}
+      saveState={saveState} onRetry={retrySave} storageDamaged={!!storageIssue} />;
+  }
 
   return (
     <div
@@ -85,6 +160,7 @@ export function App() {
       className="flex flex-col h-screen w-screen overflow-hidden bg-[var(--bg-canvas)] text-[var(--text-primary)] select-none font-nastaliq"
     >
       {/* 1. Minimalist Top Navigation Bar */}
+      {showTopNav && (
       <TopNavBar
         prefs={prefs}
         onThemeChange={setTheme}
@@ -96,12 +172,65 @@ export function App() {
         onToggleZen={toggleZenMode}
         onNewPoem={startNewPoem}
         onOpenExport={() => setIsExportModalOpen(true)}
+        saveState={saveState}
+        saveError={saveError}
+        onRetrySave={retrySave}
       />
+      )}
+
+      {/* Corrupt/unavailable storage: keep the original bytes accessible. */}
+      {storageIssue && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs font-nastaliq flex-shrink-0"
+        >
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            <span>
+              {storageIssue.status === 'corrupt'
+                ? 'خراب ذخیرۂ کلام ملا ہے۔ اصل ڈیٹا محفوظ رکھا گیا ہے؛ خودکار تبدیلی نہیں کی جائے گی۔'
+                : 'ذخیرۂ کلام پڑھا نہیں جا سکا؛ موجودہ تبدیلیاں صرف اسی نشست میں رہیں گی۔'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {storageIssue.raw !== null && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleDownloadRecovery}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+                  title="اصل خراب ڈیٹا بغیر تبدیلی کے ڈاؤنلوڈ کریں"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>بازیابی ڈاؤنلوڈ کریں</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyRecovery}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+                  title="اصل ڈیٹا نقل کریں"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>نقل کریں</span>
+                </button>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={dismissStorageIssue}
+              aria-label="اطلاع بند کریں"
+              className="p-1 rounded-lg hover:bg-amber-500/20 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. Interactive Qafiya Tray (when docked to top) */}
-      {prefs.qafiyaDockPosition === 'top' && !prefs.isZenMode && (
+      {prefs.qafiyaDockPosition === 'top' && showQafiyaBar && (
         <QafiyaTray
-          chips={currentDraft.qafiyaList.map((w, i) => ({ id: `${i}`, word: w, isUsed: false }))}
+          chips={chips}
           filteredChips={filteredChips}
           searchFilter={searchFilter}
           onSearchChange={setSearchFilter}
@@ -122,7 +251,45 @@ export function App() {
         />
       )}
 
-      {/* 3. Main Workspace Area with Resizable Splitter */}
+      {/* 3. Main Workspace Area with Resizable Splitter or Custom Studio */}
+      {isCustomMode ? (
+        <Suspense
+          fallback={
+            <div className="flex-1 flex items-center justify-center bg-[var(--bg-canvas)] text-sm font-nastaliq text-[var(--text-muted)]">
+              من پسند اسٹوڈیو لوڈ ہو رہا ہے...
+            </div>
+          }
+        >
+          <LazyCustomStudioWorkspace
+            currentDraft={currentDraft}
+            textareaRef={textareaRef}
+            prefs={prefs}
+            stats={stats}
+            selectedWord={selectedWord}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undo}
+            onRedo={redo}
+            onTitleChange={setTitle}
+            onPoetChange={setPoet}
+            onFormChange={setForm}
+            onMeterChange={(name, rukn) => setMeter(name, rukn)}
+            onContentChange={updateContent}
+            onQafiyaListChange={setQafiyaList}
+            onLoadRhymesToTray={handleLoadRhymesToTray}
+            onInsertErab={insertErab}
+            onInsertCoupletTemplate={insertCoupletTemplate}
+            onPaste={handlePaste}
+            onSelect={handleSelect}
+            onToggleLiveScansion={toggleLiveScansion}
+            onSelectDraft={loadDraft}
+            onDeleteDraft={deleteDraft}
+            onPortfolioRestored={handlePortfolioRestored}
+            onUpdateCustomConfig={updateCustomConfig}
+            onExitCustom={() => applyPreset('classic')}
+          />
+        </Suspense>
+      ) : (
       <div
         ref={workspaceContainerRef}
         className="flex-1 flex overflow-hidden relative"
@@ -134,15 +301,25 @@ export function App() {
               style={{ width: `${100 - prefs.verticalSplitPct}%` }}
               className="h-full overflow-hidden flex-shrink-0"
             >
-              <LiteraryCompanion
-                currentDraft={currentDraft}
-                selectedWord={selectedWord}
-                onLoadRhymesToTray={handleLoadRhymesToTray}
-                onSelectMeter={(name, rukn) => setMeter(name, rukn)}
-                onSelectDraft={loadDraft}
-                fontFamily={prefs.fontFamily}
-                onClose={toggleCompanion}
-              />
+              <Suspense
+                fallback={
+                  <div className="h-full flex items-center justify-center bg-[var(--bg-card)] border-l border-[var(--border-subtle)] text-xs font-nastaliq text-[var(--text-muted)]">
+                    ادبی معاون لوڈ ہو رہا ہے...
+                  </div>
+                }
+              >
+                <LazyLiteraryCompanion
+                  currentDraft={currentDraft}
+                  selectedWord={selectedWord}
+                  onLoadRhymesToTray={handleLoadRhymesToTray}
+                  onSelectMeter={(name, rukn) => setMeter(name, rukn)}
+                  onSelectDraft={loadDraft}
+                  onDeleteDraft={deleteDraft}
+                  onPortfolioRestored={handlePortfolioRestored}
+                  fontFamily={prefs.fontFamily}
+                  onClose={toggleCompanion}
+                />
+              </Suspense>
             </div>
 
             <ResizableDivider
@@ -200,24 +377,35 @@ export function App() {
               style={{ width: `${100 - prefs.verticalSplitPct}%` }}
               className="h-full overflow-hidden flex-shrink-0"
             >
-              <LiteraryCompanion
-                currentDraft={currentDraft}
-                selectedWord={selectedWord}
-                onLoadRhymesToTray={handleLoadRhymesToTray}
-                onSelectMeter={(name, rukn) => setMeter(name, rukn)}
-                onSelectDraft={loadDraft}
-                fontFamily={prefs.fontFamily}
-                onClose={toggleCompanion}
-              />
+              <Suspense
+                fallback={
+                  <div className="h-full flex items-center justify-center bg-[var(--bg-card)] border-l border-[var(--border-subtle)] text-xs font-nastaliq text-[var(--text-muted)]">
+                    ادبی معاون لوڈ ہو رہا ہے...
+                  </div>
+                }
+              >
+                <LazyLiteraryCompanion
+                  currentDraft={currentDraft}
+                  selectedWord={selectedWord}
+                  onLoadRhymesToTray={handleLoadRhymesToTray}
+                  onSelectMeter={(name, rukn) => setMeter(name, rukn)}
+                  onSelectDraft={loadDraft}
+                  onDeleteDraft={deleteDraft}
+                  onPortfolioRestored={handlePortfolioRestored}
+                  fontFamily={prefs.fontFamily}
+                  onClose={toggleCompanion}
+                />
+              </Suspense>
             </div>
           </>
         )}
       </div>
+      )}
 
       {/* 4. Interactive Qafiya Tray (when docked to bottom) */}
-      {prefs.qafiyaDockPosition === 'bottom' && !prefs.isZenMode && (
+      {prefs.qafiyaDockPosition === 'bottom' && showQafiyaBar && (
         <QafiyaTray
-          chips={currentDraft.qafiyaList.map((w, i) => ({ id: `${i}`, word: w, isUsed: false }))}
+          chips={chips}
           filteredChips={filteredChips}
           searchFilter={searchFilter}
           onSearchChange={setSearchFilter}
@@ -238,24 +426,34 @@ export function App() {
         />
       )}
 
+      <CreatorCredit />
+
       {/* 5. Multi-format Export Modal */}
-      <ExportModal
-        isOpen={isExportModalOpen}
-        onClose={() => setIsExportModalOpen(false)}
-        title={currentDraft.title}
-        poet={currentDraft.poet}
-        content={currentDraft.content}
-        onOpenCardModal={() => setIsCardModalOpen(true)}
-      />
+      {isExportModalOpen && (
+        <Suspense fallback={null}>
+          <LazyExportModal
+            isOpen={isExportModalOpen}
+            onClose={() => setIsExportModalOpen(false)}
+            title={currentDraft.title}
+            poet={currentDraft.poet}
+            content={currentDraft.content}
+            onOpenCardModal={() => setIsCardModalOpen(true)}
+          />
+        </Suspense>
+      )}
 
       {/* 6. Calligraphy Social Card Modal */}
-      <CalligraphyCardModal
-        isOpen={isCardModalOpen}
-        onClose={() => setIsCardModalOpen(false)}
-        title={currentDraft.title}
-        poet={currentDraft.poet}
-        content={currentDraft.content}
-      />
+      {isCardModalOpen && (
+        <Suspense fallback={null}>
+          <LazyCalligraphyCardModal
+            isOpen={isCardModalOpen}
+            onClose={() => setIsCardModalOpen(false)}
+            title={currentDraft.title}
+            poet={currentDraft.poet}
+            content={currentDraft.content}
+          />
+        </Suspense>
+      )}
 
       {/* 7. Dedicated Print Container for High-Resolution PDF Printing */}
       <div className="hidden print-poetry-container">

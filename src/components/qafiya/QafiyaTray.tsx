@@ -11,6 +11,7 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
+import { WordSelectionArea } from '../common/WordSelectionArea';
 import { QafiyaChip } from '../../types/editor';
 import { MarkerOption } from '../../types/workspace';
 
@@ -241,7 +242,7 @@ export const QafiyaTray: React.FC<QafiyaTrayProps> = ({
       </div>
 
       {/* Chips Container: Horizontal scroll / wrapped chips */}
-      <div className="p-3 max-h-44 overflow-y-auto flex flex-wrap gap-2 items-center">
+      <WordSelectionArea id="tray" label="قوافی کی تختی" resetKey={filteredChips.map(c => c.id).join("|")} className="p-3 pb-10 max-h-44 overflow-y-auto flex flex-wrap gap-2 items-center">
         {filteredChips.length === 0 ? (
           <div className="w-full py-4 text-center text-xs text-[var(--text-muted)] font-nastaliq">
             کوئی قافیہ نہیں ملا۔ "خزانہ قوافی" سے نئے قوافی منتخب فرمائیں یا دستی شامل کریں۔
@@ -250,6 +251,8 @@ export const QafiyaTray: React.FC<QafiyaTrayProps> = ({
           filteredChips.map((chip) => (
             <div
               key={chip.id}
+              data-selectable-id={chip.id}
+              data-selectable-word={chip.word}
               onClick={() => onToggleChip(chip.id)}
               style={{
                 fontSize: `${zoom}px`,
@@ -266,6 +269,7 @@ export const QafiyaTray: React.FC<QafiyaTrayProps> = ({
 
               {/* Remove button on hover */}
               <button
+                data-selection-control="true"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemoveWord(chip.id);
@@ -278,7 +282,7 @@ export const QafiyaTray: React.FC<QafiyaTrayProps> = ({
             </div>
           ))
         )}
-      </div>
+      </WordSelectionArea>
     </div>
   );
 };

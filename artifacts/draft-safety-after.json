@@ -1,0 +1,853 @@
+{
+  "config": {
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.0.0/bin/node",
+      "/Users/syedrizvi/Documents/my website projects/Likho/node_modules/.bin/playwright",
+      "test",
+      "tests/e2e/draft-safety.spec.ts",
+      "--reporter=json"
+    ],
+    "configFile": "/Users/syedrizvi/Documents/my website projects/Likho/playwright.config.ts",
+    "rootDir": "/Users/syedrizvi/Documents/my website projects/Likho/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/syedrizvi/Documents/my website projects/Likho/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/syedrizvi/Documents/my website projects/Likho/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/Users/syedrizvi/Documents/my website projects/Likho/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/Users/syedrizvi/Documents/my website projects/Likho/tests/e2e",
+        "snapshotDir": "/Users/syedrizvi/Documents/my website projects/Likho/tests/e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 120000,
+        "use": {
+          "actionTimeout": 15000,
+          "channel": "chromium",
+          "baseURL": "http://127.0.0.1:5173",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          },
+          "trace": "retain-on-failure",
+          "screenshot": "only-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev -- --host 127.0.0.1",
+      "url": "http://127.0.0.1:5173",
+      "reuseExistingServer": true
+    }
+  },
+  "suites": [
+    {
+      "title": "draft-safety.spec.ts",
+      "file": "draft-safety.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "LKH-002 preservation",
+          "file": "draft-safety.spec.ts",
+          "line": 37,
+          "column": 6,
+          "specs": [
+            {
+              "title": "S1 sample first line and metadata survive autosave, another read and reload",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4951,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:14.649Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJkcmFmdC1pbml0aWFsLWdoYWxpYlwiLFwidGl0bGVcIjpcItmF24zYsdinINi52YbZiNin2YYgUzFcIixcInBvZXRcIjpcItmF24zYsdinINmG2KfZhSBTMVwiLFwiZm9ybVwiOlwiZ2hhemFsXCIsXCJtZXRlck5hbWVcIjpcItio2K3YsdmQINix2YXZhCDZhdir2YXZhiDZhdit2LDZiNmBXCIsXCJtZXRlclJ1a25cIjpcItmB2KfYudmE2KfYqtmGINmB2KfYudmE2KfYqtmGINmB2KfYudmE2KfYqtmGINmB2KfYudmE2YZcIixcInJhZGlmXCI6XCLaqdinXCIsXCJ0YWdzXCI6W1wi2qnZhNin2LPbjNqp24xcIixcIti62LLZhFwiLFwi2YXYudix2YHYqlwiXSxcImNyZWF0ZWRBdFwiOjE3OTMxNzYzMzU4NDIsXCJ1cGRhdGVkQXRcIjoxNzkzMjYyNzM5MzU3LFwicWFmaXlhTGlzdFwiOltcItiq2K3YsduM2LFcIixcItiq2LXZiNuM2LFcIixcItiy2YbYrNuM2LFcIixcItiq2YLYr9uM2LFcIixcItiq2K/YqNuM2LFcIixcIti02YXYtNuM2LFcIixcItis2Kfar9uM2LFcIixcItiq2LnYqNuM2LFcIl0sXCJjb250ZW50XCI6XCLZhduM2LHYpyDZhdit2YHZiNi4INm+24HZhNinINmF2LXYsdi5IFMxXFxu2qnYp9i62LDbjCDbgduSINm+24zYsduB2YYg24HYsSDZvtuM2qnYsdmQINiq2LXZiNuM2LEg2qnYp1xcblxcbtqp2KfZiCDaqdin2YjZkCDYs9iu2Kog2KzYp9mG24wg24HYp9im25Ig2KrZhtuB2KfYptuMINmG24Eg2b7ZiNqG2r5cXG7Ytdio2K0g2qnYsdmG2Kcg2LTYp9mFINqp2Kcg2YTYp9mG2Kcg24HbkiDYrNmI2KbbkiDYtNuM2LEg2qnYp1xcblxcbtis2LDYqNuCINio25Ig2KfYrtiq24zYp9ix2ZAg2LTZiNmCINiv24zaqdq+2Kcg2obYp9uB24zbklxcbtiz24zZhtuB2ZQg2LTZhdi024zYsSDYs9uSINio2KfbgdixINuB25Ig2K/ZhSDYtNmF2LTbjNixINqp2KdcXG5cXG7Yotqv24HbjCDYr9in2YXZkCDYtNmG24zYr9mGINis2LMg2YLYr9ixINqG2KfbgduSINio2obavtin2KbbklxcbtmF2K/YudinINi52YbZgtinINuB25Ig2KfZvtmG25Ig2LnYp9mE2YXZkCDYqtmC2LHbjNixINqp2KdcXG5cXG7YqNiz2qnbgSDbgdmI2rog2LrYp9mE2Kgg2KfYs9uM2LHbjCDZhduM2rog2KjavtuMINii2KrYtCDYstuM2LHZkCDZvtinXFxu2YXZiNim25Ig2KLYqti0INiv24zYr9uBINuB25Ig2K3ZhNmC24Eg2YXYsduMINiy2YbYrNuM2LEg2qnYp1wifV0iCn0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-09816b919dfb7d887e57",
+              "file": "draft-safety.spec.ts",
+              "line": 42,
+              "column": 3
+            },
+            {
+              "title": "S2 sample later-line edit survives reload",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4148,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:20.010Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJkcmFmdC1pbml0aWFsLWdoYWxpYlwiLFwidGl0bGVcIjpcItmG2YLYtCDZgdix24zYp9iv24wg24HbkiDaqdizINqp24wg2LTZiNiu24zZkCDYqtit2LHbjNixINqp2KdcIixcInBvZXRcIjpcItmF2LHYstinINin2LPYryDYp9mE2YTbgSDYrtin2YYg2LrYp9mE2KhcIixcImZvcm1cIjpcImdoYXphbFwiLFwibWV0ZXJOYW1lXCI6XCLYqNit2LHZkCDYsdmF2YQg2YXYq9mF2YYg2YXYrdiw2YjZgVwiLFwibWV0ZXJSdWtuXCI6XCLZgdin2LnZhNin2KrZhiDZgdin2LnZhNin2KrZhiDZgdin2LnZhNin2KrZhiDZgdin2LnZhNmGXCIsXCJyYWRpZlwiOlwi2qnYp1wiLFwidGFnc1wiOltcItqp2YTYp9iz24zaqduMXCIsXCLYutiy2YRcIixcItmF2LnYsdmB2KpcIl0sXCJjcmVhdGVkQXRcIjoxNzkzMTc2MzQwNzM5LFwidXBkYXRlZEF0XCI6MTc5MzI2Mjc0MzU2MSxcInFhZml5YUxpc3RcIjpbXCLYqtit2LHbjNixXCIsXCLYqti12YjbjNixXCIsXCLYstmG2KzbjNixXCIsXCLYqtmC2K/bjNixXCIsXCLYqtiv2KjbjNixXCIsXCLYtNmF2LTbjNixXCIsXCLYrNin2q/bjNixXCIsXCLYqti52KjbjNixXCJdLFwiY29udGVudFwiOlwi2YbZgti0INmB2LHbjNin2K/bjCDbgduSINqp2LMg2qnbjCDYtNmI2K7bjNmQINiq2K3YsduM2LEg2qnYp1xcbtmF24zYsdinINmF2K3ZgdmI2Lgg2K/ZiNiz2LHYpyDZhdi12LHYuSBTMlxcblxcbtqp2KfZiCDaqdin2YjZkCDYs9iu2Kog2KzYp9mG24wg24HYp9im25Ig2KrZhtuB2KfYptuMINmG24Eg2b7ZiNqG2r5cXG7Ytdio2K0g2qnYsdmG2Kcg2LTYp9mFINqp2Kcg2YTYp9mG2Kcg24HbkiDYrNmI2KbbkiDYtNuM2LEg2qnYp1xcblxcbtis2LDYqNuCINio25Ig2KfYrtiq24zYp9ix2ZAg2LTZiNmCINiv24zaqdq+2Kcg2obYp9uB24zbklxcbtiz24zZhtuB2ZQg2LTZhdi024zYsSDYs9uSINio2KfbgdixINuB25Ig2K/ZhSDYtNmF2LTbjNixINqp2KdcXG5cXG7Yotqv24HbjCDYr9in2YXZkCDYtNmG24zYr9mGINis2LMg2YLYr9ixINqG2KfbgduSINio2obavtin2KbbklxcbtmF2K/YudinINi52YbZgtinINuB25Ig2KfZvtmG25Ig2LnYp9mE2YXZkCDYqtmC2LHbjNixINqp2KdcXG5cXG7YqNiz2qnbgSDbgdmI2rog2LrYp9mE2Kgg2KfYs9uM2LHbjCDZhduM2rog2KjavtuMINii2KrYtCDYstuM2LHZkCDZvtinXFxu2YXZiNim25Ig2KLYqti0INiv24zYr9uBINuB25Ig2K3ZhNmC24Eg2YXYsduMINiy2YbYrNuM2LEg2qnYp1wifV0iCn0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-83132ea6858aebbb5ece",
+              "file": "draft-safety.spec.ts",
+              "line": 55,
+              "column": 3
+            },
+            {
+              "title": "S3 ordinary draft text survives reload",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2777,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:24.169Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjE3OTMyNjI3NDY5OTMsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhduM2LHYpyDYudin2YUg2YXYs9mI2K/bgSBTM1xcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-189a2825341f9c8a5cb4",
+              "file": "draft-safety.spec.ts",
+              "line": 63,
+              "column": 3
+            },
+            {
+              "title": "S4 empty portfolio is not silently reseeded or autosaved",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1895,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:26.956Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJwb2VtLTE3OTMyNjI3NDk5NjdcIixcInRpdGxlXCI6XCLZhtmI24zYr9mQINiz2K3YsVwiLFwicG9ldFwiOlwi2LTYp9i52LFcIixcImZvcm1cIjpcImdoYXphbFwiLFwibWV0ZXJOYW1lXCI6XCLYqNit2LHZkCDYsdmF2YQg2YXYq9mF2YYg2YXYrdiw2YjZgVwiLFwibWV0ZXJSdWtuXCI6XCLZgdin2LnZhNin2KrZhiDZgdin2LnZhNin2KrZhiDZgdin2LnZhNin2KrZhiDZgdin2LnZhNmGXCIsXCJyYWRpZlwiOlwiXCIsXCJ0YWdzXCI6W1wi2LrYstmEXCJdLFwiY3JlYXRlZEF0XCI6MTc5MzI2Mjc0OTk2NyxcInVwZGF0ZWRBdFwiOjE3OTMyNjI3NTMyNTQsXCJxYWZpeWFMaXN0XCI6W1wi2LPYrdixXCIsXCLZhti42LFcIixcItin2KvYsVwiLFwi2LPZgdixXCIsXCLYrtio2LFcIl0sXCJjb250ZW50XCI6XCLYrNiv2YrYryDZhdiz2YjYr9uBIFM0XCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-70b69dceef938d176672",
+              "file": "draft-safety.spec.ts",
+              "line": 71,
+              "column": 3
+            },
+            {
+              "title": "S5 exact title spelling is authoritative",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2756,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:28.860Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2YbYp9iy24Eg2qnbjCDYp9i12YQg2LnYqNin2LHYqiBTNVwiLFwicG9ldFwiOlwi2LTYp9i52LEg2KLYstmF2KfYpti0XCIsXCJmb3JtXCI6XCJnaGF6YWxcIixcInRhZ3NcIjpbXSxcImNyZWF0ZWRBdFwiOjEsXCJ1cGRhdGVkQXRcIjoxNzkzMjYyNzUxNzE1LFwicWFmaXlhTGlzdFwiOltdLFwiY29udGVudFwiOlwi2YXbjNix2Kcg2LnYp9mFINmF2LPZiNiv24EgUzVcXG7Zhdix2Kcg2K/ZhCDZhdix2Kcg2K/ZhFwifV0iCn0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-ecbde586de08eaf4afa0",
+              "file": "draft-safety.spec.ts",
+              "line": 83,
+              "column": 3
+            },
+            {
+              "title": "S8 unreadable/invalid storage remains byte-for-byte intact after an edit",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2250,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:31.625Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAie3VucmVhZGFibGUtb3JpZ2luYWwtUzgiCn0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-71e6102df756820bb9b0",
+              "file": "draft-safety.spec.ts",
+              "line": 93,
+              "column": 5
+            },
+            {
+              "title": "S9 unreadable/invalid storage remains byte-for-byte intact after an edit",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2251,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:33.885Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjEsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6NDJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-da09e898a389c5ba52f3",
+              "file": "draft-safety.spec.ts",
+              "line": 93,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "LKH-003 open acceptance contracts",
+          "file": "draft-safety.spec.ts",
+          "line": 105,
+          "column": 6,
+          "specs": [
+            {
+              "title": "S6 quota-exceeded draft write retains text and must not claim saved",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1914,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:36.146Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjEsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhdix2Kcg2K/ZhCDZhdix2Kcg2K/ZhFxcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-2b8deb10ec2f399c5e4c",
+              "file": "draft-safety.spec.ts",
+              "line": 111,
+              "column": 5
+            },
+            {
+              "title": "S6 generic draft write retains text and must not claim saved",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1869,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:38.074Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjEsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhdix2Kcg2K/ZhCDZhdix2Kcg2K/ZhFxcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-f4030494c2420f2c586d",
+              "file": "draft-safety.spec.ts",
+              "line": 111,
+              "column": 5
+            },
+            {
+              "title": "S7 failed draft save offers explicit retry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1983,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:39.961Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjE3OTMyNjI3NjM1MDIsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLYr9mI2KjYp9ix24Eg2YXYrdmB2YjYuCBTN1xcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-e6de074c20901343481f",
+              "file": "draft-safety.spec.ts",
+              "line": 121,
+              "column": 3
+            },
+            {
+              "title": "S10 corrupt originals have a visible recovery route even if recovery writes fail",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1540,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:41.950Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAie3JlY292ZXJ5LW9yaWdpbmFsLVMxMCIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-891af7992b736ec6627a",
+              "file": "draft-safety.spec.ts",
+              "line": 130,
+              "column": 3
+            },
+            {
+              "title": "S11 malformed backup is rejected without changing drafts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2443,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:43.500Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjEsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhdix2Kcg2K/ZhCDZhdix2Kcg2K/ZhFxcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-9ccd2858363865b3be14",
+              "file": "draft-safety.spec.ts",
+              "line": 138,
+              "column": 3
+            },
+            {
+              "title": "S12 valid replacement preserves previous portfolio for recovery",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1749,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:45.954Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJyZXN0b3JlZFwiLFwidGl0bGVcIjpcIti52YbZiNin2YYgcmVzdG9yZWRcIixcInBvZXRcIjpcIti02KfYudixINii2LLZhdin2KbYtFwiLFwiZm9ybVwiOlwiZ2hhemFsXCIsXCJ0YWdzXCI6W10sXCJjcmVhdGVkQXRcIjoxLFwidXBkYXRlZEF0XCI6MSxcInFhZml5YUxpc3RcIjpbXSxcImNvbnRlbnRcIjpcItmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXFxu2YXYsdinINiv2YQg2YXYsdinINiv2YRcIn1dIgp9"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-1ff0c8730a0407e6b28f",
+              "file": "draft-safety.spec.ts",
+              "line": 149,
+              "column": 3
+            },
+            {
+              "title": "S13 dirty navigation warns before leaving",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4802,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:47.711Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjE3OTMyNjI3NzA1MTcsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhNmF2K3Yp9iq24wg2KrYqNiv24zZhNuMIFMxM1xcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-4c91cf465740cb72eb92",
+              "file": "draft-safety.spec.ts",
+              "line": 158,
+              "column": 3
+            },
+            {
+              "title": "S14 a newer edit is never labelled saved before its debounce commits",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2234,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:52.521Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjE3OTMyNjI3Nzc0ODgsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLYr9mI2LPYsduMINiq2KjYr9uM2YTbjCBTMTRcXG7Zhdix2Kcg2K/ZhCDZhdix2Kcg2K/ZhFwifV0iCn0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-5e788966fc2797fc5c90",
+              "file": "draft-safety.spec.ts",
+              "line": 166,
+              "column": 3
+            },
+            {
+              "title": "S15 real aborted proposal transaction must not report durable success",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2365,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:54.766Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjEsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhdix2Kcg2K/ZhCDZhdix2Kcg2K/ZhFxcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-f316c52da04c03b58c1f",
+              "file": "draft-safety.spec.ts",
+              "line": 176,
+              "column": 3
+            },
+            {
+              "title": "S16 deleting the active dirty draft does not resurrect it on autosave",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1995,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:57.143Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW10iCn0="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-60cf8ae766b9861c1130",
+              "file": "draft-safety.spec.ts",
+              "line": 198,
+              "column": 3
+            },
+            {
+              "title": "S17 reload reopens the selected draft rather than drafts[0]",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2451,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T08:32:59.144Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "draft-storage.json",
+                          "contentType": "application/json",
+                          "body": "ewogICJyYXciOiAiW3tcImlkXCI6XCJvcmRpbmFyeS1hXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1hXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjEsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhdix2Kcg2K/ZhCDZhdix2Kcg2K/ZhFxcbtmF2LHYpyDYr9mEINmF2LHYpyDYr9mEXCJ9LHtcImlkXCI6XCJvcmRpbmFyeS1iXCIsXCJ0aXRsZVwiOlwi2LnZhtmI2KfZhiBvcmRpbmFyeS1iXCIsXCJwb2V0XCI6XCLYtNin2LnYsSDYotiy2YXYp9im2LRcIixcImZvcm1cIjpcImdoYXphbFwiLFwidGFnc1wiOltdLFwiY3JlYXRlZEF0XCI6MSxcInVwZGF0ZWRBdFwiOjEsXCJxYWZpeWFMaXN0XCI6W10sXCJjb250ZW50XCI6XCLZhdmG2KrYrtioINmF2LPZiNiv24EgUzE3XCJ9XSIKfQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d360ecf78e3001f8c9e1-e369dd9fabbd20282db8",
+              "file": "draft-safety.spec.ts",
+              "line": 207,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-29T08:32:14.295Z",
+    "duration": 47411.634,
+    "expected": 18,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

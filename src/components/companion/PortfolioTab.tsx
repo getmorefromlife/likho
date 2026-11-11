@@ -13,16 +13,21 @@ import { StorageService } from '../../services/storageService';
 interface PortfolioTabProps {
   currentDraftId: string;
   onSelectDraft: (draft: PoemDraft) => void;
+  onDeleteDraft?: (id: string) => boolean;
+  onPortfolioRestored?: (drafts: PoemDraft[]) => void;
   fontFamily: string;
 }
 
 export const PortfolioTab: React.FC<PortfolioTabProps> = ({
   currentDraftId,
   onSelectDraft,
+  onDeleteDraft,
+  onPortfolioRestored,
   fontFamily,
 }) => {
   const [drafts, setDrafts] = useState<PoemDraft[]>([]);
   const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<{ text: string; isError?: boolean } | null>(null);
 
   const refreshDrafts = () => {
     setDrafts(StorageService.getDrafts());
@@ -35,8 +40,13 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (window.confirm('کیا آپ واقعی اس کلام کو حذف کرنا چاہتے ہیں؟')) {
-      StorageService.deleteDraft(id);
-      refreshDrafts();
+      const deleted = onDeleteDraft ? onDeleteDraft(id) : StorageService.deleteDraft(id);
+      if (deleted) {
+        refreshDrafts();
+        setStatus({ text: 'مسودہ حذف ہو گیا۔' });
+      } else {
+        setStatus({ text: 'مسودہ حذف نہیں ہو سکا؛ ذخیرہ دستیاب نہیں ہے۔', isError: true });
+      }
     }
   };
 
@@ -57,15 +67,28 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Replacement is explicit: this backup replaces the whole current portfolio.
+    if (!window.confirm('موجودہ دیوان کی جگہ بیک اپ بحال کیا جائے گا۔ پرانا دیوان بازیابی کے لیے محفوظ کر دیا جائے گا۔ جاری رکھیں؟')) {
+      e.target.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      if (content && StorageService.restoreBackup(content)) {
+      const result = StorageService.restoreBackup(content);
+      if (result.success && result.drafts) {
         refreshDrafts();
-        alert('بیک اپ کامیابی کے ساتھ بحال ہو گیا۔');
+        onPortfolioRestored?.(result.drafts);
+        setStatus({
+          text: result.recoverySaved
+            ? 'بیک اپ بحال ہو گیا۔ پرانا دیوان بازیابی کے لیے محفوظ کر دیا گیا ہے۔'
+            : 'بیک اپ بحال ہو گیا۔',
+        });
       } else {
-        alert('بیک اپ فائل پڑھنے میں خرابی پیش آئی۔');
+        setStatus({ text: result.error || 'بیک اپ فائل پڑھنے میں خرابی پیش آئی۔', isError: true });
       }
+      e.target.value = '';
     };
     reader.readAsText(file);
   };
@@ -119,6 +142,19 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
             </label>
           </div>
         </div>
+
+        {status && (
+          <div
+            role="status"
+            className={`p-1.5 rounded-lg text-[11px] font-nastaliq border ${
+              status.isError
+                ? 'bg-red-500/10 border-red-500/30 text-red-500'
+                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+            }`}
+          >
+            {status.text}
+          </div>
+        )}
       </div>
 
       {/* Drafts List */}

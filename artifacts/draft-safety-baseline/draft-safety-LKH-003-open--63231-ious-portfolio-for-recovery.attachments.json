@@ -1,0 +1,40 @@
+[
+  {
+    "type": "after",
+    "callId": "ihrk@75",
+    "endTime": 85521.892,
+    "attachments": [
+      {
+        "name": "draft-storage.json",
+        "contentType": "application/json",
+        "file": "attachments/ac995d7b3cbd188bbd143dc0c1b4b14685aee2dc"
+      }
+    ],
+    "annotations": []
+  },
+  {
+    "type": "after",
+    "callId": "ihrk@91",
+    "endTime": 85603.086,
+    "attachments": [
+      {
+        "name": "error-context",
+        "contentType": "text/markdown",
+        "file": "attachments/de4077c905feb60c1eb23a12c5c6ebc3c9d75997"
+      }
+    ]
+  },
+  {
+    "type": "after",
+    "callId": "ihrk@70",
+    "endTime": 85607.66,
+    "attachments": [
+      {
+        "name": "screenshot",
+        "contentType": "image/png",
+        "file": "attachments/b5a5bd471cc3cdf58ec3f1cbb005e22d90ea0250"
+      }
+    ],
+    "annotations": []
+  }
+]

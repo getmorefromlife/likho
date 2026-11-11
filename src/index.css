@@ -172,3 +172,11 @@ input.font-nastaliq,
     font-family: "Noto Nastaliq Urdu", "Gulzar", serif !important;
   }
 }
+
+/* Shared box selection for rhyme and dictionary result chips. */
+.word-selection-area [data-box-selected="true"] {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 1px;
+  background-color: var(--bg-surface) !important;
+  opacity: 1 !important;
+}

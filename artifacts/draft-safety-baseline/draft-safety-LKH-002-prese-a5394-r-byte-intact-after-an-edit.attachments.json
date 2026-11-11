@@ -1,0 +1,40 @@
+[
+  {
+    "type": "after",
+    "callId": "dvxr@62",
+    "endTime": 56513.235,
+    "attachments": [
+      {
+        "name": "draft-storage.json",
+        "contentType": "application/json",
+        "file": "attachments/af8dd2c615116392daedac8c9178e260df45c27e"
+      }
+    ],
+    "annotations": []
+  },
+  {
+    "type": "after",
+    "callId": "dvxr@78",
+    "endTime": 56547.157,
+    "attachments": [
+      {
+        "name": "error-context",
+        "contentType": "text/markdown",
+        "file": "attachments/139eb84dc80848a8727fadd5bc48a43170381714"
+      }
+    ]
+  },
+  {
+    "type": "after",
+    "callId": "dvxr@57",
+    "endTime": 56552.062,
+    "attachments": [
+      {
+        "name": "screenshot",
+        "contentType": "image/png",
+        "file": "attachments/986e3332ef4ae22f5d9a6abd22b07d10b11be63c"
+      }
+    ],
+    "annotations": []
+  }
+]

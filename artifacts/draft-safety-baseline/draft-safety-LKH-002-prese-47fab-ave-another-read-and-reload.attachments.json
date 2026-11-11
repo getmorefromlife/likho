@@ -1,0 +1,40 @@
+[
+  {
+    "type": "after",
+    "callId": "exmn@107",
+    "endTime": 14514.254,
+    "attachments": [
+      {
+        "name": "draft-storage.json",
+        "contentType": "application/json",
+        "file": "attachments/caa38c0ac00fbd21803eb889ecb430bebaf64889"
+      }
+    ],
+    "annotations": []
+  },
+  {
+    "type": "after",
+    "callId": "exmn@123",
+    "endTime": 14726.054,
+    "attachments": [
+      {
+        "name": "error-context",
+        "contentType": "text/markdown",
+        "file": "attachments/aa99c499b99589da1415e5685dc8ecaf45141474"
+      }
+    ]
+  },
+  {
+    "type": "after",
+    "callId": "exmn@102",
+    "endTime": 14727.951,
+    "attachments": [
+      {
+        "name": "screenshot",
+        "contentType": "image/png",
+        "file": "attachments/804d34086fbba9d351d6407d9516b4618158cc2c"
+      }
+    ],
+    "annotations": []
+  }
+]

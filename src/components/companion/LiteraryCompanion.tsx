@@ -24,6 +24,8 @@ interface LiteraryCompanionProps {
   onSelectMeter: (name: string, rukn: string) => void;
   onSelectWordToInsert?: (word: string) => void;
   onSelectDraft: (draft: PoemDraft) => void;
+  onDeleteDraft?: (id: string) => boolean;
+  onPortfolioRestored?: (drafts: PoemDraft[]) => void;
   fontFamily: string;
   onClose?: () => void;
 }
@@ -35,6 +37,8 @@ export const LiteraryCompanion: React.FC<LiteraryCompanionProps> = ({
   onSelectMeter,
   onSelectWordToInsert,
   onSelectDraft,
+  onDeleteDraft,
+  onPortfolioRestored,
   fontFamily,
   onClose,
 }) => {
@@ -97,7 +101,12 @@ export const LiteraryCompanion: React.FC<LiteraryCompanionProps> = ({
       {/* Tab Panels */}
       <div className="flex-1 overflow-hidden">
         {activeTab === 'treasury' && (
-          <RhymeTreasuryTab onLoadToTray={onLoadRhymesToTray} fontFamily={fontFamily} />
+          <RhymeTreasuryTab
+            onLoadToTray={onLoadRhymesToTray}
+            fontFamily={fontFamily}
+            poemContent={currentDraft.content}
+            selectedWord={selectedWord}
+          />
         )}
         {activeTab === 'prosody' && (
           <ProsodyTab
@@ -118,6 +127,8 @@ export const LiteraryCompanion: React.FC<LiteraryCompanionProps> = ({
           <PortfolioTab
             currentDraftId={currentDraft.id}
             onSelectDraft={onSelectDraft}
+            onDeleteDraft={onDeleteDraft}
+            onPortfolioRestored={onPortfolioRestored}
             fontFamily={fontFamily}
           />
         )}

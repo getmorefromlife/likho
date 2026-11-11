@@ -12,8 +12,12 @@ import {
   Sparkles,
   Palette,
   Sliders,
+  Clock3,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont } from '../../types/workspace';
+import type { PersistenceState } from '../../hooks/usePoemEditor';
 
 interface TopNavBarProps {
   prefs: WorkspacePrefs;
@@ -26,7 +30,9 @@ interface TopNavBarProps {
   onToggleZen: () => void;
   onNewPoem: () => void;
   onOpenExport: () => void;
-  isSaved?: boolean;
+  saveState?: PersistenceState;
+  saveError?: string | null;
+  onRetrySave?: () => void;
 }
 
 export const TopNavBar: React.FC<TopNavBarProps> = ({
@@ -40,11 +46,46 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   onToggleZen,
   onNewPoem,
   onOpenExport,
-  isSaved = true,
+  saveState = 'idle',
+  saveError,
+  onRetrySave,
 }) => {
   const [showTypographyMenu, setShowTypographyMenu] = useState(false);
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [showPresetMenu, setShowPresetMenu] = useState(false);
+
+  const saveStatus = {
+    idle: {
+      label: 'کوئی غیر محفوظ تبدیلی نہیں',
+      icon: <Check className="w-3.5 h-3.5 text-emerald-500" />,
+      tone: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
+    },
+    dirty: {
+      label: 'غیر محفوظ تبدیلی',
+      icon: <Clock3 className="w-3.5 h-3.5 text-amber-500" />,
+      tone: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
+    },
+    saving: {
+      label: 'محفوظ ہو رہا ہے...',
+      icon: <RefreshCw className="w-3.5 h-3.5 text-sky-500 animate-spin" />,
+      tone: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/30',
+    },
+    saved: {
+      label: 'محفوظ شدہ',
+      icon: <Check className="w-3.5 h-3.5 text-emerald-500" />,
+      tone: 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
+    },
+    failed: {
+      label: 'محفوظ نہیں ہو سکا',
+      icon: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />,
+      tone: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30',
+    },
+    'session-only': {
+      label: 'صرف اس نشست میں',
+      icon: <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />,
+      tone: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30',
+    },
+  }[saveState];
 
   const fontOptions: { id: NastaliqFont; label: string }[] = [
     { id: 'Noto Nastaliq Urdu', label: 'نوٹو نستعلیق (Noto Nastaliq)' },
@@ -61,7 +102,10 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 
   const presetLabels: Record<LayoutPreset, string> = {
     classic: 'کلاسیکی (Classic)',
+    custom: 'من پسند (Custom Studio)',
     zen: 'گوشۂ تنہائی (Zen)',
+    quiet: 'صرف تحریر (Writing only)',
+    quiet_rhymes: 'تحریر و قوافی (70 / 30)',
     swapped: 'معکوس (Swapped)',
     bottom_dock: 'تہہ نشین (Bottom Dock)',
   };
@@ -94,10 +138,30 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
         </span>
 
         {/* Auto-Save Status Pill */}
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)] flex-shrink-0 shadow-2xs font-nastaliq">
-          <Check className="w-3.5 h-3.5 text-emerald-500" />
-          <span>{isSaved ? 'محفوظ شدہ' : 'محفوظ ہو رہا ہے...'}</span>
+        <div
+          data-testid="save-status"
+          title={saveError || saveStatus.label}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs border flex-shrink-0 shadow-2xs font-nastaliq ${saveStatus.tone}`}
+        >
+          {saveStatus.icon}
+          <span>{saveStatus.label}</span>
         </div>
+
+        {(saveState === 'session-only' || saveState === 'failed') && onRetrySave && (
+          <button
+            type="button"
+            onClick={onRetrySave}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-nastaliq border transition-colors flex-shrink-0 ${
+              saveState === 'failed'
+                ? 'border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-500/20'
+                : 'border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20'
+            }`}
+            title="مسودہ دوبارہ محفوظ کرنے کی کوشش کریں"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>دوبارہ کوشش</span>
+          </button>
+        )}
       </div>
 
       {/* Middle & Left Controls */}
@@ -266,6 +330,22 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             </div>
           )}
         </div>
+
+        {/* Dedicated من پسند (Custom View) Quick Toggle Button */}
+        <button
+          type="button"
+          data-testid="custom-view-toggle-btn"
+          onClick={() => onApplyPreset(prefs.activePreset === 'custom' ? 'classic' : 'custom')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all border ${
+            prefs.activePreset === 'custom'
+              ? 'bg-[var(--accent-gold)] text-white border-[var(--accent-gold)] font-bold shadow-sm'
+              : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--accent-gold)]'
+          }`}
+          title="من پسند منظر — اپنی مرضی کے مطابق اسکرین کی تقسیم، کالم، قطاریں اور سہولیات چنیں"
+        >
+          <Sliders className={`w-3.5 h-3.5 ${prefs.activePreset === 'custom' ? 'text-white' : 'text-[var(--accent-gold)]'}`} />
+          <span className="font-nastaliq">من پسند</span>
+        </button>
 
         {/* Dedicated Lock / Unlock Button */}
         <button

@@ -1,3 +1,4 @@
+import { WordSelectionArea } from '../common/WordSelectionArea';
 import React, { useState, useEffect } from 'react';
 import { Search, Sparkles, Quote } from 'lucide-react';
 import { URDU_THESAURUS } from '../../data/urduThesaurus';
@@ -76,7 +77,7 @@ export const ThesaurusTab: React.FC<ThesaurusTabProps> = ({
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+      <WordSelectionArea id="dictionary" label="لغت و الفاظ" resetKey={searchTerm} className="flex-1 overflow-y-auto p-3 pb-14 space-y-3 custom-scrollbar">
         {matchedEntry ? (
           <div className="space-y-3">
             {/* Main Word Header */}
@@ -110,6 +111,8 @@ export const ThesaurusTab: React.FC<ThesaurusTabProps> = ({
                 {matchedEntry.synonyms.map((s) => (
                   <span
                     key={s}
+                    data-selectable-id={`synonym:${s}`}
+                    data-selectable-word={s}
                     style={{ fontFamily }}
                     onClick={() => onSelectWordToInsert && onSelectWordToInsert(s)}
                     className="px-2.5 py-1 rounded-lg text-xs bg-[var(--bg-subtle)] hover:bg-[var(--accent-gold)]/15 hover:border-[var(--accent-gold)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-nastaliq transition-all cursor-pointer"
@@ -131,6 +134,8 @@ export const ThesaurusTab: React.FC<ThesaurusTabProps> = ({
                   {matchedEntry.antonyms.map((a) => (
                     <span
                       key={a}
+                    data-selectable-id={`antonym:${a}`}
+                    data-selectable-word={a}
                       style={{ fontFamily }}
                       className="px-2.5 py-1 rounded-lg text-xs bg-[var(--bg-subtle)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-nastaliq"
                     >
@@ -151,6 +156,8 @@ export const ThesaurusTab: React.FC<ThesaurusTabProps> = ({
                   {matchedEntry.compounds.map((c) => (
                     <span
                       key={c}
+                    data-selectable-id={`compound:${c}`}
+                    data-selectable-word={c}
                       style={{ fontFamily }}
                       className="px-2.5 py-1 rounded-lg text-xs bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-nastaliq"
                     >
@@ -185,7 +192,7 @@ export const ThesaurusTab: React.FC<ThesaurusTabProps> = ({
             اس لفظ کے لیے ابھی لغت میں اندراج موجود نہیں ہے۔ اوپر دیے گئے منتخب الفاظ میں سے انتخاب فرمائیں یا متن میں کسی دوسرے لفظ کو منتخب کریں۔
           </div>
         )}
-      </div>
+      </WordSelectionArea>
     </div>
   );
 };
