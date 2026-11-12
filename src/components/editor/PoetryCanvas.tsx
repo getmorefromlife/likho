@@ -738,7 +738,7 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                       lineHeight: prefs.lineHeight,
                       textAlign: textAlign === 'justify' ? 'right' : textAlign,
                     }}
-                    className="w-full bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)]/40 font-nastaliq py-2.5 px-4 leading-[2.6]"
+                    className="w-full bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)]/75 font-nastaliq py-2.5 px-4 leading-[2.6]"
                   />
 
                   {/* Per-Line Scansion Card with Interactive Syllable Repair */}

@@ -97,7 +97,7 @@ export const MeterReferenceView: React.FC<MeterReferenceViewProps> = ({
               onClick={() => onSelectMeter(entry.nameUrdu, patternString)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                 isSelectedMeter
-                  ? 'bg-[var(--accent-gold)] text-black border-[var(--accent-gold)]'
+                  ? 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] border-[var(--accent-gold)]'
                   : 'border-[var(--accent-gold)] text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/15'
               }`}
             >

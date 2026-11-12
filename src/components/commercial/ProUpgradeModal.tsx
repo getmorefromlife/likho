@@ -80,7 +80,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({
         <div className="text-center space-y-3 pt-2">
           <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden border border-[var(--accent-gold)]/40 shadow-md bg-[#0f141c]">
             <img src="/logo.jpg" alt="قلم و قافیہ" className="w-full h-full object-cover" />
-            <span className="absolute -bottom-1 -right-1 p-1 rounded-full bg-[var(--accent-gold)] text-black shadow-xs">
+            <span className="absolute -bottom-1 -right-1 p-1 rounded-full bg-[var(--accent-gold)] text-[var(--text-on-gold)] shadow-xs">
               <Crown className="w-3.5 h-3.5" />
             </span>
           </div>

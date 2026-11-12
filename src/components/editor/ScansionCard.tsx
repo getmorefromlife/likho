@@ -358,9 +358,9 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             <button
               type="button"
               onClick={handleToggleRepair}
-              className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-nastaliq text-[11px] font-bold transition-all border shadow-2xs ${
+              className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-nastaliq text-[11px] font-bold transition-all border shadow-2xs ${
                 isRepairOpen
-                  ? 'bg-[var(--accent-gold)] text-black border-[var(--accent-gold)]'
+                  ? 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] border-[var(--accent-gold)]'
                   : 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/30 hover:bg-[var(--accent-gold)]/25'
               }`}
               title="شکستِ بحر کی نشان دہی اور تجاویز ملاحظہ فرمائیں"
@@ -448,9 +448,9 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
               type="button"
               data-testid="open-custom-bahar-builder"
               onClick={() => setIsCustomBaharOpen((prev) => !prev)}
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] transition-all cursor-pointer border ${
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] transition-all cursor-pointer border ${
                 isCustomBaharOpen
-                  ? 'bg-[var(--accent-gold)] text-black font-bold border-[var(--accent-gold)]'
+                  ? 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] font-bold border-[var(--accent-gold)]'
                   : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/40'
               }`}
               title="اگر آپ کی بحر فہرست میں نہیں تو اپنے ارکان خود درج کریں"
@@ -558,7 +558,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                       }
                       setIsCustomBaharOpen(false);
                     }}
-                    className="px-3 py-1 rounded-lg bg-[var(--accent-gold)] text-black font-bold text-xs disabled:opacity-40 cursor-pointer hover:opacity-90 transition-all"
+                    className="px-3 py-1 rounded-lg bg-[var(--accent-gold)] text-[var(--text-on-gold)] font-bold text-xs disabled:opacity-40 cursor-pointer hover:opacity-90 transition-all"
                   >
                     یہ بحر نافذ کریں
                   </button>
@@ -633,7 +633,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                         type="button"
                         data-testid="apply-enforced-bahar-word"
                         onClick={() => handlePinReading(m.wordIndex, ded.deducedPattern)}
-                        className="px-2.5 py-0.5 rounded-md bg-[var(--accent-gold)] text-black font-bold text-[11px] cursor-pointer hover:opacity-90 transition-all"
+                        className="px-3 py-1 rounded-md bg-[var(--accent-gold)] text-[var(--text-on-gold)] font-bold text-[11px] cursor-pointer hover:opacity-90 transition-all"
                       >
                         ✓ اس مصرعے میں نافذ کریں
                       </button>
@@ -783,19 +783,11 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                           </span>
                           <div className="flex items-center gap-1.5">
                             {choice.ruknLabel && (
-                              <span className="px-1.5 py-0.5 rounded bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/30 font-bold text-[11px]">
+                              <span className="px-2 py-0.5 rounded bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 font-bold text-[11px]">
                                 {choice.ruknLabel}
                               </span>
                             )}
-                            <span
-                              dir="rtl"
-                              title="دائیں سے بائیں"
-                              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-subtle)] font-mono font-bold text-[var(--accent-gold)]"
-                            >
-                              {choice.combinedPattern.split('').map((sym, i) => (
-                                <span key={i}>{sym}</span>
-                              ))}
-                            </span>
+                            <ProsodicPatternView pattern={choice.combinedPattern} size="xs" />
                           </div>
                         </div>
                         <p className="text-[11px] text-[var(--text-secondary)]">
@@ -808,9 +800,9 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                           onClick={() =>
                             handleApplyCompoundSplit(activeWordMenu.wordIndex, choice)
                           }
-                          className="self-end inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--accent-gold)] text-black font-bold text-[11px] hover:opacity-90 transition-all cursor-pointer"
+                          className="self-end inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent-gold)] text-[var(--text-on-gold)] font-bold text-xs leading-[2.1] hover:opacity-90 transition-all cursor-pointer shadow-xs"
                         >
-                          <Check className="w-3 h-3" />
+                          <Check className="w-3.5 h-3.5 shrink-0" />
                           <span>«{choice.spacedText}» ({choice.ruknLabel}) منتخب کریں</span>
                         </button>
                       )}
@@ -871,13 +863,13 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                           onClick={() =>
                             handlePinReading(activeWordMenu.wordIndex, reading.pattern)
                           }
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer border ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold leading-[2.1] transition-all cursor-pointer border ${
                             reading.isPinnedByPoet
-                              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40'
-                              : 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/35 hover:bg-[var(--accent-gold)] hover:text-black'
+                              ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
+                              : 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/40 hover:bg-[var(--accent-gold)] hover:text-[var(--text-on-gold)]'
                           }`}
                         >
-                          <Check className="w-3 h-3" />
+                          <Check className="w-3.5 h-3.5 shrink-0" />
                           <span>
                             {reading.isPinnedByPoet
                               ? 'مقررہ وزن ہٹائیں (خودکار)'
@@ -891,7 +883,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                             onClick={() =>
                               handleApplyVocalizedWord(activeWordMenu.wordIndex, reading)
                             }
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] cursor-pointer"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs leading-[2.1] bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] cursor-pointer"
                           >
                             <span>متن میں «{reading.vocalizedSpelling}» درج کریں</span>
                           </button>
@@ -920,14 +912,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                           <span className="font-bold text-sm text-[var(--text-primary)]">
                             «{alt.alternativeWord}»
                           </span>
-                          <span
-                            dir="rtl"
-                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-subtle)] font-mono font-bold text-[var(--accent-gold)]"
-                          >
-                            {alt.alternativePattern.split('').map((sym, i) => (
-                              <span key={i}>{sym}</span>
-                            ))}
-                          </span>
+                          <ProsodicPatternView pattern={alt.alternativePattern} size="xs" />
                         </div>
                         <p className="text-[10px] text-[var(--text-muted)]">
                           {alt.explanationUrdu}
@@ -966,7 +951,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
               <button
                 type="button"
                 onClick={() => setCorrectingWord(activeWordMenu.word)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-nastaliq bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] border border-[var(--accent-gold)]/30 hover:bg-[var(--accent-gold)] hover:text-white transition-all font-bold cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-nastaliq bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 hover:bg-[var(--accent-gold)] hover:text-[var(--text-on-gold)] transition-all font-bold cursor-pointer"
                 title="اس لفظ کا صحیح عروضی وزن تجویز یا درست فرمائیں"
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -1232,10 +1217,10 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                           type="button"
                           disabled={!canApplyLineUpdate}
                           onClick={() => handleApply(sug)}
-                          className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-nastaliq font-bold transition-all shadow-2xs ${
+                          className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-nastaliq font-bold transition-all shadow-2xs ${
                             isApplied
                               ? 'bg-emerald-600 text-white'
-                              : 'bg-[var(--accent-gold)] text-black hover:brightness-110 active:scale-95'
+                              : 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] hover:brightness-110 active:scale-95'
                           }`}
                         >
                           {isApplied ? (

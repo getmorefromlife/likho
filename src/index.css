@@ -1,21 +1,26 @@
 @import "tailwindcss";
 
+/* Bind Tailwind dark: variant strictly to Likho's [data-theme="dark"] attribute
+   so OS dark mode never leaks low-contrast pastel text onto Sepia or White themes */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* -------------------------------------------------------------
-   THEME DESIGN TOKENS (Sepia, Obsidian, Clean White)
+   THEME DESIGN TOKENS (Sepia, Obsidian, Clean White) — WCAG High Contrast
 ------------------------------------------------------------- */
 :root {
   /* Default: کاغذ (Sepia / Warm Parchment) */
   --bg-canvas: #faf6ee;
   --bg-card: #ffffff;
-  --bg-surface: #f5efe3;
-  --bg-subtle: #eee5d3;
-  --text-primary: #27211b;
-  --text-secondary: #52473c;
-  --text-muted: #7c6f62;
-  --accent-gold: #9d6825;
-  --accent-gold-hover: #b87c32;
-  --border-subtle: #e2d7c3;
-  --border-focus: #c29b4e;
+  --bg-surface: #f4ede0;
+  --bg-subtle: #ebe0cc;
+  --text-primary: #1c1610;
+  --text-secondary: #3b3026;
+  --text-muted: #594b3e;
+  --accent-gold: #8a5615;
+  --accent-gold-hover: #73460f;
+  --text-on-gold: #ffffff;
+  --border-subtle: #d8cab0;
+  --border-focus: #8a5615;
 }
 
 [data-theme="dark"] {
@@ -23,14 +28,15 @@
   --bg-canvas: #0c0e12;
   --bg-card: #151820;
   --bg-surface: #1b202a;
-  --bg-subtle: #242a37;
-  --text-primary: #f6f2e9;
-  --text-secondary: #c2c7d4;
-  --text-muted: #858d9f;
-  --accent-gold: #e2b45f;
-  --accent-gold-hover: #f1c574;
-  --border-subtle: #2b3242;
-  --border-focus: #e2b45f;
+  --bg-subtle: #252c3a;
+  --text-primary: #f8f5ee;
+  --text-secondary: #d5dae5;
+  --text-muted: #9da6b8;
+  --accent-gold: #e6b966;
+  --accent-gold-hover: #f2c97d;
+  --text-on-gold: #111318;
+  --border-subtle: #2f3747;
+  --border-focus: #e6b966;
 }
 
 [data-theme="white"] {
@@ -38,14 +44,15 @@
   --bg-canvas: #f8f9fa;
   --bg-card: #ffffff;
   --bg-surface: #f1f3f5;
-  --bg-subtle: #e9ecef;
-  --text-primary: #1a1a1a;
-  --text-secondary: #495057;
-  --text-muted: #6c757d;
-  --accent-gold: #855823;
-  --accent-gold-hover: #9c682c;
-  --border-subtle: #dee2e6;
-  --border-focus: #855823;
+  --bg-subtle: #e5e9ed;
+  --text-primary: #111315;
+  --text-secondary: #343a40;
+  --text-muted: #4f575e;
+  --accent-gold: #7c4e14;
+  --accent-gold-hover: #663f0f;
+  --text-on-gold: #ffffff;
+  --border-subtle: #ced4da;
+  --border-focus: #7c4e14;
 }
 
 /* -------------------------------------------------------------
@@ -109,6 +116,45 @@ input.font-nastaliq,
 button.font-nastaliq,
 .font-nastaliq button {
   overflow: visible !important;
+  line-height: 2.05;
+}
+
+/* Guarantee WCAG contrast on all solid --accent-gold buttons and badges across all 3 themes */
+.bg-\[var\(--accent-gold\)\] {
+  color: var(--text-on-gold) !important;
+}
+
+.hover\:bg-\[var\(--accent-gold\)\]:hover {
+  color: var(--text-on-gold) !important;
+}
+
+/* Strengthen semantic badge text contrast on light/parchment themes (Sepia & White) */
+:root:not([data-theme="dark"]) .text-amber-600,
+:root:not([data-theme="dark"]) .text-amber-500 {
+  color: #92400e !important;
+}
+
+:root:not([data-theme="dark"]) .text-emerald-600,
+:root:not([data-theme="dark"]) .text-emerald-500 {
+  color: #065f46 !important;
+}
+
+:root:not([data-theme="dark"]) .text-sky-600,
+:root:not([data-theme="dark"]) .text-sky-500 {
+  color: #075985 !important;
+}
+
+:root:not([data-theme="dark"]) .text-blue-600 {
+  color: #1e40af !important;
+}
+
+:root:not([data-theme="dark"]) .text-purple-600 {
+  color: #5b21b6 !important;
+}
+
+:root:not([data-theme="dark"]) .text-rose-500,
+:root:not([data-theme="dark"]) .text-rose-600 {
+  color: #9f1239 !important;
 }
 
 /* Unclipped ContentEditable Title styling for Nastaliq calligraphy */
