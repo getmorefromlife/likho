@@ -1,0 +1,57 @@
+{
+  "name": "قلم و قافیہ | Likho Pro",
+  "short_name": "قلم و قافیہ",
+  "description": "اردو شعراء، ادباء اور محققین کے لیے ایک خود مختار، سنجیدہ اور کلاؤڈ سے آزاد عروضی اسٹوڈیو",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "dir": "rtl",
+  "lang": "ur",
+  "theme_color": "#8a5615",
+  "background_color": "#faf6ee",
+  "categories": ["productivity", "education", "books", "utilities"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "نیا کلام شروع کریں",
+      "short_name": "نیا کلام",
+      "description": "خالی کینوس پر نئی غزل یا نظم لکھیں",
+      "url": "/?action=new",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "خزانہ قوافی",
+      "short_name": "قوافی",
+      "description": "۵۸,۰۰۰+ مصدقہ قوافی کی لغت تلاش کریں",
+      "url": "/?action=rhymes",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "اطلسِ بحور (۵۰ اوزان)",
+      "short_name": "اوزان",
+      "description": "کلاسیکی اردو عروض اور بحور کا انسائیکلوپیڈیا",
+      "url": "/?action=meters",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

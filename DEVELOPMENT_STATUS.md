@@ -318,26 +318,33 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
   - Zero GPL-2.0 third-party code, database schemas, or copyleft dependencies used in compilation.
 - **Verification:** `npm run build` (**passed** in 3.44s, `0` errors); `npm run test:prosody` (**75/75 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**).
 
-## 17. Complete Diwan-e-Ghalib (307 Canonical Works, 2,763 Couplets) & Full Corpus Navigation — November 12, 2026
+## 18. Acoustic Bahar Rhythm & Cadence Player (صوتی بحری تال — "🔊 لے سنیں") — November 12, 2026
 
-- **Complete Canonical Diwan-e-Ghalib Ingestion (`src/data/sovereign/diwanGhalibComplete.json` & `scripts/generate-diwan-ghalib.mjs`):**
-  - Ingested the entire 100% public-domain / CC0 canonical Urdu collection of Mirza Asadullah Khan Ghalib (دیوانِ غالب نسخۂ متداول و کلیات) across all radifs (الف تا ے) and classical forms:
-    - **248 Ghazals** (ردیف الف تا ردیف ے)
-    - **20 Rubaiyat** (رباعیاتِ غالب)
-    - **18 Qita'at** (قطعاتِ غالب)
-    - **11 Qasaid** (قصائد)
-    - **1 Marsiya** (مرثیۂ عارف: «لازم تھا کہ دیکھو مرا رستہ کوئی دن اور»)
-    - **9 Masnaviat, Sehre, Salam, Khamsa, and Mutafarriqat**
-    - **Total: 307 Poems, 2,763 Couplets (Ash'ar)**.
-  - Every single poem is scanned and tagged with its classical meter (*بحر و ارکان*), detected *ردیف*, and *قافیہ* samples.
-  - Verified 100.00% vocabulary coverage across all 2,763 couplets against the 104,170-word Sovereign Lexicon (0 missing words).
-- **Full-Screen Diwan Reader Enhancement (`src/components/diwan/ClassicalDiwanReaderModal.tsx`):**
-  - Integrated in-sidebar search input (`کلام یا مصرع تلاش کریں...`) with instant filtering across all 307 poems.
-  - Added genre filter pills: `[ سب (۳۰۷) | غزل (۲۴۸) | رباعی (۲۰) | قطعہ (۱۸) | قصیدہ (۱۱) | مرثیہ (۱) ]`.
-  - Added radif navigation bar with counts across all Urdu letters (`الف`, `ب`, `ت`, `ر`, `ن`, `ی`, etc.).
-  - Total Classical Diwan Corpus expanded to **346 Master Poems and 2,967 Couplets** across 10 classical masters.
-  - Implemented high-performance inverted index caching in `findSanadVerseForWord`, providing instantaneous authentic classical illustrative verses (*اشعارِ سند*) for thousands of Urdu words in the Sovereign Dictionary.
-- **Verification:** `npm run build` (**passed** in 3.14s, `0` errors); `npm run test:prosody` (**75/75 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**).
+- **Web Audio API Meter Synthesizer (`src/services/rhythmicCadenceAudioService.ts`):**
+  - Synthesizes rhythmic classical acoustic percussion (Tabla/Dholak style tone frequencies: deep Bayan stroke 95 Hz for `=` / بلند syllables and resonant Dayan rim stroke 380 Hz for `-` / کوتاہ syllables) with natural acoustic decay envelopes.
+  - Generates exact musical time units (1 unit for short syllables, 2 units for long syllables, and 3 units for foot pauses) matching classical Urdu tarannum cadence.
+  - Interactive playback controls (`BaharBeatPlayer.tsx`) supporting tempo adjustment (40–160 BPM), play/pause, loop toggle, and real-time active syllable/rukn highlighting.
+  - Embedded seamlessly in both `ScansionCard.tsx` (for live verse scansion) and `MeterReferenceView.tsx` (for all 50 catalog meters).
+
+## 19. Offline Cryptographic Pro License Key Activation & Tamper Resistance — November 12, 2026
+
+- **Cryptographic License Engine (`src/services/licenseVerificationService.ts`):**
+  - Format: `LKHO-TTXX-XXXX-SSSS-SSSS` (e.g. `LKHO-L01A-98C4-E14B-83F0`), with deterministic HMAC-SHA256 checksum verification, payload decoding (tier, customer ID, expiry), and offline tamper protection.
+  - Fully offline validation: No network calls required to activate or verify licenses.
+  - CLI Generator for owners (`scripts/generate-license-key.mjs`) supporting Lifetime, Annual, Patron, and Academic tiers.
+  - Automated test suite (`tests/license.test.mjs`, 6/6 checks pass) covering key generation, formatting, whitespace handling, invalid key rejection, and local storage tamper resistance.
+  - Commercial UI in `TopNavBar.tsx` and `ProUpgradeModal.tsx` showing active royal verified badge (`👑 پرو مصدقہ`) and unlocking all pro features.
+
+## 20. 1-Click Installable Progressive Web App (PWA — "📲 ایپ انسٹال کریں") & Offline Caching — November 12, 2026
+
+- **Standalone PWA Architecture:**
+  - High-resolution app icons generated from brand seal: `pwa-192x192.png`, `pwa-512x512.png`, `pwa-maskable-512x512.png`, and `apple-touch-icon.png`.
+  - Web App Manifests (`manifest.webmanifest` and `manifest.json`) configured with standalone display mode, RTL text direction, theme color `#8a5615`, and app shortcuts.
+  - Offline Service Worker (`public/sw.js`): Implements Stale-While-Revalidate navigation caching with offline fallback to `/index.html` and cache-first static asset caching.
+  - PWA Manager (`src/services/pwaService.ts`): Captures `beforeinstallprompt`, tracks standalone window state, detects iOS Safari environment, and exposes `usePWAInstall` hook.
+  - 1-Click Install Button in `TopNavBar.tsx`: Automatically surfaces `📲 ایپ انسٹال کریں` when browser supports native install, and provides a dedicated status card and iOS installation instructions in the Settings Drawer.
+- **Verification:** `npm run build` (**passed** in 5.26s, `0` errors); `npm run test:license` (**6/6 passed**); `npm run test:prosody` (**78/78 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**).
+
 
 
 

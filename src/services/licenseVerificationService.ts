@@ -290,3 +290,4 @@ export const licenseVerificationService = {
     return generateLicenseKey(tier, customerSeed);
   },
 };
+

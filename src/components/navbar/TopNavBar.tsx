@@ -18,6 +18,7 @@ import {
   Crown,
   Settings,
   X,
+  Smartphone,
 } from 'lucide-react';
 import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont } from '../../types/workspace';
 import type { PersistenceState } from '../../hooks/usePoemEditor';
@@ -25,6 +26,7 @@ import {
   licenseVerificationService,
   ActiveLicense,
 } from '../../services/licenseVerificationService';
+import { usePWAInstall } from '../../services/pwaService';
 
 interface TopNavBarProps {
   prefs: WorkspacePrefs;
@@ -65,6 +67,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 }) => {
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [showPresetMenu, setShowPresetMenu] = useState(false);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
+  const { canInstall, isInstalled, isStandalone, isIOS, promptInstall } = usePWAInstall();
   const [activeLicense, setActiveLicense] = useState<ActiveLicense | null>(() =>
     licenseVerificationService.getActiveLicense()
   );
@@ -301,6 +305,25 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                 </button>
               )}
             </>
+          )}
+
+          {/* PWA 1-Click Desktop/Mobile Install Button */}
+          {canInstall && !isStandalone && (
+            <button
+              type="button"
+              onClick={async () => {
+                const outcome = await promptInstall();
+                if (outcome === 'ios_guide') {
+                  setShowInstallHelp(true);
+                  setIsSettingsDrawerOpen(true);
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-500/25 transition-all leading-[2.2] shadow-2xs cursor-pointer animate-in fade-in"
+              title="قلم و قافیہ کو اپنے کمپیوٹر یا موبائل پر براہِ راست انسٹال کریں (آف لائن دستیاب)"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+              <span>📲 ایپ انسٹال کریں</span>
+            </button>
           )}
 
           <div className="h-6 w-px bg-[var(--border-subtle)] mx-0.5 hidden sm:block"></div>
@@ -555,6 +578,61 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                 >
                   {prefs.isLocked ? <Lock className="w-4 h-4 text-amber-500" /> : <Unlock className="w-4 h-4 text-[var(--accent-gold)]" />}
                 </button>
+              </div>
+            </div>
+
+            {/* Section 5: PWA & Offline Desktop/Mobile App */}
+            <div className="pt-2 border-t border-[var(--border-subtle)] space-y-3">
+              <h3 className="text-sm font-bold text-[var(--accent-gold)] font-nastaliq leading-[2.2] flex items-center gap-2">
+                <Smartphone className="w-4 h-4" />
+                <span>ڈیسک ٹاپ و موبائل ایپ (PWA)</span>
+              </h3>
+              <div className="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-bold font-nastaliq text-[var(--text-primary)] leading-[2.2]">
+                    حالتِ تنصیب (Install Status)
+                  </div>
+                  <span
+                    className={`text-xs px-2.5 py-0.5 rounded-full font-nastaliq font-bold border ${
+                      isStandalone || isInstalled
+                        ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                        : 'bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300'
+                    }`}
+                  >
+                    {isStandalone || isInstalled ? 'مستقل ونڈو ایپ' : 'ویب براؤزر'}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--text-secondary)] font-nastaliq leading-[2.2]">
+                  {isStandalone || isInstalled
+                    ? 'قلم و قافیہ آپ کے کمپیوٹر / موبائل پر بطور خود مختار ایپ انسٹال ہے اور بغیر انٹرنیٹ مکمل آف لائن چلتی ہے۔'
+                    : 'قلم و قافیہ کو اپنے سسٹم (Mac / Windows / Android / iOS) پر بغیر ایپ اسٹور کے ایک کلک میں انسٹال کریں۔'}
+                </p>
+                {!isStandalone && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const outcome = await promptInstall();
+                      if (outcome === 'ios_guide') {
+                        setShowInstallHelp(true);
+                      }
+                    }}
+                    className="w-full py-2 px-3 rounded-xl bg-[var(--accent-gold)] text-white hover:opacity-95 font-nastaliq font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-xs leading-[2.2] cursor-pointer"
+                  >
+                    <Smartphone className="w-4 h-4" />
+                    <span>
+                      {canInstall
+                        ? 'ابھی ایپ انسٹال کریں'
+                        : isIOS
+                        ? 'آئی فون / آئی پیڈ پر انسٹالیشن کا طریقہ'
+                        : 'ڈیسک ٹاپ پر انسٹال کریں'}
+                    </span>
+                  </button>
+                )}
+                {showInstallHelp && (
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-[var(--text-primary)] font-nastaliq leading-[2.2] animate-in fade-in">
+                    💡 <strong>ہدایت:</strong> سفاری براؤزر میں نیچے <strong>Share</strong> کے بٹن پر ٹیپ کریں اور فہرست سے <strong>Add to Home Screen (ہوم اسکرین پر شامل کریں)</strong> منتخب فرمائیں۔
+                  </div>
+                )}
               </div>
             </div>
           </div>
