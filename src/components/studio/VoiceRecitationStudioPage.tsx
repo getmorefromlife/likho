@@ -77,9 +77,19 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Active / finished recording object
+  // Active / finished recording object & Multi-Take Comping Slots
+  const [takes, setTakes] = useState<VoiceRecordingMeta[]>(() =>
+    draft.voiceRecording ? [draft.voiceRecording] : []
+  );
+  const [activeTakeIndex, setActiveTakeIndex] = useState<number>(0);
   const [currentRecording, setCurrentRecording] = useState<VoiceRecordingMeta | null>(
     draft.voiceRecording || null
+  );
+  const [trimStart, setTrimStart] = useState<number>(
+    draft.voiceRecording?.trimStartSeconds ?? 0
+  );
+  const [trimEnd, setTrimEnd] = useState<number>(
+    draft.voiceRecording?.trimEndSeconds ?? draft.voiceRecording?.durationSeconds ?? 0
   );
   const [saveSuccessNotification, setSaveSuccessNotification] = useState(false);
 
@@ -372,6 +382,8 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
         musicVolume: bgMusicVolume,
         musicLoop: bgMusicLoop,
         includeBgMusic: bgMusicInfo.loaded,
+        trimStartSec: trimStart,
+        trimEndSec: trimEnd > trimStart ? trimEnd : currentRecording.durationSeconds,
       });
       const url = URL.createObjectURL(wavBlob);
       const a = document.createElement('a');
@@ -479,13 +491,26 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
         withMetronome: isMetronomeEnabled,
       });
 
-      setCurrentRecording(recordingMeta);
+      const withTrim: VoiceRecordingMeta = {
+        ...recordingMeta,
+        trimStartSeconds: 0,
+        trimEndSeconds: recordingMeta.durationSeconds,
+      };
+
+      setTakes((prev) => {
+        const next = [...prev, withTrim].slice(-5); // Keep up to 5 takes in studio session
+        setActiveTakeIndex(next.length - 1);
+        return next;
+      });
+      setCurrentRecording(withTrim);
+      setTrimStart(0);
+      setTrimEnd(withTrim.durationSeconds);
       setIsRecording(false);
       setIsPaused(false);
       setAmplitudeLevels(Array(28).fill(0.08));
 
       // Auto-save to draft
-      onSaveVoiceRecording(recordingMeta);
+      onSaveVoiceRecording(withTrim);
       setSaveSuccessNotification(true);
       setTimeout(() => setSaveSuccessNotification(false), 3000);
     } catch (err) {
@@ -509,7 +534,40 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
     setAmplitudeLevels(Array(28).fill(0.08));
   };
 
-  // 5. Playback Handlers for Finished/Saved Take
+  // Multi-Take Selection & Trim Helpers
+  const handleSelectTake = (index: number) => {
+    const chosen = takes[index];
+    if (!chosen) return;
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+    }
+    setIsPlayingAudio(false);
+    setActiveTakeIndex(index);
+    setCurrentRecording(chosen);
+    setTrimStart(chosen.trimStartSeconds ?? 0);
+    setTrimEnd(chosen.trimEndSeconds ?? chosen.durationSeconds);
+    setAudioCurrentTime(chosen.trimStartSeconds ?? 0);
+    setAudioProgress(0);
+  };
+
+  const handleUpdateTrim = (nextStart: number, nextEnd: number) => {
+    if (!currentRecording) return;
+    const maxDur = currentRecording.durationSeconds;
+    const clampedStart = Math.max(0, Math.min(nextStart, maxDur - 0.5));
+    const clampedEnd = Math.min(maxDur, Math.max(nextEnd, clampedStart + 0.5));
+    setTrimStart(clampedStart);
+    setTrimEnd(clampedEnd);
+
+    const updated: VoiceRecordingMeta = {
+      ...currentRecording,
+      trimStartSeconds: clampedStart,
+      trimEndSeconds: clampedEnd,
+    };
+    setCurrentRecording(updated);
+    setTakes((prev) => prev.map((t, i) => (i === activeTakeIndex ? updated : t)));
+  };
+
+  // 5. Playback Handlers for Finished/Saved Take (respects Trim Window)
   const handleTogglePlayAudio = () => {
     if (!audioPlayerRef.current || !currentRecording) return;
 
@@ -517,6 +575,13 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
       audioPlayerRef.current.pause();
       setIsPlayingAudio(false);
     } else {
+      const effectiveEnd = trimEnd > trimStart ? trimEnd : currentRecording.durationSeconds;
+      if (
+        audioPlayerRef.current.currentTime < trimStart ||
+        audioPlayerRef.current.currentTime >= effectiveEnd - 0.05
+      ) {
+        audioPlayerRef.current.currentTime = trimStart;
+      }
       void audioPlayerRef.current.play();
       setIsPlayingAudio(true);
     }
@@ -526,6 +591,17 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
     if (!audioPlayerRef.current) return;
     const current = audioPlayerRef.current.currentTime;
     const duration = audioPlayerRef.current.duration || currentRecording?.durationSeconds || 1;
+    const effectiveEnd = trimEnd > trimStart ? trimEnd : duration;
+
+    if (isPlayingAudio && current >= effectiveEnd) {
+      audioPlayerRef.current.pause();
+      audioPlayerRef.current.currentTime = trimStart;
+      setIsPlayingAudio(false);
+      setAudioCurrentTime(trimStart);
+      setAudioProgress((trimStart / duration) * 100);
+      return;
+    }
+
     setAudioCurrentTime(current);
     setAudioProgress((current / duration) * 100);
   };
@@ -543,26 +619,47 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
   const handleAudioEnded = () => {
     setIsPlayingAudio(false);
     setAudioProgress(0);
-    setAudioCurrentTime(0);
+    setAudioCurrentTime(trimStart);
   };
 
-  // 6. Save Recording to Draft
+  // 6. Save Recording (Master Take + Trim Points) to Draft
   const handleManualSave = () => {
     if (!currentRecording) return;
-    onSaveVoiceRecording(currentRecording);
+    const synced: VoiceRecordingMeta = {
+      ...currentRecording,
+      trimStartSeconds: trimStart,
+      trimEndSeconds: trimEnd > trimStart ? trimEnd : currentRecording.durationSeconds,
+    };
+    setCurrentRecording(synced);
+    onSaveVoiceRecording(synced);
     setSaveSuccessNotification(true);
     setTimeout(() => setSaveSuccessNotification(false), 3000);
   };
 
-  // 7. Delete Recording from Draft
+  // 7. Delete Active Take / Recording from Draft
   const handleDeleteRecording = () => {
-    if (window.confirm('کیا آپ اس کلام کی ریکارڈ شدہ صوتی فائل حذف کرنا چاہتے ہیں؟')) {
+    if (window.confirm('کیا آپ اس ٹیک کو حذف کرنا چاہتے ہیں؟')) {
       if (audioPlayerRef.current) {
         audioPlayerRef.current.pause();
       }
-      setCurrentRecording(null);
       setIsPlayingAudio(false);
-      onSaveVoiceRecording(undefined);
+      const remaining = takes.filter((_, idx) => idx !== activeTakeIndex);
+      setTakes(remaining);
+      if (remaining.length > 0) {
+        const nextIdx = Math.max(0, activeTakeIndex - 1);
+        const nextTake = remaining[nextIdx];
+        setActiveTakeIndex(nextIdx);
+        setCurrentRecording(nextTake);
+        setTrimStart(nextTake.trimStartSeconds ?? 0);
+        setTrimEnd(nextTake.trimEndSeconds ?? nextTake.durationSeconds);
+        onSaveVoiceRecording(nextTake);
+      } else {
+        setActiveTakeIndex(0);
+        setCurrentRecording(null);
+        setTrimStart(0);
+        setTrimEnd(0);
+        onSaveVoiceRecording(undefined);
+      }
     }
   };
 
@@ -1415,6 +1512,28 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
                 </span>
               </div>
 
+              {/* Multi-Take Comping Switcher (ٹیک ۱، ۲، ۳) */}
+              {takes.length > 1 && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[11px] font-nastaliq text-[var(--text-muted)] ml-1">ٹیک منتخب کریں:</span>
+                  {takes.map((t, idx) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => handleSelectTake(idx)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-nastaliq border transition-all cursor-pointer ${
+                        idx === activeTakeIndex
+                          ? 'bg-[var(--accent-gold)] text-white font-bold border-[var(--accent-gold)] shadow-2xs'
+                          : 'bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                      }`}
+                      title={`ٹیک ${toUrduNumerals(String(idx + 1))} — ${formatDurationMMSS(t.durationSeconds)}`}
+                    >
+                      ٹیک {toUrduNumerals(String(idx + 1))} ({formatDurationMMSS(t.durationSeconds)})
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Audio Element */}
               <audio
                 ref={audioPlayerRef}
@@ -1436,9 +1555,113 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
                 />
                 <div className="flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)]">
                   <span>{formatDurationMMSS(audioCurrentTime)}</span>
+                  <span className="text-[10px] font-nastaliq text-[var(--accent-gold)]">
+                    موثر دورانیہ: {Math.max(0.5, trimEnd - trimStart).toFixed(1)}s
+                  </span>
                   <span>{formatDurationMMSS(currentRecording.durationSeconds)}</span>
                 </div>
               </div>
+
+              {/* Non-Destructive Audio Trim Controls (آڈیو ٹرمنگ) */}
+              {currentRecording.durationSeconds > 1 && (
+                <div className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]/70 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-nastaliq text-[var(--text-secondary)]">
+                    <span className="font-bold text-[var(--accent-gold)]">آڈیو ٹرمنگ (شروع و آخر کا کٹاؤ)</span>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateTrim(0, currentRecording.durationSeconds)}
+                      className="text-[10px] text-[var(--text-muted)] hover:text-[var(--accent-gold)] underline cursor-pointer"
+                    >
+                      ری سیٹ
+                    </button>
+                  </div>
+
+                  {/* Visual Trim Window Indicator */}
+                  <div className="relative h-2 w-full rounded-full bg-[var(--bg-subtle)] overflow-hidden">
+                    <div
+                      className="absolute top-0 bottom-0 bg-[var(--accent-gold)] rounded-full transition-all"
+                      style={{
+                        left: `${(trimStart / Math.max(0.1, currentRecording.durationSeconds)) * 100}%`,
+                        right: `${100 - (trimEnd / Math.max(0.1, currentRecording.durationSeconds)) * 100}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    {/* Trim Start */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-nastaliq text-[var(--text-muted)]">شروع:</span>
+                        <span className="font-mono text-[10px] text-[var(--text-primary)]">{trimStart.toFixed(1)}s</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateTrim(trimStart - 0.2, trimEnd)}
+                          className="px-1.5 py-0.5 rounded border border-[var(--border-subtle)] text-[10px] hover:bg-[var(--bg-subtle)] cursor-pointer"
+                          title="-0.2s"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="range"
+                          min="0"
+                          max={Math.max(0.5, trimEnd - 0.5)}
+                          step="0.1"
+                          value={trimStart}
+                          onChange={(e) => handleUpdateTrim(parseFloat(e.target.value), trimEnd)}
+                          aria-label="شروع کا کٹاؤ"
+                          className="flex-1 h-1 rounded-lg appearance-none cursor-pointer bg-[var(--border-subtle)] accent-[var(--accent-gold)]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateTrim(trimStart + 0.2, trimEnd)}
+                          className="px-1.5 py-0.5 rounded border border-[var(--border-subtle)] text-[10px] hover:bg-[var(--bg-subtle)] cursor-pointer"
+                          title="+0.2s"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Trim End */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-nastaliq text-[var(--text-muted)]">اختتام:</span>
+                        <span className="font-mono text-[10px] text-[var(--text-primary)]">{trimEnd.toFixed(1)}s</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateTrim(trimStart, trimEnd - 0.2)}
+                          className="px-1.5 py-0.5 rounded border border-[var(--border-subtle)] text-[10px] hover:bg-[var(--bg-subtle)] cursor-pointer"
+                          title="-0.2s"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="range"
+                          min={Math.min(currentRecording.durationSeconds, trimStart + 0.5)}
+                          max={currentRecording.durationSeconds}
+                          step="0.1"
+                          value={trimEnd}
+                          onChange={(e) => handleUpdateTrim(trimStart, parseFloat(e.target.value))}
+                          aria-label="آخری کٹاؤ"
+                          className="flex-1 h-1 rounded-lg appearance-none cursor-pointer bg-[var(--border-subtle)] accent-[var(--accent-gold)]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateTrim(trimStart, trimEnd + 0.2)}
+                          className="px-1.5 py-0.5 rounded border border-[var(--border-subtle)] text-[10px] hover:bg-[var(--bg-subtle)] cursor-pointer"
+                          title="+0.2s"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Player Row */}
               <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--border-subtle)]/40">

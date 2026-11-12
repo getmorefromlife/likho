@@ -30,6 +30,8 @@ export interface VoiceRecordingMeta {
   poet?: string;
   mode?: 'tarannum' | 'taht-ul-lafz';
   withMetronome?: boolean;
+  trimStartSeconds?: number;
+  trimEndSeconds?: number;
 }
 
 export interface PoemDraft extends PoemMetadata {

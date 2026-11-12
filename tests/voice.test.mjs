@@ -226,6 +226,27 @@ try {
     assert.equal(wave, 'WAVE');
   });
 
+  await test('StorageService preserves non-destructive trimStartSeconds and trimEndSeconds on voiceRecording', () => {
+    const draft = StorageService.createBlankDraft();
+    draft.voiceRecording = {
+      id: 'rec-trimmed',
+      blobDataUrl: 'data:audio/webm;base64,AAAA',
+      mimeType: 'audio/webm',
+      durationSeconds: 18.5,
+      recordedAt: Date.now(),
+      mode: 'tarannum',
+      trimStartSeconds: 1.4,
+      trimEndSeconds: 16.2,
+    };
+
+    const ok = StorageService.saveDraft(draft);
+    assert.equal(ok, true);
+    const loaded = StorageService.getDrafts().find((d) => d.id === draft.id);
+    assert.ok(loaded && loaded.voiceRecording);
+    assert.equal(loaded.voiceRecording.trimStartSeconds, 1.4);
+    assert.equal(loaded.voiceRecording.trimEndSeconds, 16.2);
+  });
+
   console.log(`${passed} voice recitation & DSP studio checks passed.`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
