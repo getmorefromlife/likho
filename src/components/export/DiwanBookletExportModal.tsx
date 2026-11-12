@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
-import { DiwanBookletService, DiwanBookletConfig, PdfProgress } from '../../services/diwanBookletService';
+import { DiwanBookletService, DiwanBookletConfig, DiwanFontSize, PdfProgress } from '../../services/diwanBookletService';
 
 interface DiwanBookletExportModalProps {
   isOpen: boolean;
@@ -46,6 +46,7 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
   const [subtitle, setSubtitle] = useState('طبعِ اوّل — مجموعۂ کلام');
   const [dedication, setDedication] = useState('بہ نامِ اہلِ ذوق و سخن، اور اردو شاعری کے سچے قدردانوں کے نام...');
   const [pageSize, setPageSize] = useState<'A4' | 'A5'>('A4');
+  const [fontSize, setFontSize] = useState<DiwanFontSize>('medium');
   const [includeTOC, setIncludeTOC] = useState(true);
   const [includeMeters, setIncludeMeters] = useState(true);
   const [previewPageIdx, setPreviewPageIdx] = useState(0);
@@ -90,11 +91,12 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
       dedication,
       pageSize,
       fontFamily: 'Noto Nastaliq Urdu',
+      fontSize,
       includeTOC,
       includeMeters,
       selectedDrafts,
     };
-  }, [bookTitle, poetName, subtitle, dedication, pageSize, includeTOC, includeMeters, selectedDrafts]);
+  }, [bookTitle, poetName, subtitle, dedication, pageSize, fontSize, includeTOC, includeMeters, selectedDrafts]);
 
   if (!isOpen) return null;
 
@@ -334,6 +336,48 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                   <FileText className="w-3.5 h-3.5" />
                   <span>A5 (جیبی کتابچہ)</span>
                 </button>
+              </div>
+
+              {/* Font Size Selector */}
+              <div className="pt-2">
+                <label className="block text-xs font-bold font-nastaliq text-[var(--text-secondary)] mb-1.5">
+                  کتاب کا فونٹ سائز (Typography & Font Size):
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setFontSize('compact')}
+                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                      fontSize === 'compact'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>چھوٹا (Compact)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFontSize('medium')}
+                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                      fontSize === 'medium'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>متوسط (Medium)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFontSize('large')}
+                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                      fontSize === 'large'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>جلی (Large)</span>
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2 pt-1">
@@ -620,18 +664,50 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                         </div>
 
                         <div className="my-auto text-center py-4">
-                          <h2 className="text-lg font-bold text-[#8a5615] leading-[2.2]">{draft.title || 'بے عنوان'}</h2>
-                          {includeMeters && draft.meterName && (
-                            <p className="text-[11px] text-[#6a5845] leading-[2.2]">بحر: {draft.meterName}</p>
-                          )}
-                          <div className="text-xs text-[#8a5615] my-1">❦</div>
+                          {/* Form badge in preview with generous breathing clearance */}
+                          <div className="mb-4">
+                            <span className="inline-block text-[11px] px-3.5 py-1 rounded-full bg-[#f4ecdf] border border-[#d4c2a5] text-[#8a5615] font-bold shadow-2xs">
+                              [ {draft.form === 'nazm' ? 'نظم' : draft.form === 'rubai' ? 'رباعی' : draft.form === 'qataa' ? 'قطعہ' : 'غزل'} ]
+                            </span>
+                          </div>
 
-                          <div className="space-y-3 mt-4">
+                          <h2
+                            className={`font-bold text-[#8a5615] leading-[2.2] my-3.5 ${
+                              fontSize === 'compact' ? 'text-lg' : fontSize === 'large' ? 'text-2xl' : 'text-xl'
+                            }`}
+                          >
+                            {draft.title || 'بے عنوان'}
+                          </h2>
+
+                          {includeMeters && (draft.meterName || draft.radif) && (
+                            <p className="text-[11px] text-[#6a5845] leading-[2.2] my-2">
+                              {draft.meterName && <span>بحر: {draft.meterName}</span>}
+                              {draft.meterName && draft.radif && <span>  •  </span>}
+                              {draft.radif && <span>ردیف: {draft.radif}</span>}
+                            </p>
+                          )}
+                          <div className="text-xs text-[#8a5615] my-3">❦</div>
+
+                          <div className={`mt-5 ${fontSize === 'large' ? 'space-y-4' : 'space-y-3'}`}>
                             {couplets.map((c, i) => (
                               <div key={i} className="text-center">
-                                <div className="text-sm text-[#1a1612] leading-[2.6]">{c.misra1}</div>
-                                {c.misra2 && <div className="text-sm text-[#1a1612] leading-[2.6]">{c.misra2}</div>}
-                                <div className="text-[9px] text-[#b3823d] opacity-60 mt-1">✦</div>
+                                <div
+                                  className={`text-[#1a1612] leading-[2.8] ${
+                                    fontSize === 'compact' ? 'text-xs' : fontSize === 'large' ? 'text-base' : 'text-sm'
+                                  }`}
+                                >
+                                  {c.misra1}
+                                </div>
+                                {c.misra2 && (
+                                  <div
+                                    className={`text-[#1a1612] leading-[2.8] ${
+                                      fontSize === 'compact' ? 'text-xs' : fontSize === 'large' ? 'text-base' : 'text-sm'
+                                    }`}
+                                  >
+                                    {c.misra2}
+                                  </div>
+                                )}
+                                <div className="text-[9px] text-[#b3823d] opacity-60 mt-1.5">✦</div>
                               </div>
                             ))}
                           </div>

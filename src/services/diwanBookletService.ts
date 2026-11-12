@@ -7,6 +7,8 @@
 
 import { PoemDraft } from '../types/editor';
 
+export type DiwanFontSize = 'compact' | 'medium' | 'large';
+
 export interface DiwanBookletConfig {
   title: string;
   poet: string;
@@ -15,6 +17,7 @@ export interface DiwanBookletConfig {
   publicationYear?: string;
   pageSize: 'A4' | 'A5';
   fontFamily: string;
+  fontSize: DiwanFontSize;
   includeTOC: boolean;
   includeMeters: boolean;
   selectedDrafts: PoemDraft[];
@@ -485,6 +488,9 @@ export class DiwanBookletService {
       currentPageNum++;
     }
 
+    const fontMultiplier =
+      config.fontSize === 'compact' ? 0.85 : config.fontSize === 'large' ? 1.18 : 1.0;
+
     // -------------------------------------------------------------------------
     // PAGES 4+: POEM PAGES
     // -------------------------------------------------------------------------
@@ -503,40 +509,50 @@ export class DiwanBookletService {
       ctx.direction = 'rtl';
       ctx.textAlign = 'center';
 
-      let poemY = isA5 ? 165 : 220;
+      let poemY = isA5 ? 150 : 200;
 
-      // Form badge
+      // 1. Form badge: with ample clearance
       const formUrdu = this.getFormUrdu(draft.form);
+      const badgeFontSize = Math.round(14 * scale * fontMultiplier);
       ctx.fillStyle = '#8a5615';
-      ctx.font = `bold ${Math.round(15 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.font = `bold ${badgeFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
       ctx.fillText(`[ ${formUrdu} ]`, canvasWidth / 2, poemY);
-      poemY += isA5 ? 35 : 45;
 
-      // Poem Title
-      ctx.font = `bold ${Math.round(36 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      // Ample breathing space: badge bottom to title baseline
+      poemY += Math.round((isA5 ? 65 : 85) * fontMultiplier);
+
+      // 2. Poem Title (Bold Nastaliq)
+      const titleFontSize = Math.round(38 * scale * fontMultiplier);
+      ctx.fillStyle = '#8a5615';
+      ctx.font = `bold ${titleFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
       ctx.fillText(draft.title || 'بے عنوان', canvasWidth / 2, poemY);
-      poemY += isA5 ? 30 : 40;
 
-      // Meter & Radif annotations
+      // Ample breathing space: title baseline to meter metadata
+      poemY += Math.round((isA5 ? 65 : 85) * fontMultiplier);
+
+      // 3. Meter & Radif annotations
       if (config.includeMeters && (draft.meterName || draft.radif)) {
         ctx.fillStyle = '#6a5845';
-        ctx.font = `${Math.round(16 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        ctx.font = `${Math.round(16 * scale * fontMultiplier)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
         const metaParts: string[] = [];
         if (draft.meterName) metaParts.push(`بحر: ${draft.meterName}`);
         if (draft.radif) metaParts.push(`ردیف: ${draft.radif}`);
         ctx.fillText(metaParts.join('  •  '), canvasWidth / 2, poemY);
-        poemY += isA5 ? 25 : 35;
+        poemY += Math.round((isA5 ? 35 : 45) * fontMultiplier);
       }
 
+      // 4. Centered fleuron
       ctx.fillStyle = '#8a5615';
-      ctx.font = `${Math.round(18 * scale)}px "Amiri", serif`;
+      ctx.font = `${Math.round(18 * scale * fontMultiplier)}px "Amiri", serif`;
       ctx.fillText('❦', canvasWidth / 2, poemY);
-      poemY += isA5 ? 35 : 55;
+      poemY += Math.round((isA5 ? 55 : 75) * fontMultiplier);
 
-      // Couplets rendering
+      // 5. Couplets rendering with generous line height
       const couplets = this.parsePoemCouplets(draft.content || '');
-      ctx.font = `${Math.round(25 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-      const misraLineHeight = isA5 ? 50 : 66;
+      const misraFontSize = Math.round(26 * scale * fontMultiplier);
+      ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      const misraLineHeight = Math.round((isA5 ? 58 : 78) * fontMultiplier);
+      const coupletGap = Math.round((isA5 ? 20 : 28) * fontMultiplier);
 
       for (let cIdx = 0; cIdx < couplets.length; cIdx++) {
         const c = couplets[cIdx];
@@ -557,12 +573,12 @@ export class DiwanBookletService {
           ctx.fillStyle = '#b3823d';
           ctx.font = `${Math.round(13 * scale)}px serif`;
           ctx.fillText('✦', canvasWidth / 2, poemY - 12);
-          poemY += isA5 ? 18 : 26;
-          ctx.font = `${Math.round(25 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+          poemY += coupletGap;
+          ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
         }
 
         // Safety break if poem has many couplets
-        if (poemY > canvasHeight - (isA5 ? 130 : 180)) break;
+        if (poemY > canvasHeight - (isA5 ? 120 : 160)) break;
       }
       ctx.restore();
 
@@ -1037,35 +1053,36 @@ export class DiwanBookletService {
 
     .poem-header {
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 35px;
+      padding-top: 10px;
     }
 
     .poem-form-badge {
       display: inline-block;
-      font-size: 10pt;
+      font-size: ${config.fontSize === 'compact' ? '9.5pt' : config.fontSize === 'large' ? '12pt' : '10.5pt'};
       background: #f4ecdf;
       border: 1px solid #d4c2a5;
       color: #8a5615;
-      padding: 2px 14px;
+      padding: 3px 18px;
       border-radius: 20px;
       font-weight: bold;
-      margin-bottom: 8px;
+      margin-bottom: 24px;
     }
 
     .poem-title {
-      font-size: 22pt;
+      font-size: ${config.fontSize === 'compact' ? '20pt' : config.fontSize === 'large' ? '28pt' : '24pt'};
       color: #8a5615;
-      margin: 0;
+      margin: 10px 0 18px 0;
       line-height: 2.2;
     }
 
     .poem-meter-meta {
-      font-size: 10.5pt;
+      font-size: ${config.fontSize === 'compact' ? '9.5pt' : config.fontSize === 'large' ? '12pt' : '10.5pt'};
       color: #6a5845;
-      margin-top: 6px;
+      margin: 12px 0 16px 0;
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 18px;
     }
 
     .poem-body {
@@ -1081,14 +1098,14 @@ export class DiwanBookletService {
       width: 100%;
       max-width: 580px;
       text-align: center;
-      margin-bottom: 18px;
+      margin-bottom: 22px;
       page-break-inside: avoid;
       break-inside: avoid;
     }
 
     .misra {
-      font-size: 17pt;
-      line-height: 2.7;
+      font-size: ${config.fontSize === 'compact' ? '15pt' : config.fontSize === 'large' ? '20pt' : '17.5pt'};
+      line-height: 2.8;
       color: #1a1612;
       letter-spacing: 0.3px;
     }
