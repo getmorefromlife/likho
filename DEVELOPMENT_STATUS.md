@@ -347,9 +347,16 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
 
 ## 22. Voice Recitation & Tarannum Studio with Acoustic Rhythm Accompaniment (صوتی ترنم و مشاعرہ اسٹوڈیو) — November 12, 2026
 
-- **Client-Side Voice Recording & Audio Engine (`src/services/voiceRecitationService.ts`):**
+- **Client-Side Voice Recording & Audio Engine (`src/services/voiceRecitationService.ts` & `src/services/voiceDspService.ts`):**
   - High-fidelity in-browser audio capture via HTML5 `MediaRecorder` API with multi-browser audio format negotiation (`audio/webm;codecs=opus`, `audio/webm`, `audio/mp4`, `audio/ogg`, and `audio/wav`).
-  - Web Audio API `AudioContext` and `AnalyserNode` delivering real-time normalized frequency and amplitude streams for live visual waveform display.
+  - **Broadcast Vocal DSP Processing Chain:**
+    - 80Hz Low-Cut / High-Pass filter removing microphone rumble, fan whirring, and table thumps.
+    - 3-Band Parametric Vocal EQ: Low-shelf warmth boost at 200Hz, peaking diction clarity at 3.5kHz, and high-shelf air/sheen at 10kHz.
+    - Studio Dynamics Compressor evening out soft whispery verses and loud impassioned tarannum climaxes.
+    - **Synthetic Convolution Reverb:** Mathematically synthesizes realistic acoustic impulse responses (Dry Studio, Intimate Chamber, Grand Mushaira Hall, and Spiritual Cathedral) with zero audio files or server latency.
+    - Direct processed audio routing through `createMediaStreamDestination()`, ensuring downloaded and saved takes carry the broadcast studio polish.
+  - **Ambient Tanpura / Shruti Drone Synthesizer:**
+    - Synthesizes classical Indian drone harmonics (Root Sa C3, Fifth Pa G3, Octave Sa C4, and shimmer detune) with natural LFO chorus and volume control, providing the musical foundation for tarannum recitation.
   - Duration calculations and bilingual time formatting (`formatDurationMMSS` e.g. `02:15` and `toUrduNumerals` e.g. `۰۲:۱۵`).
   - Base64 serialization via `FileReader` allowing 100% offline persistence within `PoemDraft.voiceRecording` in local IndexedDB/localStorage.
   - Zero external cloud services, API keys, or server uploads; 100% private to the poet's device.
@@ -357,8 +364,10 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
 
 - **Interactive Mushaira & Tarannum Studio (`src/components/studio/VoiceRecitationStudioModal.tsx`):**
   - **Recitation Modes:** Quick toggle between *ترنم (Tarannum / Melodic chanting)* and *تحت اللفظ (Taht-ul-Lafz / Rhythmic recitation)*.
+  - **Studio Vocal Profiles:** 1-Click presets for *شاہی براڈکاسٹ (Broadcast Warmth)*, *ترنم و نغمگی (Tarannum Sheen)*, *قدرتی نکھار (Natural Studio)*, and *خام و اصلی (Raw Mic)*.
+  - **Hands-Free Auto-Scrolling Prompter:** Synchronized, speed-controlled (`slow`, `normal`, `fast`) teleprompter that automatically scrolls verses smoothly during recording so the narrator never has to touch the keyboard or screen.
+  - **Interactive Couplet Focus:** Clicking any couplet highlights it with active gold illumination.
   - **Live Dynamic Waveform & Elapsed Timer:** 24 animated frequency visualizer bars pulsing with voice volume, live red indicator dot, and real-time elapsed counter.
-  - **Recitation Teleprompter (کلام کا اسکرولر):** Displays the full kalam with large, comfortable Nastaliq typography, adjustable font size (`A-` / `A+`), and separated couplet cards with Eastern Urdu numbering (`شعر ۱، شعر ۲...`).
   - **Acoustic Bahar Cadence Synchronization:** Integrates directly with `rhythmicCadenceAudioService`, allowing the poet to hear the exact classical prosodic rhythm (`= / -`) metronome in headphones while recording with selectable tempo (75, 100, 130 BPM).
   - **Playback & Scrubber Hub:** Built-in audio player with play/pause, range scrubber, duration timestamps, re-record take, direct audio file download (`.webm` / `.mp4`), and draft attachment.
 
@@ -369,12 +378,12 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
   - `storageService.ts`: Defensively validates `voiceRecording` metadata to prevent corruption.
 
 - **Verification:**
-  - `npm run test:voice`: **4/4 passed** (duration formatting, Urdu numerals, persistence round-trip, malformed payload rejection).
+  - `npm run test:voice`: **7/7 passed** (duration formatting, Urdu numerals, DSP presets, convolution impulse mathematics, persistence round-trip, malformed payload rejection).
   - `npm run test:storage`: **15/15 passed**.
   - `npm run test:booklet`: **6/6 passed**.
   - `npm run test:license`: **6/6 passed**.
   - `npm run test:prosody`: **78/78 passed**.
-  - `npm run build`: **passed** in 5.14s with zero errors; separate lazy-loaded chunk `VoiceRecitationStudioModal-B0GDGGKo.js` (23.73 kB).
+  - `npm run build`: **passed** in 5.16s with zero errors; separate lazy-loaded chunk `VoiceRecitationStudioModal-DLU_EITt.js` (39.2 kB).
 
 
 - **Classical Multi-Poem Book Compilation Engine (`src/services/diwanBookletService.ts`):**
