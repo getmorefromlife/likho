@@ -233,16 +233,32 @@ test('assemblePdf generates valid multi-page binary PDF with correct dimensions'
   assert.ok(a4Text.includes('595.28 841.89'));
   assert.ok(a4Text.includes('%%EOF'));
 
-  // A5 Test
-  const a5Pdf = TestDiwanBookletService.assemblePdf([
+  // WhatsApp Mobile HD (9:16 Portrait) Test
+  const whatsappPdf = TestDiwanBookletService.assemblePdf([
     { jpegBytes: dummyJpeg, width: 1, height: 1 },
-  ], 419.53, 595.28);
+  ], 450, 800);
 
-  const a5Text = new TextDecoder().decode(a5Pdf);
-  assert.ok(a5Text.startsWith('%PDF-1.4'));
-  assert.ok(a5Text.includes('/Count 1'));
-  assert.ok(a5Text.includes('419.53 595.28'));
-  assert.ok(a5Text.includes('%%EOF'));
+  const whatsappText = new TextDecoder().decode(whatsappPdf);
+  assert.ok(whatsappText.startsWith('%PDF-1.4'));
+  assert.ok(whatsappText.includes('/Count 1'));
+  assert.ok(whatsappText.includes('450 800'), 'Must contain exact 450x800 pt dimensions for WhatsApp Mobile HD');
+  assert.ok(whatsappText.includes('%%EOF'));
+
+  // Crown Octavo (5.5" x 8.5") Test
+  const crownPdf = TestDiwanBookletService.assemblePdf([
+    { jpegBytes: dummyJpeg, width: 1, height: 1 },
+  ], 396, 612);
+
+  const crownText = new TextDecoder().decode(crownPdf);
+  assert.ok(crownText.includes('396 612'), 'Must contain exact 396x612 pt dimensions for Crown Octavo');
+
+  // Royal Octavo (6" x 9") Test
+  const royalPdf = TestDiwanBookletService.assemblePdf([
+    { jpegBytes: dummyJpeg, width: 1, height: 1 },
+  ], 432, 648);
+
+  const royalText = new TextDecoder().decode(royalPdf);
+  assert.ok(royalText.includes('432 648'), 'Must contain exact 432x648 pt dimensions for Royal Octavo');
 });
 
 test('ghazal serial numbering and breathing space configuration format correctly', () => {

@@ -19,10 +19,12 @@ import {
   ChevronLeft,
   Loader2,
   CheckCircle2,
+  Smartphone,
+  BookMarked,
 } from 'lucide-react';
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
-import { DiwanBookletService, DiwanBookletConfig, DiwanFontSize, DiwanSpacing, PdfProgress } from '../../services/diwanBookletService';
+import { DiwanBookletService, DiwanBookletConfig, DiwanFontSize, DiwanSpacing, DiwanPageSize, PdfProgress } from '../../services/diwanBookletService';
 
 interface DiwanBookletExportModalProps {
   isOpen: boolean;
@@ -45,7 +47,7 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
   const [poetName, setPoetName] = useState(initialPoetName || 'شاعرِ قلم و قافیہ');
   const [subtitle, setSubtitle] = useState('طبعِ اوّل — مجموعۂ کلام');
   const [dedication, setDedication] = useState('بہ نامِ اہلِ ذوق و سخن، اور اردو شاعری کے سچے قدردانوں کے نام...');
-  const [pageSize, setPageSize] = useState<'A4' | 'A5'>('A4');
+  const [pageSize, setPageSize] = useState<DiwanPageSize>('whatsapp_hd');
   const [fontSize, setFontSize] = useState<DiwanFontSize>('medium');
   const [spacing, setSpacing] = useState<DiwanSpacing>('spacious');
   const [includeGhazalNumber, setIncludeGhazalNumber] = useState(true);
@@ -314,32 +316,95 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                 <span>طباعت و صفحات کی ترتیب</span>
               </h3>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
+                {/* Featured: WhatsApp Mobile HD */}
                 <button
                   type="button"
-                  onClick={() => setPageSize('A4')}
-                  className={`p-2.5 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] flex items-center justify-center gap-2 ${
-                    pageSize === 'A4'
-                      ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                  onClick={() => setPageSize('whatsapp_hd')}
+                  className={`w-full p-2.5 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] flex items-center justify-between gap-2 text-right ${
+                    pageSize === 'whatsapp_hd'
+                      ? 'bg-[var(--accent-gold)]/20 border-[var(--accent-gold)] text-[var(--accent-gold)] shadow-xs'
                       : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>A4 (سٹینڈرڈ کتاب)</span>
+                  <div className="flex items-center gap-2">
+                    <Smartphone className="w-4 h-4 text-[var(--accent-gold)] flex-shrink-0" />
+                    <div>
+                      <span className="font-bold text-[var(--text-primary)]">📱 واٹس ایپ ایچ ڈی (WhatsApp Mobile HD)</span>
+                      <p className="text-[10px] text-[var(--text-muted)] font-sans">9:16 فل اسکرین پورٹریٹ — دوستوں کو واٹس ایپ پر کلام بھیجنے کے لیے موزوں ترین</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--accent-gold)] text-white font-sans flex-shrink-0">
+                    تجویز کردہ
+                  </span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setPageSize('A5')}
-                  className={`p-2.5 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] flex items-center justify-center gap-2 ${
-                    pageSize === 'A5'
-                      ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
-                      : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>A5 (جیبی کتابچہ)</span>
-                </button>
+                {/* Classical Print & Standard Sizes */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPageSize('crown_octavo')}
+                    className={`p-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2] flex flex-col items-center justify-center text-center ${
+                      pageSize === 'crown_octavo'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>کراؤن دیوان (5.5"×8.5")</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--text-muted)] font-sans">روایتی اردو کتابی سائز</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPageSize('royal_octavo')}
+                    className={`p-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2] flex flex-col items-center justify-center text-center ${
+                      pageSize === 'royal_octavo'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <BookMarked className="w-3.5 h-3.5" />
+                      <span>ڈیمی سائز (6"×9")</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--text-muted)] font-sans">شاہانہ کلیات و ضخیم دیوان</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPageSize('A4')}
+                    className={`p-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2] flex flex-col items-center justify-center text-center ${
+                      pageSize === 'A4'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>A4 سٹینڈرڈ</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--text-muted)] font-sans">معیاری دفتری دستاویز</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPageSize('A5')}
+                    className={`p-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2] flex flex-col items-center justify-center text-center ${
+                      pageSize === 'A5'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>A5 جیبی سائز</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--text-muted)] font-sans">مختصر پاکٹ کتابچہ</span>
+                  </button>
+                </div>
               </div>
 
               {/* Font Size Selector */}
@@ -624,9 +689,17 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
             {/* Realistic Paper Page Container */}
             <div className="flex-1 flex items-center justify-center py-2">
               <div
-                className={`w-full max-w-[480px] min-h-[580px] bg-white text-[#1a1612] p-8 shadow-2xl rounded-sm border border-[#e0d6c4] flex flex-col justify-between transition-all duration-300 font-nastaliq ${
-                  pageSize === 'A5' ? 'scale-95' : 'scale-100'
-                }`}
+                className={`w-full ${
+                  pageSize === 'whatsapp_hd'
+                    ? 'max-w-[360px] min-h-[640px] aspect-[9/16] rounded-2xl border-4 border-[#3a2e1d] shadow-2xl p-6 ring-2 ring-[var(--accent-gold)]/40'
+                    : pageSize === 'crown_octavo'
+                    ? 'max-w-[440px] min-h-[580px] p-7 shadow-2xl rounded-sm border border-[#e0d6c4]'
+                    : pageSize === 'royal_octavo'
+                    ? 'max-w-[460px] min-h-[600px] p-8 shadow-2xl rounded-sm border border-[#e0d6c4]'
+                    : pageSize === 'A5'
+                    ? 'max-w-[420px] min-h-[560px] p-7 shadow-2xl rounded-sm border border-[#e0d6c4] scale-95'
+                    : 'max-w-[480px] min-h-[580px] p-8 shadow-2xl rounded-sm border border-[#e0d6c4] scale-100'
+                } bg-white text-[#1a1612] flex flex-col justify-between transition-all duration-300 font-nastaliq`}
                 style={{
                   backgroundImage: 'radial-gradient(#faf6ee 15%, transparent 16%)',
                   backgroundSize: '24px 24px',

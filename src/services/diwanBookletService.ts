@@ -9,6 +9,7 @@ import { PoemDraft } from '../types/editor';
 
 export type DiwanFontSize = 'compact' | 'medium' | 'large' | 'royal';
 export type DiwanSpacing = 'comfortable' | 'spacious' | 'luxurious';
+export type DiwanPageSize = 'A4' | 'A5' | 'whatsapp_hd' | 'crown_octavo' | 'royal_octavo';
 
 export interface DiwanBookletConfig {
   title: string;
@@ -16,7 +17,7 @@ export interface DiwanBookletConfig {
   subtitle?: string;
   dedication?: string;
   publicationYear?: string;
-  pageSize: 'A4' | 'A5';
+  pageSize: DiwanPageSize;
   fontFamily: string;
   fontSize: DiwanFontSize;
   spacing?: DiwanSpacing;
@@ -158,6 +159,78 @@ export class DiwanBookletService {
   }
 
   /**
+   * Resolves physical and canvas dimensions, scale factors, and layout traits for all publication formats.
+   */
+  static getPageMetrics(pageSize: DiwanPageSize): {
+    canvasWidth: number;
+    canvasHeight: number;
+    ptWidth: number;
+    ptHeight: number;
+    scale: number;
+    isSmallFormat: boolean;
+    isMobileHd: boolean;
+  } {
+    switch (pageSize) {
+      case 'whatsapp_hd':
+        // WhatsApp Mobile HD Portrait: Native 9:16 aspect ratio (1080 x 1920)
+        return {
+          canvasWidth: 1080,
+          canvasHeight: 1920,
+          ptWidth: 450,
+          ptHeight: 800,
+          scale: 0.96,
+          isSmallFormat: false,
+          isMobileHd: true,
+        };
+      case 'crown_octavo':
+        // Traditional Pakistani/Indian Urdu Diwan standard (5.5" x 8.5")
+        return {
+          canvasWidth: 825,
+          canvasHeight: 1275,
+          ptWidth: 396,
+          ptHeight: 612,
+          scale: 0.74,
+          isSmallFormat: true,
+          isMobileHd: false,
+        };
+      case 'royal_octavo':
+        // Grand Classical Anthology / Kulliyat format (6" x 9")
+        return {
+          canvasWidth: 900,
+          canvasHeight: 1350,
+          ptWidth: 432,
+          ptHeight: 648,
+          scale: 0.78,
+          isSmallFormat: true,
+          isMobileHd: false,
+        };
+      case 'A5':
+        // Pocket A5 booklet
+        return {
+          canvasWidth: 874,
+          canvasHeight: 1240,
+          ptWidth: 419.53,
+          ptHeight: 595.28,
+          scale: 0.72,
+          isSmallFormat: true,
+          isMobileHd: false,
+        };
+      case 'A4':
+      default:
+        // Standard A4
+        return {
+          canvasWidth: 1240,
+          canvasHeight: 1754,
+          ptWidth: 595.28,
+          ptHeight: 841.89,
+          scale: 1.0,
+          isSmallFormat: false,
+          isMobileHd: false,
+        };
+    }
+  }
+
+  /**
    * Generates a high-resolution, pixel-perfect binary PDF Blob in exact A4 or A5 dimensions.
    */
   static async generateDirectPDFBlob(
@@ -172,13 +245,8 @@ export class DiwanBookletService {
       }
     }
 
-    const isA5 = config.pageSize === 'A5';
-    // Resolution: ~150 DPI for crisp vector-like typography without bloating memory
-    const canvasWidth = isA5 ? 874 : 1240;
-    const canvasHeight = isA5 ? 1240 : 1754;
-    const ptWidth = isA5 ? 419.53 : 595.28;
-    const ptHeight = isA5 ? 595.28 : 841.89;
-    const scale = isA5 ? 0.72 : 1.0;
+    const metrics = this.getPageMetrics(config.pageSize);
+    const { canvasWidth, canvasHeight, ptWidth, ptHeight, scale, isSmallFormat, isMobileHd } = metrics;
 
     const canvas = document.createElement('canvas');
     canvas.width = canvasWidth;
@@ -218,12 +286,16 @@ export class DiwanBookletService {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-      const margin = isA5 ? (isCover ? 35 : 40) : (isCover ? 50 : 55);
-      const innerGap = isA5 ? 8 : 12;
+      const margin = isMobileHd
+        ? (isCover ? 50 : 60)
+        : isSmallFormat
+        ? (isCover ? 35 : 40)
+        : (isCover ? 50 : 55);
+      const innerGap = isSmallFormat ? 8 : 12;
 
       // Outer gold border
       ctx.strokeStyle = '#8a5615';
-      ctx.lineWidth = isA5 ? 3 : 4;
+      ctx.lineWidth = isSmallFormat ? 3 : 4;
       ctx.strokeRect(margin, margin, canvasWidth - margin * 2, canvasHeight - margin * 2);
 
       // Inner subtle border
@@ -241,7 +313,7 @@ export class DiwanBookletService {
       ctx.fillStyle = '#8a5615';
       const drawDot = (x: number, y: number) => {
         ctx.beginPath();
-        ctx.arc(x, y, isA5 ? 3.5 : 5, 0, Math.PI * 2);
+        ctx.arc(x, y, isSmallFormat ? 3.5 : 5, 0, Math.PI * 2);
         ctx.fill();
       };
       drawDot(dotDist, dotDist);
@@ -255,9 +327,9 @@ export class DiwanBookletService {
     const drawHeaderFooter = (title: string, poet: string, pageNum: number) => {
       ctx.save();
       ctx.direction = 'rtl';
-      const headerY = isA5 ? 75 : 100;
-      const footerY = canvasHeight - (isA5 ? 65 : 90);
-      const marginSide = isA5 ? 55 : 80;
+      const headerY = isMobileHd ? 120 : isSmallFormat ? 75 : 100;
+      const footerY = canvasHeight - (isMobileHd ? 105 : isSmallFormat ? 65 : 90);
+      const marginSide = isMobileHd ? 65 : isSmallFormat ? 55 : 80;
 
       // Header rule & labels
       ctx.fillStyle = '#8a5615';
@@ -306,19 +378,19 @@ export class DiwanBookletService {
     // Top fleuron & bismillah
     ctx.fillStyle = '#8a5615';
     ctx.font = `${Math.round(22 * scale)}px "Amiri", "Noto Nastaliq Urdu", serif`;
-    ctx.fillText('❦  ❦  ❦', canvasWidth / 2, centerY - (isA5 ? 380 : 520));
+    ctx.fillText('❦  ❦  ❦', canvasWidth / 2, centerY - (isMobileHd ? 540 : isSmallFormat ? 380 : 520));
     ctx.font = `${Math.round(26 * scale)}px "Amiri", serif`;
-    ctx.fillText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', canvasWidth / 2, centerY - (isA5 ? 330 : 450));
+    ctx.fillText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', canvasWidth / 2, centerY - (isMobileHd ? 470 : isSmallFormat ? 330 : 450));
 
     // Book title
     ctx.font = `bold ${Math.round(52 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-    ctx.fillText(config.title || 'دیوانِ کلام', canvasWidth / 2, centerY - (isA5 ? 120 : 160));
+    ctx.fillText(config.title || 'دیوانِ کلام', canvasWidth / 2, centerY - (isMobileHd ? 180 : isSmallFormat ? 120 : 160));
 
     // Subtitle
     if (config.subtitle) {
       ctx.fillStyle = '#5a4225';
       ctx.font = `${Math.round(24 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-      ctx.fillText(config.subtitle, canvasWidth / 2, centerY - (isA5 ? 50 : 70));
+      ctx.fillText(config.subtitle, canvasWidth / 2, centerY - (isMobileHd ? 80 : isSmallFormat ? 50 : 70));
     }
 
     // Divider line
@@ -332,23 +404,23 @@ export class DiwanBookletService {
     // Author block
     ctx.fillStyle = '#7a6652';
     ctx.font = `${Math.round(20 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-    ctx.fillText('کلام و نگارشِ', canvasWidth / 2, centerY + (isA5 ? 50 : 70));
+    ctx.fillText('کلام و نگارشِ', canvasWidth / 2, centerY + (isMobileHd ? 80 : isSmallFormat ? 50 : 70));
 
     ctx.fillStyle = '#1a1612';
     ctx.font = `bold ${Math.round(42 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-    ctx.fillText(config.poet || 'شاعر', canvasWidth / 2, centerY + (isA5 ? 120 : 160));
+    ctx.fillText(config.poet || 'شاعر', canvasWidth / 2, centerY + (isMobileHd ? 180 : isSmallFormat ? 120 : 160));
 
     // Footer emblem & year
     ctx.fillStyle = '#8a5615';
     ctx.font = `${Math.round(36 * scale)}px sans-serif`;
-    ctx.fillText('⚜️', canvasWidth / 2, centerY + (isA5 ? 320 : 440));
+    ctx.fillText('⚜️', canvasWidth / 2, centerY + (isMobileHd ? 460 : isSmallFormat ? 320 : 440));
 
     ctx.font = `bold ${Math.round(18 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-    ctx.fillText(`سنۂ اشاعت: ${year}ء`, canvasWidth / 2, centerY + (isA5 ? 370 : 500));
+    ctx.fillText(`سنۂ اشاعت: ${year}ء`, canvasWidth / 2, centerY + (isMobileHd ? 520 : isSmallFormat ? 370 : 500));
 
     ctx.fillStyle = '#8a7a6a';
     ctx.font = `${Math.round(14 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-    ctx.fillText('مرتب کردہ: قلم و قافیہ — اسٹوڈیو برائے شعر و ادب', canvasWidth / 2, centerY + (isA5 ? 410 : 545));
+    ctx.fillText('مرتب کردہ: قلم و قافیہ — اسٹوڈیو برائے شعر و ادب', canvasWidth / 2, centerY + (isMobileHd ? 570 : isSmallFormat ? 410 : 545));
     ctx.restore();
 
     renderedPages.push({
@@ -378,16 +450,16 @@ export class DiwanBookletService {
       // Section title
       ctx.fillStyle = '#8a5615';
       ctx.font = `bold ${Math.round(36 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-      ctx.fillText('انتساب', canvasWidth / 2, centerY - (isA5 ? 180 : 260));
+      ctx.fillText('انتساب', canvasWidth / 2, centerY - (isMobileHd ? 280 : isSmallFormat ? 180 : 260));
 
       ctx.font = `${Math.round(20 * scale)}px "Amiri", serif`;
-      ctx.fillText('❦', canvasWidth / 2, centerY - (isA5 ? 130 : 190));
+      ctx.fillText('❦', canvasWidth / 2, centerY - (isMobileHd ? 220 : isSmallFormat ? 130 : 190));
 
       // Dedication body lines
       ctx.fillStyle = '#332b24';
       ctx.font = `${Math.round(25 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
       const dedLines = config.dedication.split('\n').filter((l) => l.trim().length > 0);
-      const lineSpacing = isA5 ? 55 : 75;
+      const lineSpacing = isMobileHd ? 80 : isSmallFormat ? 55 : 75;
       let dY = centerY - ((dedLines.length - 1) * lineSpacing) / 2;
 
       for (const line of dedLines) {
@@ -424,15 +496,15 @@ export class DiwanBookletService {
       ctx.textAlign = 'center';
       ctx.fillStyle = '#8a5615';
       ctx.font = `bold ${Math.round(34 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-      ctx.fillText('فہرستِ کلام', canvasWidth / 2, isA5 ? 170 : 230);
+      ctx.fillText('فہرستِ کلام', canvasWidth / 2, isMobileHd ? 240 : isSmallFormat ? 170 : 230);
       ctx.font = `${Math.round(20 * scale)}px "Amiri", serif`;
-      ctx.fillText('❦', canvasWidth / 2, isA5 ? 210 : 280);
+      ctx.fillText('❦', canvasWidth / 2, isMobileHd ? 290 : isSmallFormat ? 210 : 280);
 
       // Rows
-      let tocY = isA5 ? 270 : 360;
-      const rowStep = isA5 ? 58 : 78;
-      const rightX = canvasWidth - (isA5 ? 85 : 120);
-      const leftX = isA5 ? 85 : 120;
+      let tocY = isMobileHd ? 380 : isSmallFormat ? 270 : 360;
+      const rowStep = isMobileHd ? 82 : isSmallFormat ? 58 : 78;
+      const rightX = canvasWidth - (isMobileHd ? 100 : isSmallFormat ? 85 : 120);
+      const leftX = isMobileHd ? 100 : isSmallFormat ? 85 : 120;
       let poemPageTracker = currentPageNum + 1;
 
       for (let i = 0; i < config.selectedDrafts.length; i++) {
@@ -479,7 +551,7 @@ export class DiwanBookletService {
         ctx.setLineDash([]);
 
         tocY += rowStep;
-        if (tocY > canvasHeight - 160) break; // Limit single TOC page
+        if (tocY > canvasHeight - (isMobileHd ? 180 : 160)) break; // Limit single TOC page
       }
       ctx.restore();
 
@@ -525,7 +597,7 @@ export class DiwanBookletService {
       ctx.direction = 'rtl';
       ctx.textAlign = 'center';
 
-      let poemY = isA5 ? 160 : 210;
+      let poemY = isMobileHd ? 220 : isSmallFormat ? 160 : 210;
 
       // 1. Form badge: with generous breathing clearance and serial numbering
       let formUrdu = this.getFormUrdu(draft.form);
@@ -541,7 +613,7 @@ export class DiwanBookletService {
       // Nastaliq title ascenders reach up to 2.2x font size (~85px for 38px font).
       // We provide 165px (A4) / 120px (A5) multiplied by spacingMultiplier,
       // guaranteeing ~75px of clean white space between badge and top of title ascenders.
-      const badgeToTitleGap = Math.round((isA5 ? 120 : 165) * fontMultiplier * spacingMultiplier);
+      const badgeToTitleGap = Math.round((isMobileHd ? 175 : isSmallFormat ? 120 : 165) * fontMultiplier * spacingMultiplier);
       poemY += badgeToTitleGap;
 
       // 2. Poem Title (Bold Nastaliq)
@@ -553,7 +625,7 @@ export class DiwanBookletService {
       // Ample breathing space: title baseline to meter metadata
       // Nastaliq title descenders extend down ~45px.
       // We provide 110px (A4) / 80px (A5) so descenders never clash with meter annotations.
-      const titleToMetaGap = Math.round((isA5 ? 80 : 110) * fontMultiplier * spacingMultiplier);
+      const titleToMetaGap = Math.round((isMobileHd ? 115 : isSmallFormat ? 80 : 110) * fontMultiplier * spacingMultiplier);
       poemY += titleToMetaGap;
 
       // 3. Meter & Radif annotations
@@ -564,25 +636,25 @@ export class DiwanBookletService {
         if (draft.meterName) metaParts.push(`بحر: ${draft.meterName}`);
         if (draft.radif) metaParts.push(`ردیف: ${draft.radif}`);
         ctx.fillText(metaParts.join('  •  '), canvasWidth / 2, poemY);
-        poemY += Math.round((isA5 ? 50 : 70) * spacingMultiplier);
+        poemY += Math.round((isMobileHd ? 75 : isSmallFormat ? 50 : 70) * spacingMultiplier);
       }
 
       // 4. Centered fleuron
       ctx.fillStyle = '#8a5615';
       ctx.font = `${Math.round(18 * scale * fontMultiplier)}px "Amiri", serif`;
       ctx.fillText('❦', canvasWidth / 2, poemY);
-      poemY += Math.round((isA5 ? 75 : 105) * spacingMultiplier);
+      poemY += Math.round((isMobileHd ? 110 : isSmallFormat ? 75 : 105) * spacingMultiplier);
 
       // 5. Couplets rendering with generous line height and multi-page safety
       const couplets = this.parsePoemCouplets(draft.content || '');
       const misraFontSize = Math.round(26 * scale * fontMultiplier);
       ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-      const misraLineHeight = Math.round((isA5 ? 68 : 92) * fontMultiplier * spacingMultiplier);
-      const coupletGap = Math.round((isA5 ? 28 : 42) * spacingMultiplier);
+      const misraLineHeight = Math.round((isMobileHd ? 96 : isSmallFormat ? 68 : 92) * fontMultiplier * spacingMultiplier);
+      const coupletGap = Math.round((isMobileHd ? 45 : isSmallFormat ? 28 : 42) * spacingMultiplier);
 
       for (let cIdx = 0; cIdx < couplets.length; cIdx++) {
         // Multi-page check: if next couplet would collide with footer, start continuation page
-        if (poemY + misraLineHeight * 2 > canvasHeight - (isA5 ? 120 : 160)) {
+        if (poemY + misraLineHeight * 2 > canvasHeight - (isMobileHd ? 140 : isSmallFormat ? 120 : 160)) {
           ctx.restore();
           renderedPages.push({
             jpegBytes: await captureCurrentPage(),
@@ -598,7 +670,7 @@ export class DiwanBookletService {
           ctx.direction = 'rtl';
           ctx.textAlign = 'center';
           ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-          poemY = isA5 ? 160 : 210;
+          poemY = isMobileHd ? 220 : isSmallFormat ? 160 : 210;
         }
 
         const c = couplets[cIdx];
@@ -671,7 +743,34 @@ export class DiwanBookletService {
    */
   static generateStandaloneBookletHTML(config: DiwanBookletConfig): string {
     const year = config.publicationYear || this.toUrduDigits(new Date().getFullYear());
-    const isA5 = config.pageSize === 'A5';
+    const size = config.pageSize || 'A4';
+
+    let pageSizeCSS = 'A4';
+    let maxContainerWidth = '820px';
+    let minPageHeight = '297mm';
+    let pagePadding = '30mm 25mm';
+
+    if (size === 'A5') {
+      pageSizeCSS = 'A5';
+      maxContainerWidth = '580px';
+      minPageHeight = '210mm';
+      pagePadding = '22mm 18mm';
+    } else if (size === 'whatsapp_hd') {
+      pageSizeCSS = '450pt 800pt';
+      maxContainerWidth = '540px';
+      minPageHeight = '960px';
+      pagePadding = '38px 24px';
+    } else if (size === 'crown_octavo') {
+      pageSizeCSS = '5.5in 8.5in';
+      maxContainerWidth = '560px';
+      minPageHeight = '8.5in';
+      pagePadding = '20mm 16mm';
+    } else if (size === 'royal_octavo') {
+      pageSizeCSS = '6in 9in';
+      maxContainerWidth = '610px';
+      minPageHeight = '9in';
+      pagePadding = '22mm 18mm';
+    }
 
     let pagesHTML = '';
     let currentPageNum = 1;
@@ -840,7 +939,7 @@ export class DiwanBookletService {
   
   <style>
     @page {
-      size: ${isA5 ? 'A5' : 'A4'};
+      size: ${pageSizeCSS};
       margin: 0;
     }
 
@@ -861,7 +960,7 @@ export class DiwanBookletService {
     }
 
     .book-container {
-      max-width: ${isA5 ? '580px' : '820px'};
+      max-width: ${maxContainerWidth};
       margin: 0 auto;
       background: #ffffff;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -869,8 +968,8 @@ export class DiwanBookletService {
 
     .book-page {
       width: 100%;
-      min-height: ${isA5 ? '210mm' : '297mm'};
-      padding: ${isA5 ? '25mm 20mm' : '30mm 25mm'};
+      min-height: ${minPageHeight};
+      padding: ${pagePadding};
       position: relative;
       display: flex;
       flex-direction: column;
