@@ -27,6 +27,7 @@ import {
   querySlotRhymes,
 } from '../../services/slotRhymeBuilder';
 import { loadSovereignLexicon } from '../../services/sovereignLexiconService';
+import { ProsodicPatternView } from '../common/ProsodicPatternView';
 
 interface VisualSlotRhymeBuilderProps {
   initialWord?: string;
@@ -622,15 +623,7 @@ export const VisualSlotRhymeBuilder: React.FC<VisualSlotRhymeBuilderProps> = ({
               >
                 <span className="text-sm font-bold">{item.word}</span>
                 {item.pattern && (
-                  <span
-                    dir="rtl"
-                    title="دائیں سے بائیں: پہلا ہجا دائیں جانب"
-                    className="inline-flex items-center gap-0.5 text-[10px] font-mono text-[var(--accent-gold)] bg-[var(--bg-subtle)] px-1.5 py-0.5 rounded opacity-75 group-hover:opacity-100"
-                  >
-                    {item.pattern.split('').map((sym, sIdx) => (
-                      <span key={sIdx}>{sym}</span>
-                    ))}
-                  </span>
+                  <ProsodicPatternView pattern={item.pattern} size="xs" />
                 )}
               </button>
             ))}

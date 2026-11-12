@@ -28,6 +28,7 @@ import { AroozLexiconService } from '../../services/aroozLexiconService';
 import { VisualSlotRhymeBuilder } from './VisualSlotRhymeBuilder';
 import { FileImportModal } from './FileImportModal';
 import { QuickScansionCorrectionModal } from './QuickScansionCorrectionModal';
+import { ProsodicPatternView } from '../common/ProsodicPatternView';
 
 interface RhymeTreasuryTabProps {
   onLoadToTray: (words: string[]) => void;
@@ -479,15 +480,7 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
                           {group.afail}
                         </span>
                         {group.wazn && (
-                          <span
-                            dir="rtl"
-                            title="دائیں سے بائیں: پہلا ہجا دائیں جانب"
-                            className="inline-flex items-center gap-0.5 text-[11px] font-mono px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--accent-gold)] border border-[var(--border-subtle)] font-bold"
-                          >
-                            {group.wazn.split('').map((sym, sIdx) => (
-                              <span key={sIdx}>{sym}</span>
-                            ))}
-                          </span>
+                          <ProsodicPatternView pattern={group.wazn} size="xs" />
                         )}
                         <span
                           className={`text-[10px] font-nastaliq px-2 py-0.5 rounded-full border ${tierBadgeClass}`}

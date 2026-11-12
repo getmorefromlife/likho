@@ -23,6 +23,7 @@ import {
   AroozLexiconService,
   QUARANTINE_REASON_LABELS,
 } from '../../services/aroozLexiconService';
+import { ProsodicPatternView } from '../common/ProsodicPatternView';
 import type {
   QuarantinedEntry,
   UserPronunciationProposal,
@@ -558,8 +559,9 @@ export const LexiconManagerModal: React.FC<LexiconManagerModalProps> = ({
                               </span>
                             )}
                             {existingProposal && (
-                              <span className="font-mono text-xs font-bold text-[var(--accent-gold)] bg-[var(--accent-gold)]/10 px-2 py-0.5 rounded">
-                                وزن: {existingProposal.pattern}
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--accent-gold)] bg-[var(--accent-gold)]/10 px-2 py-0.5 rounded">
+                                <span>وزن:</span>
+                                <ProsodicPatternView pattern={existingProposal.pattern} size="xs" />
                               </span>
                             )}
                           </div>
@@ -821,6 +823,15 @@ export const LexiconManagerModal: React.FC<LexiconManagerModalProps> = ({
                     </button>
                   </div>
                 </div>
+
+                {propPattern && (
+                  <div className="mt-2 p-2 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center justify-between">
+                    <span className="text-[11px] font-nastaliq text-[var(--text-muted)]">
+                      راست منظر (دائیں تا بائیں):
+                    </span>
+                    <ProsodicPatternView pattern={propPattern} size="sm" showDirectionBadge={true} />
+                  </div>
+                )}
               </div>
 
               {/* Vocalized Text with Erab (Optional) */}

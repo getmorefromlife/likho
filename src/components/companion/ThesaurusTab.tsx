@@ -10,6 +10,7 @@ import {
   SovereignDictionaryLookupResult,
 } from '../../services/sovereignLexiconService';
 import { findSanadVerseForWord } from '../../data/sovereign/classicalDiwanCorpus';
+import { ProsodicPatternView } from '../common/ProsodicPatternView';
 
 interface ThesaurusTabProps {
   selectedWord?: string;
@@ -238,13 +239,7 @@ export const ThesaurusTab: React.FC<ThesaurusTabProps> = ({
                     <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/25 font-bold">
                       {reading.rukn}
                     </span>
-                    <span
-                      dir="ltr"
-                      className="px-2 py-0.5 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-mono text-[11px] tracking-widest text-[var(--text-primary)]"
-                      title="عروضی وزن (بلند = ، کوتاہ -)"
-                    >
-                      {reading.pattern}
-                    </span>
+                    <ProsodicPatternView pattern={reading.pattern} size="xs" syllables={reading.syllables} />
                   </div>
                 </div>
               </div>

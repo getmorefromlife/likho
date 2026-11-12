@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X, Check, Edit3, Sparkles, Download, RotateCcw, Info } from 'lucide-react';
 import { AroozLexiconService } from '../../services/aroozLexiconService';
 import { FOOT_NAMES } from '../../data/prosodyMeters';
+import { ProsodicPatternView } from '../common/ProsodicPatternView';
 
 interface QuickScansionCorrectionModalProps {
   isOpen: boolean;
@@ -144,28 +145,33 @@ export const QuickScansionCorrectionModal: React.FC<QuickScansionCorrectionModal
           <div className="p-4 rounded-xl border border-[var(--accent-gold)]/30 bg-[var(--accent-gold)]/5 flex flex-col items-center justify-center text-center">
             <span
               style={{ fontFamily }}
-              className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-1"
+              className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-2"
             >
               {word}
             </span>
-            <div className="flex items-center gap-2 text-xs font-nastaliq text-[var(--text-muted)]">
+
+            {/* Visual Syllable Scansion Strip (Strict RTL: Syllable 1 on Right) */}
+            {cleanPattern && (
+              <div className="my-2 p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex flex-col items-center gap-1.5 shadow-xs">
+                <div className="flex items-center gap-2">
+                  <ProsodicPatternView pattern={cleanPattern} size="md" />
+                </div>
+                <span className="text-[10px] text-[var(--accent-gold)] font-nastaliq flex items-center gap-1">
+                  <span>← دائیں سے بائیں (RTL): پہلا ہجا دائیں جانب شروع ہوتا ہے</span>
+                </span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 text-xs font-nastaliq text-[var(--text-muted)] mt-1">
               <span>وزن کا نام:</span>
               <strong className="text-[var(--accent-gold)]">{ruknName || 'زیرِ تدوین'}</strong>
-              {cleanPattern && (
-                <span
-                  dir="rtl"
-                  className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-secondary)] font-bold tracking-widest"
-                >
-                  {cleanPattern}
-                </span>
-              )}
             </div>
           </div>
 
           {/* Quick Preset Rukn Buttons */}
           <div>
             <label className="block text-xs font-nastaliq font-bold text-[var(--text-primary)] mb-1.5">
-              مقبول عروضی ارکان (ایک کلک سے چنیں):
+              مقبول عروضی ارکان (ایک کلک سے چنیں — دائیں تا بائیں):
             </label>
             <div className="flex flex-wrap gap-1.5">
               {COMMON_RUKN_PRESETS.map((p) => {
@@ -175,15 +181,15 @@ export const QuickScansionCorrectionModal: React.FC<QuickScansionCorrectionModal
                     key={p.rukn + p.pattern}
                     type="button"
                     onClick={() => handleApplyPreset(p.pattern)}
-                    title={`${p.desc} (${p.pattern})`}
-                    className={`px-2 py-1 rounded-lg text-xs font-nastaliq border transition-all cursor-pointer ${
+                    title={`${p.desc} (دائیں تا بائیں وزن)`}
+                    className={`flex items-center gap-2 px-2.5 py-1 rounded-lg text-xs font-nastaliq border transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-[var(--accent-gold)] text-white border-[var(--accent-gold)] font-bold shadow-xs'
                         : 'bg-[var(--bg-surface)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)]'
                     }`}
                   >
                     <span>{p.rukn}</span>
-                    <span className="font-mono text-[10px] opacity-75 mr-1">({p.pattern})</span>
+                    <ProsodicPatternView pattern={p.pattern} size="xs" />
                   </button>
                 );
               })}
@@ -223,14 +229,25 @@ export const QuickScansionCorrectionModal: React.FC<QuickScansionCorrectionModal
                 </button>
               </div>
             </div>
+
             <input
               type="text"
               value={pattern}
               onChange={(e) => setPattern(e.target.value)}
-              placeholder="مثلاً: -=- یا =--="
+              placeholder="مثلاً: =- یا -== یا =="
               dir="ltr"
               className="w-full px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] text-center font-mono font-bold tracking-widest text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-gold)]"
             />
+
+            {/* Live Interactive RTL Scansion Preview */}
+            {cleanPattern && (
+              <div className="mt-2 p-2 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)] flex items-center justify-between">
+                <span className="text-[11px] font-nastaliq text-[var(--text-muted)]">
+                  راست منظر (دائیں تا بائیں):
+                </span>
+                <ProsodicPatternView pattern={cleanPattern} size="sm" showDirectionBadge={true} />
+              </div>
+            )}
           </div>
 
           {/* Vocalized Pronunciation Input */}
@@ -326,3 +343,4 @@ export const QuickScansionCorrectionModal: React.FC<QuickScansionCorrectionModal
     </div>
   );
 };
+

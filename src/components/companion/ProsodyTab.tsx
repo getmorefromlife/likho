@@ -7,6 +7,7 @@ import { LexiconManagerModal } from './LexiconManagerModal';
 import { FirstTaqtiLesson } from '../reference/FirstTaqtiLesson';
 import { MeterReferenceView } from '../reference/MeterReferenceView';
 import { getMeterAtlasEntry, REVIEW_STAGE_LABELS } from '../../data/meterReferenceAtlas';
+import { ProsodicPatternView } from '../common/ProsodicPatternView';
 
 interface ProsodyTabProps {
   currentMeterName?: string;
@@ -222,9 +223,9 @@ export const ProsodyTab: React.FC<ProsodyTabProps> = ({
                 <span className="text-sm font-bold font-nastaliq text-[var(--accent-gold)]">
                   {meter.pattern}
                 </span>
-                <span className="block text-[10px] font-mono text-[var(--text-muted)] mt-0.5">
-                  {meter.syllabicCode}
-                </span>
+                <div className="flex justify-center mt-1">
+                  <ProsodicPatternView pattern={meter.syllabicCode} size="xs" showDirectionBadge={true} />
+                </div>
               </div>
 
               <p className="text-xs text-[var(--text-muted)] font-nastaliq mb-2 leading-relaxed">

@@ -28,6 +28,7 @@ import {
   WordReadingChoice,
 } from '../../services/wordIntentionService';
 import { QuickScansionCorrectionModal } from '../companion/QuickScansionCorrectionModal';
+import { ProsodicPatternView } from '../common/ProsodicPatternView';
 
 interface ScansionCardProps {
   scansion?: ScansionResult;
@@ -514,15 +515,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                                 {reading.ruknLabel}
                               </span>
                             )}
-                            <span
-                              dir="rtl"
-                              title="دائیں سے بائیں: پہلا ہجا دائیں جانب"
-                              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[var(--bg-surface)] border border-[var(--border-subtle)] font-mono font-bold text-[var(--accent-gold)]"
-                            >
-                              {reading.pattern.split('').map((sym, i) => (
-                                <span key={i}>{sym}</span>
-                              ))}
-                            </span>
+                            <ProsodicPatternView pattern={reading.pattern} size="xs" />
                           </div>
                         </div>
                         <p className="text-[11px] text-[var(--text-secondary)]">
