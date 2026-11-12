@@ -244,15 +244,16 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
 
   // Toggle Tanpura Drone anytime
   const handleToggleTanpura = async () => {
-    if (isTanpuraPlaying) {
-      voiceDspService.stopTanpuraDrone();
-      setIsTanpuraPlaying(false);
-    } else {
-      const audioCtx = await voiceRecitationService.ensureAudioContext();
-      if (audioCtx) {
-        await voiceDspService.startTanpuraDrone(audioCtx, tanpuraVolume);
+    try {
+      if (isTanpuraPlaying) {
+        voiceDspService.stopTanpuraDrone();
+        setIsTanpuraPlaying(false);
+      } else {
+        await voiceDspService.startTanpuraDrone(tanpuraVolume);
         setIsTanpuraPlaying(true);
       }
+    } catch (err) {
+      console.error('Failed to start Tanpura drone:', err);
     }
   };
 

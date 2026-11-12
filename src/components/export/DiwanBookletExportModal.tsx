@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
-import { DiwanBookletService, DiwanBookletConfig, DiwanFontSize, PdfProgress } from '../../services/diwanBookletService';
+import { DiwanBookletService, DiwanBookletConfig, DiwanFontSize, DiwanSpacing, PdfProgress } from '../../services/diwanBookletService';
 
 interface DiwanBookletExportModalProps {
   isOpen: boolean;
@@ -47,6 +47,8 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
   const [dedication, setDedication] = useState('بہ نامِ اہلِ ذوق و سخن، اور اردو شاعری کے سچے قدردانوں کے نام...');
   const [pageSize, setPageSize] = useState<'A4' | 'A5'>('A4');
   const [fontSize, setFontSize] = useState<DiwanFontSize>('medium');
+  const [spacing, setSpacing] = useState<DiwanSpacing>('spacious');
+  const [includeGhazalNumber, setIncludeGhazalNumber] = useState(true);
   const [includeTOC, setIncludeTOC] = useState(true);
   const [includeMeters, setIncludeMeters] = useState(true);
   const [previewPageIdx, setPreviewPageIdx] = useState(0);
@@ -92,11 +94,13 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
       pageSize,
       fontFamily: 'Noto Nastaliq Urdu',
       fontSize,
+      spacing,
+      includeGhazalNumber,
       includeTOC,
       includeMeters,
       selectedDrafts,
     };
-  }, [bookTitle, poetName, subtitle, dedication, pageSize, fontSize, includeTOC, includeMeters, selectedDrafts]);
+  }, [bookTitle, poetName, subtitle, dedication, pageSize, fontSize, spacing, includeGhazalNumber, includeTOC, includeMeters, selectedDrafts]);
 
   if (!isOpen) return null;
 
@@ -343,11 +347,11 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                 <label className="block text-xs font-bold font-nastaliq text-[var(--text-secondary)] mb-1.5">
                   کتاب کا فونٹ سائز (Typography & Font Size):
                 </label>
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-4 gap-1.5">
                   <button
                     type="button"
                     onClick={() => setFontSize('compact')}
-                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                    className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-nastaliq font-bold transition-all leading-[2] text-center ${
                       fontSize === 'compact'
                         ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
                         : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -358,18 +362,18 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                   <button
                     type="button"
                     onClick={() => setFontSize('medium')}
-                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                    className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-nastaliq font-bold transition-all leading-[2] text-center ${
                       fontSize === 'medium'
                         ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
                         : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <span>متوسط (Medium)</span>
+                    <span>متوازن (Medium)</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFontSize('large')}
-                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                    className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-nastaliq font-bold transition-all leading-[2] text-center ${
                       fontSize === 'large'
                         ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
                         : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -377,10 +381,75 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                   >
                     <span>جلی (Large)</span>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setFontSize('royal')}
+                    className={`py-1.5 px-1.5 rounded-xl border text-[11px] font-nastaliq font-bold transition-all leading-[2] text-center ${
+                      fontSize === 'royal'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>شاہانہ (Royal)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Breathing Space / Vertical Spacing Selector */}
+              <div className="pt-2">
+                <label className="block text-xs font-bold font-nastaliq text-[var(--text-secondary)] mb-1.5">
+                  تنفس و فاصلہ بندی (Breathing Space & Clearance):
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setSpacing('comfortable')}
+                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                      spacing === 'comfortable'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>متوازن فاصلہ</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSpacing('spacious')}
+                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                      spacing === 'spacious'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>کشادہ (تجویز کردہ)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSpacing('luxurious')}
+                    className={`py-1.5 px-2 rounded-xl border text-xs font-nastaliq font-bold transition-all leading-[2.2] text-center ${
+                      spacing === 'luxurious'
+                        ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)] text-[var(--accent-gold)]'
+                        : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>شاہانہ کشادگی</span>
+                  </button>
                 </div>
               </div>
 
               <div className="space-y-2 pt-1">
+                <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={includeGhazalNumber}
+                    onChange={(e) => setIncludeGhazalNumber(e.target.checked)}
+                    className="accent-[var(--accent-gold)] w-4 h-4 rounded"
+                  />
+                  <span className="text-xs font-nastaliq font-bold text-[var(--text-primary)] leading-[2.2]">
+                    کلام کا صنف اور شمار شامل کریں (مثلاً: [ غزل ۱ ])
+                  </span>
+                </label>
+
                 <label className="flex items-center gap-2.5 p-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] cursor-pointer">
                   <input
                     type="checkbox"
@@ -664,16 +733,33 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                         </div>
 
                         <div className="my-auto text-center py-4">
-                          {/* Form badge in preview with generous breathing clearance */}
-                          <div className="mb-4">
-                            <span className="inline-block text-[11px] px-3.5 py-1 rounded-full bg-[#f4ecdf] border border-[#d4c2a5] text-[#8a5615] font-bold shadow-2xs">
-                              [ {draft.form === 'nazm' ? 'نظم' : draft.form === 'rubai' ? 'رباعی' : draft.form === 'qataa' ? 'قطعہ' : 'غزل'} ]
+                          {/* Form badge in preview with generous breathing clearance and serial numbering */}
+                          <div
+                            className={
+                              spacing === 'luxurious'
+                                ? 'mb-7'
+                                : spacing === 'spacious'
+                                ? 'mb-6'
+                                : 'mb-5'
+                            }
+                          >
+                            <span className="inline-block text-[11px] px-4 py-1 rounded-full bg-[#f4ecdf] border border-[#d4c2a5] text-[#8a5615] font-bold shadow-2xs">
+                              [ {draft.form === 'nazm' ? 'نظم' : draft.form === 'rubai' ? 'رباعی' : draft.form === 'qataa' ? 'قطعہ' : 'غزل'}
+                              {includeGhazalNumber ? ` ${DiwanBookletService.toUrduDigits(poemIdx + 1)}` : ''} ]
                             </span>
                           </div>
 
                           <h2
-                            className={`font-bold text-[#8a5615] leading-[2.2] my-3.5 ${
-                              fontSize === 'compact' ? 'text-lg' : fontSize === 'large' ? 'text-2xl' : 'text-xl'
+                            className={`font-bold text-[#8a5615] leading-[2.4] ${
+                              spacing === 'luxurious' ? 'my-5' : spacing === 'spacious' ? 'my-4' : 'my-3'
+                            } ${
+                              fontSize === 'compact'
+                                ? 'text-lg'
+                                : fontSize === 'royal'
+                                ? 'text-3xl'
+                                : fontSize === 'large'
+                                ? 'text-2xl'
+                                : 'text-xl'
                             }`}
                           >
                             {draft.title || 'بے عنوان'}
@@ -688,12 +774,26 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                           )}
                           <div className="text-xs text-[#8a5615] my-3">❦</div>
 
-                          <div className={`mt-5 ${fontSize === 'large' ? 'space-y-4' : 'space-y-3'}`}>
+                          <div
+                            className={`mt-5 ${
+                              spacing === 'luxurious'
+                                ? 'space-y-4'
+                                : spacing === 'spacious'
+                                ? 'space-y-3.5'
+                                : 'space-y-2.5'
+                            }`}
+                          >
                             {couplets.map((c, i) => (
                               <div key={i} className="text-center">
                                 <div
                                   className={`text-[#1a1612] leading-[2.8] ${
-                                    fontSize === 'compact' ? 'text-xs' : fontSize === 'large' ? 'text-base' : 'text-sm'
+                                    fontSize === 'compact'
+                                      ? 'text-xs'
+                                      : fontSize === 'royal'
+                                      ? 'text-lg font-bold'
+                                      : fontSize === 'large'
+                                      ? 'text-base'
+                                      : 'text-sm'
                                   }`}
                                 >
                                   {c.misra1}
@@ -701,7 +801,13 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                                 {c.misra2 && (
                                   <div
                                     className={`text-[#1a1612] leading-[2.8] ${
-                                      fontSize === 'compact' ? 'text-xs' : fontSize === 'large' ? 'text-base' : 'text-sm'
+                                      fontSize === 'compact'
+                                        ? 'text-xs'
+                                        : fontSize === 'royal'
+                                        ? 'text-lg font-bold'
+                                        : fontSize === 'large'
+                                        ? 'text-base'
+                                        : 'text-sm'
                                     }`}
                                   >
                                     {c.misra2}

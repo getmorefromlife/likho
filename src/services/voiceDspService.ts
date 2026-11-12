@@ -177,6 +177,9 @@ export class VoiceDspEngine {
   // Ambient Tanpura / Shruti Drone nodes
   private tanpuraGain: GainNode | null = null;
   private tanpuraOscillators: OscillatorNode[] = [];
+  private tanpuraStringGains: GainNode[] = [];
+  private tanpuraStopTimer: ReturnType<typeof setTimeout> | null = null;
+  private tanpuraPluckTimer: ReturnType<typeof setInterval> | null = null;
   private isTanpuraPlaying = false;
 
   public currentConfig: VocalDspConfig = {
@@ -429,9 +432,44 @@ export class VoiceDspEngine {
 
   /**
    * Ambient Tanpura / Shruti Drone Synthesizer
-   * Creates classical Sa-Pa harmonic acoustic drone with 4 rich strings and subtle chorus
+   * Creates classical Sa-Pa harmonic acoustic drone with 4 rich strings and subtle chorus.
+   * Auto-resumes AudioContext, handles timers safely, and produces warm audible harmonics.
    */
-  public async startTanpuraDrone(ctx: AudioContext, volume = 0.3): Promise<void> {
+  public async startTanpuraDrone(volume = 0.35, externalCtx?: AudioContext): Promise<void> {
+    if (typeof window === 'undefined') return;
+
+    // Clear any pending stop timer immediately so it doesn't kill the new sound!
+    if (this.tanpuraStopTimer) {
+      clearTimeout(this.tanpuraStopTimer);
+      this.tanpuraStopTimer = null;
+    }
+    if (this.tanpuraPluckTimer) {
+      clearInterval(this.tanpuraPluckTimer);
+      this.tanpuraPluckTimer = null;
+    }
+
+    // Stop and disconnect old oscillators immediately
+    for (const osc of this.tanpuraOscillators) {
+      try {
+        osc.stop();
+        osc.disconnect();
+      } catch {
+        // Ignored
+      }
+    }
+    this.tanpuraOscillators = [];
+    this.tanpuraStringGains = [];
+
+    // Ensure AudioContext exists and is running
+    let ctx = externalCtx || this.ctx;
+    if (!ctx) {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctx = new AudioCtx();
+    }
+    this.ctx = ctx;
+
     if (ctx.state === 'suspended') {
       try {
         await ctx.resume();
@@ -440,38 +478,36 @@ export class VoiceDspEngine {
       }
     }
 
-    this.stopTanpuraDrone();
     this.isTanpuraPlaying = true;
-    this.ctx = ctx;
 
+    // Master Tanpura Gain
     this.tanpuraGain = ctx.createGain();
-    this.tanpuraGain.gain.setValueAtTime(0.001, ctx.currentTime);
-    this.tanpuraGain.gain.exponentialRampToValueAtTime(
-      Math.max(0.01, Math.min(1, volume)),
-      ctx.currentTime + 0.8
-    );
+    const safeVolume = Math.max(0.05, Math.min(1.0, volume));
+    this.tanpuraGain.gain.setValueAtTime(0.01, ctx.currentTime);
+    this.tanpuraGain.gain.linearRampToValueAtTime(safeVolume, ctx.currentTime + 0.15);
     this.tanpuraGain.connect(ctx.destination);
 
-    // Warm resonant tone filter
+    // Warm resonant tone filter (preserves rich harmonics up to 2.4kHz so it cuts through small phone/laptop speakers)
     const toneFilter = ctx.createBiquadFilter();
     toneFilter.type = 'lowpass';
-    toneFilter.frequency.setValueAtTime(1400, ctx.currentTime);
-    toneFilter.Q.setValueAtTime(1.8, ctx.currentTime);
+    toneFilter.frequency.setValueAtTime(2200, ctx.currentTime);
+    toneFilter.Q.setValueAtTime(2.2, ctx.currentTime);
     toneFilter.connect(this.tanpuraGain);
 
-    // Authentic 4-String Indian Tanpura Tuning:
-    // String 1: First Pa (G3, 196.00 Hz)
-    // String 2: Middle Sa (C4, 261.63 Hz)
-    // String 3: Middle Sa detuned for natural acoustic Jawari shimmer (262.20 Hz)
-    // String 4: Bass Kharaj Sa (C3, 130.81 Hz)
+    // 4-String Indian Classical Tanpura tuning (Pa, Sa, Sa, Kharaj Sa)
+    // String 1: Pa (G3, 196.0 Hz)
+    // String 2: Sa (C4, 261.63 Hz)
+    // String 3: Sa detuned (262.35 Hz for acoustic jawari shimmer)
+    // String 4: Kharaj Sa (C3, 130.81 Hz)
     const strings = [
-      { freq: 196.0, type: 'triangle' as OscillatorType, gain: 0.35, lfo: 0.12 },
-      { freq: 261.63, type: 'sawtooth' as OscillatorType, gain: 0.25, lfo: 0.15 },
-      { freq: 262.2, type: 'sawtooth' as OscillatorType, gain: 0.25, lfo: 0.18 },
-      { freq: 130.81, type: 'triangle' as OscillatorType, gain: 0.45, lfo: 0.08 },
+      { freq: 196.0, type: 'sawtooth' as OscillatorType, baseGain: 0.35, lfoRate: 0.12 },
+      { freq: 261.63, type: 'triangle' as OscillatorType, baseGain: 0.40, lfoRate: 0.16 },
+      { freq: 262.35, type: 'sawtooth' as OscillatorType, baseGain: 0.30, lfoRate: 0.20 },
+      { freq: 130.81, type: 'sawtooth' as OscillatorType, baseGain: 0.45, lfoRate: 0.09 },
+      { freq: 392.00, type: 'triangle' as OscillatorType, baseGain: 0.18, lfoRate: 0.14 }, // High sparkle
     ];
 
-    for (const str of strings) {
+    strings.forEach((str) => {
       const osc = ctx.createOscillator();
       const stringGain = ctx.createGain();
 
@@ -481,39 +517,66 @@ export class VoiceDspEngine {
       // Acoustic LFO chorus
       const lfo = ctx.createOscillator();
       const lfoGain = ctx.createGain();
-      lfo.frequency.setValueAtTime(str.lfo, ctx.currentTime);
-      lfoGain.gain.setValueAtTime(1.8, ctx.currentTime);
+      lfo.frequency.setValueAtTime(str.lfoRate, ctx.currentTime);
+      lfoGain.gain.setValueAtTime(2.0, ctx.currentTime);
       lfo.connect(lfoGain);
       lfoGain.connect(osc.frequency);
       lfo.start();
       this.tanpuraOscillators.push(lfo);
 
-      stringGain.gain.setValueAtTime(str.gain, ctx.currentTime);
+      stringGain.gain.setValueAtTime(str.baseGain, ctx.currentTime);
       osc.connect(stringGain);
       stringGain.connect(toneFilter);
 
       osc.start();
       this.tanpuraOscillators.push(osc);
-    }
+      this.tanpuraStringGains.push(stringGain);
+    });
+
+    // Meditative rhythmic string plucking accent (every 1.5 seconds cycles through the strings)
+    let currentPluckIndex = 0;
+    this.tanpuraPluckTimer = setInterval(() => {
+      if (!this.isTanpuraPlaying || !this.ctx || this.tanpuraStringGains.length === 0) return;
+      const targetGain = this.tanpuraStringGains[currentPluckIndex % 4];
+      if (targetGain) {
+        const now = this.ctx.currentTime;
+        const currentVal = targetGain.gain.value;
+        targetGain.gain.setValueAtTime(currentVal * 1.4, now);
+        targetGain.gain.exponentialRampToValueAtTime(Math.max(0.05, currentVal), now + 0.9);
+      }
+      currentPluckIndex++;
+    }, 1200);
   }
 
   public setTanpuraVolume(volume: number): void {
     if (this.tanpuraGain && this.ctx) {
-      const safeVol = Math.max(0.001, Math.min(1, volume));
-      this.tanpuraGain.gain.setTargetAtTime(safeVol, this.ctx.currentTime, 0.1);
+      const safeVol = Math.max(0.01, Math.min(1, volume));
+      this.tanpuraGain.gain.setTargetAtTime(safeVol, this.ctx.currentTime, 0.05);
     }
   }
 
   public stopTanpuraDrone(): void {
+    if (this.tanpuraPluckTimer) {
+      clearInterval(this.tanpuraPluckTimer);
+      this.tanpuraPluckTimer = null;
+    }
+
     if (this.tanpuraGain && this.ctx) {
       try {
-        this.tanpuraGain.gain.setTargetAtTime(0.001, this.ctx.currentTime, 0.3);
+        this.tanpuraGain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
       } catch {
         // Ignored
       }
     }
 
-    setTimeout(() => {
+    this.isTanpuraPlaying = false;
+
+    // Clear previous timer if any
+    if (this.tanpuraStopTimer) {
+      clearTimeout(this.tanpuraStopTimer);
+    }
+
+    this.tanpuraStopTimer = setTimeout(() => {
       for (const osc of this.tanpuraOscillators) {
         try {
           osc.stop();
@@ -523,6 +586,7 @@ export class VoiceDspEngine {
         }
       }
       this.tanpuraOscillators = [];
+      this.tanpuraStringGains = [];
       if (this.tanpuraGain) {
         try {
           this.tanpuraGain.disconnect();
@@ -531,8 +595,8 @@ export class VoiceDspEngine {
         }
         this.tanpuraGain = null;
       }
-      this.isTanpuraPlaying = false;
-    }, 350);
+      this.tanpuraStopTimer = null;
+    }, 200);
   }
 
   public getIsTanpuraPlaying(): boolean {

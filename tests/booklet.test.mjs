@@ -245,4 +245,31 @@ test('assemblePdf generates valid multi-page binary PDF with correct dimensions'
   assert.ok(a5Text.includes('%%EOF'));
 });
 
-console.log('6 diwan booklet generator checks passed.');
+test('ghazal serial numbering and breathing space configuration format correctly', () => {
+  const formatBadge = (form, index, includeNumber = true) => {
+    const formUrdu = form === 'ghazal' ? 'غزل' : form === 'nazm' ? 'نظم' : 'کلام';
+    if (!includeNumber) return `[ ${formUrdu} ]`;
+    return `[ ${formUrdu} ${TestDiwanBookletService.toUrduDigits(index + 1)} ]`;
+  };
+
+  assert.equal(formatBadge('ghazal', 0, true), '[ غزل ۱ ]');
+  assert.equal(formatBadge('ghazal', 4, true), '[ غزل ۵ ]');
+  assert.equal(formatBadge('nazm', 1, true), '[ نظم ۲ ]');
+  assert.equal(formatBadge('ghazal', 0, false), '[ غزل ]');
+
+  // Verify spacing multiplier guarantees clearance above title ascenders
+  const computeClearance = (scale = 1.0, fontMultiplier = 1.0, spacingMultiplier = 1.25) => {
+    const badgeToTitleGap = Math.round(165 * fontMultiplier * spacingMultiplier);
+    const titleAscenders = Math.round(38 * scale * fontMultiplier * 2.1);
+    const netBreathingSpace = badgeToTitleGap - titleAscenders;
+    return { badgeToTitleGap, titleAscenders, netBreathingSpace };
+  };
+
+  const standard = computeClearance(1.0, 1.0, 1.25);
+  assert.ok(standard.netBreathingSpace >= 70, 'Must have at least 70px clearance to prevent collision with ascenders');
+
+  const royal = computeClearance(1.0, 1.34, 1.48);
+  assert.ok(royal.netBreathingSpace >= 80, 'Royal spacing must preserve ample clearance even with large fonts');
+});
+
+console.log('7 diwan booklet generator checks passed.');

@@ -7,7 +7,8 @@
 
 import { PoemDraft } from '../types/editor';
 
-export type DiwanFontSize = 'compact' | 'medium' | 'large';
+export type DiwanFontSize = 'compact' | 'medium' | 'large' | 'royal';
+export type DiwanSpacing = 'comfortable' | 'spacious' | 'luxurious';
 
 export interface DiwanBookletConfig {
   title: string;
@@ -18,6 +19,8 @@ export interface DiwanBookletConfig {
   pageSize: 'A4' | 'A5';
   fontFamily: string;
   fontSize: DiwanFontSize;
+  spacing?: DiwanSpacing;
+  includeGhazalNumber?: boolean;
   includeTOC: boolean;
   includeMeters: boolean;
   selectedDrafts: PoemDraft[];
@@ -489,7 +492,20 @@ export class DiwanBookletService {
     }
 
     const fontMultiplier =
-      config.fontSize === 'compact' ? 0.85 : config.fontSize === 'large' ? 1.18 : 1.0;
+      config.fontSize === 'compact'
+        ? 0.82
+        : config.fontSize === 'royal'
+        ? 1.34
+        : config.fontSize === 'large'
+        ? 1.18
+        : 1.0;
+
+    const spacingMultiplier =
+      config.spacing === 'comfortable'
+        ? 1.0
+        : config.spacing === 'luxurious'
+        ? 1.48
+        : 1.25; // spacious default (ample, royal breathing room)
 
     // -------------------------------------------------------------------------
     // PAGES 4+: POEM PAGES
@@ -509,17 +525,24 @@ export class DiwanBookletService {
       ctx.direction = 'rtl';
       ctx.textAlign = 'center';
 
-      let poemY = isA5 ? 150 : 200;
+      let poemY = isA5 ? 160 : 210;
 
-      // 1. Form badge: with ample clearance
-      const formUrdu = this.getFormUrdu(draft.form);
+      // 1. Form badge: with generous breathing clearance and serial numbering
+      let formUrdu = this.getFormUrdu(draft.form);
+      if (config.includeGhazalNumber !== false) {
+        formUrdu = `${formUrdu} ${this.toUrduDigits(pIdx + 1)}`;
+      }
       const badgeFontSize = Math.round(14 * scale * fontMultiplier);
       ctx.fillStyle = '#8a5615';
       ctx.font = `bold ${badgeFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
       ctx.fillText(`[ ${formUrdu} ]`, canvasWidth / 2, poemY);
 
-      // Ample breathing space: badge bottom to title baseline
-      poemY += Math.round((isA5 ? 65 : 85) * fontMultiplier);
+      // Ample, guaranteed breathing space between badge and title baseline:
+      // Nastaliq title ascenders reach up to 2.2x font size (~85px for 38px font).
+      // We provide 165px (A4) / 120px (A5) multiplied by spacingMultiplier,
+      // guaranteeing ~75px of clean white space between badge and top of title ascenders.
+      const badgeToTitleGap = Math.round((isA5 ? 120 : 165) * fontMultiplier * spacingMultiplier);
+      poemY += badgeToTitleGap;
 
       // 2. Poem Title (Bold Nastaliq)
       const titleFontSize = Math.round(38 * scale * fontMultiplier);
@@ -528,7 +551,10 @@ export class DiwanBookletService {
       ctx.fillText(draft.title || 'بے عنوان', canvasWidth / 2, poemY);
 
       // Ample breathing space: title baseline to meter metadata
-      poemY += Math.round((isA5 ? 65 : 85) * fontMultiplier);
+      // Nastaliq title descenders extend down ~45px.
+      // We provide 110px (A4) / 80px (A5) so descenders never clash with meter annotations.
+      const titleToMetaGap = Math.round((isA5 ? 80 : 110) * fontMultiplier * spacingMultiplier);
+      poemY += titleToMetaGap;
 
       // 3. Meter & Radif annotations
       if (config.includeMeters && (draft.meterName || draft.radif)) {
@@ -538,23 +564,43 @@ export class DiwanBookletService {
         if (draft.meterName) metaParts.push(`بحر: ${draft.meterName}`);
         if (draft.radif) metaParts.push(`ردیف: ${draft.radif}`);
         ctx.fillText(metaParts.join('  •  '), canvasWidth / 2, poemY);
-        poemY += Math.round((isA5 ? 35 : 45) * fontMultiplier);
+        poemY += Math.round((isA5 ? 50 : 70) * spacingMultiplier);
       }
 
       // 4. Centered fleuron
       ctx.fillStyle = '#8a5615';
       ctx.font = `${Math.round(18 * scale * fontMultiplier)}px "Amiri", serif`;
       ctx.fillText('❦', canvasWidth / 2, poemY);
-      poemY += Math.round((isA5 ? 55 : 75) * fontMultiplier);
+      poemY += Math.round((isA5 ? 75 : 105) * spacingMultiplier);
 
-      // 5. Couplets rendering with generous line height
+      // 5. Couplets rendering with generous line height and multi-page safety
       const couplets = this.parsePoemCouplets(draft.content || '');
       const misraFontSize = Math.round(26 * scale * fontMultiplier);
       ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-      const misraLineHeight = Math.round((isA5 ? 58 : 78) * fontMultiplier);
-      const coupletGap = Math.round((isA5 ? 20 : 28) * fontMultiplier);
+      const misraLineHeight = Math.round((isA5 ? 68 : 92) * fontMultiplier * spacingMultiplier);
+      const coupletGap = Math.round((isA5 ? 28 : 42) * spacingMultiplier);
 
       for (let cIdx = 0; cIdx < couplets.length; cIdx++) {
+        // Multi-page check: if next couplet would collide with footer, start continuation page
+        if (poemY + misraLineHeight * 2 > canvasHeight - (isA5 ? 120 : 160)) {
+          ctx.restore();
+          renderedPages.push({
+            jpegBytes: await captureCurrentPage(),
+            width: canvasWidth,
+            height: canvasHeight,
+          });
+          currentPageNum++;
+
+          drawPageBorders(false);
+          drawHeaderFooter(`${config.title} (بقیہ)`, config.poet, currentPageNum);
+
+          ctx.save();
+          ctx.direction = 'rtl';
+          ctx.textAlign = 'center';
+          ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+          poemY = isA5 ? 160 : 210;
+        }
+
         const c = couplets[cIdx];
 
         // Misra 1
@@ -576,9 +622,6 @@ export class DiwanBookletService {
           poemY += coupletGap;
           ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
         }
-
-        // Safety break if poem has many couplets
-        if (poemY > canvasHeight - (isA5 ? 120 : 160)) break;
       }
       ctx.restore();
 
@@ -734,9 +777,12 @@ export class DiwanBookletService {
     }
 
     // Poems
-    config.selectedDrafts.forEach((draft) => {
+    config.selectedDrafts.forEach((draft, pIdx) => {
       const couplets = this.parsePoemCouplets(draft.content || '');
-      const formUrdu = this.getFormUrdu(draft.form);
+      let formUrdu = this.getFormUrdu(draft.form);
+      if (config.includeGhazalNumber !== false) {
+        formUrdu = `${formUrdu} ${this.toUrduDigits(pIdx + 1)}`;
+      }
 
       const coupletsHTML = couplets
         .map((c) => {
@@ -758,7 +804,7 @@ export class DiwanBookletService {
           </div>
 
           <div class="poem-header">
-            <div class="poem-form-badge">${formUrdu}</div>
+            <div class="poem-form-badge">[ ${formUrdu} ]</div>
             <h2 class="poem-title">${this.escapeHtml(draft.title || 'بے عنوان')}</h2>
             ${
               config.includeMeters && (draft.meterName || draft.radif)
@@ -1053,36 +1099,38 @@ export class DiwanBookletService {
 
     .poem-header {
       text-align: center;
-      margin-bottom: 35px;
-      padding-top: 10px;
+      margin-bottom: ${config.spacing === 'luxurious' ? '48px' : config.spacing === 'comfortable' ? '30px' : '40px'};
+      padding-top: 15px;
     }
 
     .poem-form-badge {
       display: inline-block;
-      font-size: ${config.fontSize === 'compact' ? '9.5pt' : config.fontSize === 'large' ? '12pt' : '10.5pt'};
+      font-size: ${config.fontSize === 'compact' ? '9.5pt' : config.fontSize === 'royal' ? '13pt' : config.fontSize === 'large' ? '12pt' : '10.5pt'};
       background: #f4ecdf;
       border: 1px solid #d4c2a5;
       color: #8a5615;
-      padding: 3px 18px;
+      padding: 4px 22px;
       border-radius: 20px;
       font-weight: bold;
-      margin-bottom: 24px;
+      margin-bottom: ${config.spacing === 'luxurious' ? '45px' : config.spacing === 'comfortable' ? '28px' : '38px'};
+      letter-spacing: 0.5px;
     }
 
     .poem-title {
-      font-size: ${config.fontSize === 'compact' ? '20pt' : config.fontSize === 'large' ? '28pt' : '24pt'};
+      font-size: ${config.fontSize === 'compact' ? '20pt' : config.fontSize === 'royal' ? '32pt' : config.fontSize === 'large' ? '28pt' : '24pt'};
       color: #8a5615;
-      margin: 10px 0 18px 0;
-      line-height: 2.2;
+      margin: 16px 0 24px 0;
+      line-height: 2.4;
+      padding-top: 6px;
     }
 
     .poem-meter-meta {
-      font-size: ${config.fontSize === 'compact' ? '9.5pt' : config.fontSize === 'large' ? '12pt' : '10.5pt'};
+      font-size: ${config.fontSize === 'compact' ? '9.5pt' : config.fontSize === 'royal' ? '13pt' : config.fontSize === 'large' ? '12pt' : '10.5pt'};
       color: #6a5845;
-      margin: 12px 0 16px 0;
+      margin: 16px 0 22px 0;
       display: flex;
       justify-content: center;
-      gap: 18px;
+      gap: 20px;
     }
 
     .poem-body {
@@ -1098,14 +1146,14 @@ export class DiwanBookletService {
       width: 100%;
       max-width: 580px;
       text-align: center;
-      margin-bottom: 22px;
+      margin-bottom: ${config.spacing === 'luxurious' ? '32px' : config.spacing === 'comfortable' ? '18px' : '25px'};
       page-break-inside: avoid;
       break-inside: avoid;
     }
 
     .misra {
-      font-size: ${config.fontSize === 'compact' ? '15pt' : config.fontSize === 'large' ? '20pt' : '17.5pt'};
-      line-height: 2.8;
+      font-size: ${config.fontSize === 'compact' ? '15pt' : config.fontSize === 'royal' ? '23pt' : config.fontSize === 'large' ? '20pt' : '17.5pt'};
+      line-height: ${config.spacing === 'luxurious' ? '3.1' : config.spacing === 'comfortable' ? '2.6' : '2.85'};
       color: #1a1612;
       letter-spacing: 0.3px;
     }
