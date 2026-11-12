@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
 const temporary = await mkdtemp(join(tmpdir(), 'likho-prosody-'));
 try {
-  await build({ stdin: { contents: `export * from './src/services/aroozEngine'; export * from './src/services/meterRepairEngine'; export * from './src/services/urduPhonology'; export * from './src/services/prosodyEngine'; export * from './src/services/fileIngestionService'; export * from './src/services/qafiyaEngine'; export * from './src/services/wordIntentionService'; export * from './src/services/slotRhymeBuilder'; export * from './src/services/sovereignLexiconService'; export * from './src/data/meterReferenceAtlas'; export * from './src/data/sovereign/classicalDiwanCorpus';`, resolveDir: process.cwd() }, bundle: true, platform: 'node', format: 'esm', outfile: join(temporary, 'engine.mjs') });
+  await build({ stdin: { contents: `export * from './src/services/aroozEngine'; export * from './src/services/meterRepairEngine'; export * from './src/services/urduPhonology'; export * from './src/services/prosodyEngine'; export * from './src/services/fileIngestionService'; export * from './src/services/qafiyaEngine'; export * from './src/services/wordIntentionService'; export * from './src/services/slotRhymeBuilder'; export * from './src/services/sovereignLexiconService'; export * from './src/services/zameenMatcherService'; export * from './src/data/meterReferenceAtlas'; export * from './src/data/sovereign/classicalDiwanCorpus';`, resolveDir: process.cwd() }, bundle: true, platform: 'node', format: 'esm', outfile: join(temporary, 'engine.mjs') });
   const e = await import(pathToFileURL(join(temporary, 'engine.mjs')));
   let passed = 0;
   async function test(name, fn) { await fn(); passed++; console.log(`✓ ${name}`); }
@@ -619,6 +619,24 @@ try {
         }
       }
     }
+  });
+  await test('classical zameen matcher identifies exact zameen, radif, qafiya and meter matches across classical diwan masters', async () => {
+    const report = e.findClassicalZameenMatches({
+      lines: [
+        'نقش فریادی ہے کس کی شوخیِ تحریر کا',
+        'کاغذی ہے پیرہن ہر پیکرِ تصویر کا',
+      ],
+    });
+    assert.equal(report.detectedRadif, 'کا');
+    assert.ok(report.detectedQafiyas.includes('تحریر'));
+    assert.ok(report.detectedQafiyas.includes('تصویر'));
+    assert.ok(report.exactZameenCount >= 1, 'Expected at least 1 exact zameen match for Ghalib ghazal-1');
+    const ghalibMatch = report.matches.find((m) => m.poem.id === 'ghalib-1');
+    assert.ok(ghalibMatch, 'Expected ghalib-1 in Zameen match results');
+    assert.equal(ghalibMatch.tier, 'exact_zameen');
+    assert.ok(ghalibMatch.sharedQafiyas.includes('تحریر'));
+    assert.ok(ghalibMatch.poem.qafiyaSample.includes('شمشیر'));
+    assert.ok(report.poetSummary.some((p) => p.poetId === 'ghalib' && p.count >= 1));
   });
   console.log(`${passed} prosody checks passed.`);
 } finally { await rm(temporary,{recursive:true,force:true}); }

@@ -15,9 +15,11 @@ import { WorkspacePrefs } from '../../types/workspace';
 import { ErabToolbar } from './ErabToolbar';
 import { WordProcessorToolbar, TextAlignment } from './WordProcessorToolbar';
 import type { detectPoemRhymeScheme as DetectPoemRhymeSchemeFn } from '../../services/qafiyaEngine';
+import type { findClassicalZameenMatches as FindClassicalZameenMatchesFn } from '../../services/zameenMatcherService';
 import { translateKeyToUrdu } from '../../utils/phoneticKeymap';
 import { useLineBoxSelection } from '../../hooks/useLineBoxSelection';
 import { PhoneticKeyboardGuideModal } from './PhoneticKeyboardGuideModal';
+import { ClassicalZameenModal } from '../companion/ClassicalZameenModal';
 
 const LazyScansionCard = React.lazy(() => import('./ScansionCard'));
 
@@ -134,11 +136,18 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
   const [rhymeDetectorFn, setRhymeDetectorFn] = useState<
     typeof DetectPoemRhymeSchemeFn | null
   >(null);
+  const [zameenMatcherFn, setZameenMatcherFn] = useState<
+    typeof FindClassicalZameenMatchesFn | null
+  >(null);
+  const [isZameenModalOpen, setIsZameenModalOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
     void import('../../services/qafiyaEngine').then((mod) => {
       if (active) setRhymeDetectorFn(() => mod.detectPoemRhymeScheme);
+    });
+    void import('../../services/zameenMatcherService').then((mod) => {
+      if (active) setZameenMatcherFn(() => mod.findClassicalZameenMatches);
     });
     return () => {
       active = false;
@@ -148,6 +157,26 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
   const detectedRhymeScheme = useMemo(
     () => (isProseMode || !rhymeDetectorFn ? null : rhymeDetectorFn(lines)),
     [currentDraft.content, isProseMode, rhymeDetectorFn]
+  );
+
+  const zameenReport = useMemo(
+    () =>
+      isProseMode || !zameenMatcherFn
+        ? null
+        : zameenMatcherFn({
+            poemContent: currentDraft.content,
+            preferredMeterName: currentDraft.meterName,
+            preferredMeterRukn: currentDraft.meterRukn,
+            preferredRadif: currentDraft.radif,
+          }),
+    [
+      currentDraft.content,
+      currentDraft.meterName,
+      currentDraft.meterRukn,
+      currentDraft.radif,
+      isProseMode,
+      zameenMatcherFn,
+    ]
   );
 
   const handleLineChange = useCallback(
@@ -449,6 +478,24 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                   <span>/ {detectedRhymeScheme.secondQafiyaWord}</span>
                 )}
               </span>
+            )}
+            {zameenReport && zameenReport.totalMatches > 0 && (
+              <button
+                type="button"
+                data-testid="zameen-matcher-pill"
+                onClick={() => setIsZameenModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/40 hover:bg-[var(--accent-gold)] hover:text-white transition-all font-nastaliq text-[11px] font-bold cursor-pointer shadow-2xs"
+                title="اس زمین، ردیف یا بحر میں موجود کلاسیکی اساتذہ کی غزلیات اور قوافی کا مطالعہ کریں"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>
+                  ہم زمین کلامِ اساتذہ:{' '}
+                  {zameenReport.poetSummary
+                    .slice(0, 3)
+                    .map((p) => `${p.takhallus}ؔ (${p.count})`)
+                    .join('، ')}
+                </span>
+              </button>
             )}
           </div>
         )}
@@ -818,6 +865,16 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
         isEnabled={isPhoneticEnabled}
         onToggle={togglePhoneticKeyboard}
       />
+
+      {/* Classical Zameen Matcher Modal */}
+      {zameenReport && (
+        <ClassicalZameenModal
+          isOpen={isZameenModalOpen}
+          onClose={() => setIsZameenModalOpen(false)}
+          report={zameenReport}
+          fontFamily={prefs.fontFamily}
+        />
+      )}
     </div>
   );
 };

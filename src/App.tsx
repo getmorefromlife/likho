@@ -168,7 +168,7 @@ export function App() {
           onChange={updateContent}
           onRhymesChange={setQafiyaList}
           onExit={() => {
-            if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+            if (document.fullscreenElement) void document.exitFullscreen().catch(() => { });
             applyPreset('classic');
           }}
           onToggleSplit={() => applyPreset(prefs.activePreset === 'quiet' ? 'quiet_rhymes' : 'quiet')}
@@ -198,24 +198,24 @@ export function App() {
     >
       {/* 1. Minimalist Top Navigation Bar */}
       {showTopNav && (
-      <TopNavBar
-        prefs={prefs}
-        onThemeChange={setTheme}
-        onFontFamilyChange={setFontFamily}
-        onFontSizeChange={setFontSize}
-        onLineHeightChange={setLineHeight}
-        onToggleLock={toggleLock}
-        onApplyPreset={applyPreset}
-        onToggleZen={toggleZenMode}
-        onNewPoem={startNewPoem}
-        onOpenExport={() => setIsExportModalOpen(true)}
-        onOpenDiwan={() => setIsDiwanModalOpen(true)}
-        onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
-        trialDaysRemaining={7}
-        saveState={saveState}
-        saveError={saveError}
-        onRetrySave={retrySave}
-      />
+        <TopNavBar
+          prefs={prefs}
+          onThemeChange={setTheme}
+          onFontFamilyChange={setFontFamily}
+          onFontSizeChange={setFontSize}
+          onLineHeightChange={setLineHeight}
+          onToggleLock={toggleLock}
+          onApplyPreset={applyPreset}
+          onToggleZen={toggleZenMode}
+          onNewPoem={startNewPoem}
+          onOpenExport={() => setIsExportModalOpen(true)}
+          onOpenDiwan={() => setIsDiwanModalOpen(true)}
+          onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
+          trialDaysRemaining={7}
+          saveState={saveState}
+          saveError={saveError}
+          onRetrySave={retrySave}
+        />
       )}
 
       {/* Corrupt/unavailable storage: keep the original bytes accessible. */}
@@ -330,116 +330,116 @@ export function App() {
           />
         </Suspense>
       ) : (
-      <div
-        ref={workspaceContainerRef}
-        className="flex-1 flex overflow-hidden relative"
-      >
-        {/* Swapped layout puts Literary Companion on the Right */}
-        {isSwapped && showCompanion && (
-          <>
-            <div
-              style={{ width: `${100 - prefs.verticalSplitPct}%` }}
-              className="h-full overflow-hidden flex-shrink-0"
-            >
-              <Suspense
-                fallback={
-                  <div className="h-full flex items-center justify-center bg-[var(--bg-card)] border-l border-[var(--border-subtle)] text-xs font-nastaliq text-[var(--text-muted)]">
-                    ادبی معاون لوڈ ہو رہا ہے...
-                  </div>
-                }
-              >
-                <LazyLiteraryCompanion
-                  currentDraft={currentDraft}
-                  selectedWord={selectedWord}
-                  onLoadRhymesToTray={handleLoadRhymesToTray}
-                  onSelectMeter={(name, rukn) => setMeter(name, rukn)}
-                  onSelectDraft={loadDraft}
-                  onDeleteDraft={deleteDraft}
-                  onPortfolioRestored={handlePortfolioRestored}
-                  fontFamily={prefs.fontFamily}
-                  onClose={toggleCompanion}
-                />
-              </Suspense>
-            </div>
-
-            <ResizableDivider
-              orientation="vertical"
-              isLocked={prefs.isLocked}
-              onResize={(pct) => setVerticalSplitPct(100 - pct)}
-              containerRef={workspaceContainerRef}
-            />
-          </>
-        )}
-
-        {/* The Urdu Poetry Canvas (مسودۂ کلام) */}
         <div
-          style={{
-            width: showCompanion
-              ? isSwapped
-                ? `${prefs.verticalSplitPct}%`
-                : `${prefs.verticalSplitPct}%`
-              : '100%',
-          }}
-          className="h-full overflow-hidden flex-1"
+          ref={workspaceContainerRef}
+          className="flex-1 flex overflow-hidden relative"
         >
-          <PoetryCanvas
-            currentDraft={currentDraft}
-            textareaRef={textareaRef}
-            prefs={prefs}
-            stats={stats}
-            canUndo={canUndo}
-            canRedo={canRedo}
-            onUndo={undo}
-            onRedo={redo}
-            onTitleChange={setTitle}
-            onPoetChange={setPoet}
-            onFormChange={setForm}
-            onContentChange={updateContent}
-            onInsertErab={insertErab}
-            onInsertCoupletTemplate={insertCoupletTemplate}
-            onPaste={handlePaste}
-            onSelect={handleSelect}
-            onToggleLiveScansion={toggleLiveScansion}
-          />
-        </div>
-
-        {/* Classic layout puts Literary Companion on the Left */}
-        {!isSwapped && showCompanion && (
-          <>
-            <ResizableDivider
-              orientation="vertical"
-              isLocked={prefs.isLocked}
-              onResize={setVerticalSplitPct}
-              containerRef={workspaceContainerRef}
-            />
-
-            <div
-              style={{ width: `${100 - prefs.verticalSplitPct}%` }}
-              className="h-full overflow-hidden flex-shrink-0"
-            >
-              <Suspense
-                fallback={
-                  <div className="h-full flex items-center justify-center bg-[var(--bg-card)] border-l border-[var(--border-subtle)] text-xs font-nastaliq text-[var(--text-muted)]">
-                    ادبی معاون لوڈ ہو رہا ہے...
-                  </div>
-                }
+          {/* Swapped layout puts Literary Companion on the Right */}
+          {isSwapped && showCompanion && (
+            <>
+              <div
+                style={{ width: `${100 - prefs.verticalSplitPct}%` }}
+                className="h-full overflow-hidden flex-shrink-0"
               >
-                <LazyLiteraryCompanion
-                  currentDraft={currentDraft}
-                  selectedWord={selectedWord}
-                  onLoadRhymesToTray={handleLoadRhymesToTray}
-                  onSelectMeter={(name, rukn) => setMeter(name, rukn)}
-                  onSelectDraft={loadDraft}
-                  onDeleteDraft={deleteDraft}
-                  onPortfolioRestored={handlePortfolioRestored}
-                  fontFamily={prefs.fontFamily}
-                  onClose={toggleCompanion}
-                />
-              </Suspense>
-            </div>
-          </>
-        )}
-      </div>
+                <Suspense
+                  fallback={
+                    <div className="h-full flex items-center justify-center bg-[var(--bg-card)] border-l border-[var(--border-subtle)] text-xs font-nastaliq text-[var(--text-muted)]">
+                      ادبی معاون لوڈ ہو رہا ہے...
+                    </div>
+                  }
+                >
+                  <LazyLiteraryCompanion
+                    currentDraft={currentDraft}
+                    selectedWord={selectedWord}
+                    onLoadRhymesToTray={handleLoadRhymesToTray}
+                    onSelectMeter={(name, rukn) => setMeter(name, rukn)}
+                    onSelectDraft={loadDraft}
+                    onDeleteDraft={deleteDraft}
+                    onPortfolioRestored={handlePortfolioRestored}
+                    fontFamily={prefs.fontFamily}
+                    onClose={toggleCompanion}
+                  />
+                </Suspense>
+              </div>
+
+              <ResizableDivider
+                orientation="vertical"
+                isLocked={prefs.isLocked}
+                onResize={(pct) => setVerticalSplitPct(100 - pct)}
+                containerRef={workspaceContainerRef}
+              />
+            </>
+          )}
+
+          {/* The Urdu Poetry Canvas (مسودۂ کلام) */}
+          <div
+            style={{
+              width: showCompanion
+                ? isSwapped
+                  ? `${prefs.verticalSplitPct}%`
+                  : `${prefs.verticalSplitPct}%`
+                : '100%',
+            }}
+            className="h-full overflow-hidden flex-1"
+          >
+            <PoetryCanvas
+              currentDraft={currentDraft}
+              textareaRef={textareaRef}
+              prefs={prefs}
+              stats={stats}
+              canUndo={canUndo}
+              canRedo={canRedo}
+              onUndo={undo}
+              onRedo={redo}
+              onTitleChange={setTitle}
+              onPoetChange={setPoet}
+              onFormChange={setForm}
+              onContentChange={updateContent}
+              onInsertErab={insertErab}
+              onInsertCoupletTemplate={insertCoupletTemplate}
+              onPaste={handlePaste}
+              onSelect={handleSelect}
+              onToggleLiveScansion={toggleLiveScansion}
+            />
+          </div>
+
+          {/* Classic layout puts Literary Companion on the Left */}
+          {!isSwapped && showCompanion && (
+            <>
+              <ResizableDivider
+                orientation="vertical"
+                isLocked={prefs.isLocked}
+                onResize={setVerticalSplitPct}
+                containerRef={workspaceContainerRef}
+              />
+
+              <div
+                style={{ width: `${100 - prefs.verticalSplitPct}%` }}
+                className="h-full overflow-hidden flex-shrink-0"
+              >
+                <Suspense
+                  fallback={
+                    <div className="h-full flex items-center justify-center bg-[var(--bg-card)] border-l border-[var(--border-subtle)] text-xs font-nastaliq text-[var(--text-muted)]">
+                      ادبی معاون لوڈ ہو رہا ہے...
+                    </div>
+                  }
+                >
+                  <LazyLiteraryCompanion
+                    currentDraft={currentDraft}
+                    selectedWord={selectedWord}
+                    onLoadRhymesToTray={handleLoadRhymesToTray}
+                    onSelectMeter={(name, rukn) => setMeter(name, rukn)}
+                    onSelectDraft={loadDraft}
+                    onDeleteDraft={deleteDraft}
+                    onPortfolioRestored={handlePortfolioRestored}
+                    fontFamily={prefs.fontFamily}
+                    onClose={toggleCompanion}
+                  />
+                </Suspense>
+              </div>
+            </>
+          )}
+        </div>
       )}
 
       {/* 4. Interactive Qafiya Tray (when docked to bottom) */}

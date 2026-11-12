@@ -105,6 +105,9 @@ export const LiteraryCompanion: React.FC<LiteraryCompanionProps> = ({
             onLoadToTray={onLoadRhymesToTray}
             fontFamily={fontFamily}
             poemContent={currentDraft.content}
+            poemMeterName={currentDraft.meterName}
+            poemMeterRukn={currentDraft.meterRukn}
+            poemRadif={currentDraft.radif}
             selectedWord={selectedWord}
           />
         )}

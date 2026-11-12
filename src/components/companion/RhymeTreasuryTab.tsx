@@ -28,12 +28,17 @@ import { AroozLexiconService } from '../../services/aroozLexiconService';
 import { VisualSlotRhymeBuilder } from './VisualSlotRhymeBuilder';
 import { FileImportModal } from './FileImportModal';
 import { QuickScansionCorrectionModal } from './QuickScansionCorrectionModal';
+import { ClassicalZameenModal } from './ClassicalZameenModal';
 import { ProsodicPatternView } from '../common/ProsodicPatternView';
+import { findClassicalZameenMatches } from '../../services/zameenMatcherService';
 
 interface RhymeTreasuryTabProps {
   onLoadToTray: (words: string[]) => void;
   fontFamily: string;
   poemContent?: string;
+  poemMeterName?: string;
+  poemMeterRukn?: string;
+  poemRadif?: string;
   selectedWord?: string;
 }
 
@@ -43,6 +48,9 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
   onLoadToTray,
   fontFamily,
   poemContent = '',
+  poemMeterName = '',
+  poemMeterRukn = '',
+  poemRadif = '',
   selectedWord = '',
 }) => {
   const [search, setSearch] = useState('');
@@ -54,6 +62,7 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
   const [viewMode, setViewMode] = useState<TreasuryViewMode>('algorithmic');
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [correctingWord, setCorrectingWord] = useState<string | null>(null);
+  const [isZameenModalOpen, setIsZameenModalOpen] = useState(false);
   const [lexiconRevision, setLexiconRevision] = useState(AroozLexiconService.getRevision());
 
   useEffect(() => AroozLexiconService.subscribe(() => setLexiconRevision(AroozLexiconService.getRevision())), []);
@@ -75,6 +84,19 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
     const lines = poemContent.split('\n');
     return detectPoemRhymeScheme(lines);
   }, [poemContent]);
+
+  // Classical Zameen Matcher computation
+  const zameenReport = useMemo(
+    () =>
+      findClassicalZameenMatches({
+        poemContent,
+        preferredMeterName: poemMeterName,
+        preferredMeterRukn: poemMeterRukn,
+        preferredRadif: poemRadif,
+        qafiyaQuery: search.trim(),
+      }),
+    [poemContent, poemMeterName, poemMeterRukn, poemRadif, search, lexiconRevision]
+  );
 
   // Algorithmic Rhymes computation
   const algorithmicResults = useMemo(() => {
@@ -455,6 +477,39 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
             </div>
           )}
 
+          {/* Classical Zameen Matcher Banner (ہم زمین کلامِ اساتذہ) */}
+          {zameenReport.totalMatches > 0 && (
+            <div
+              data-testid="companion-zameen-banner"
+              className="px-3 py-2 bg-emerald-500/10 border-b border-emerald-500/25 flex flex-wrap items-center justify-between gap-2 text-xs font-nastaliq"
+            >
+              <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300">
+                <BookOpen className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  ہم زمین کلامِ اساتذہ:{' '}
+                  <strong>
+                    {zameenReport.poetSummary
+                      .slice(0, 3)
+                      .map((p) => `${p.takhallus}ؔ (${p.count})`)
+                      .join('، ')}
+                  </strong>
+                  {zameenReport.exactZameenCount > 0 && (
+                    <span className="mr-1.5 px-1.5 py-0.2 rounded bg-emerald-500/20 text-[10px] font-bold">
+                      {zameenReport.exactZameenCount} مکمل ہم زمین
+                    </span>
+                  )}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsZameenModalOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shrink-0 shadow-xs cursor-pointer"
+              >
+                مطالعہ و قوافیِ اساتذہ ({zameenReport.matches.length})
+              </button>
+            </div>
+          )}
+
           {/* Algorithmic Results */}
           <WordSelectionArea id="treasury" label="خزانہ قوافی" resetKey={`${viewMode}:${search}:${activeCategory}:${tierFilter}`} onLoadSelected={onLoadToTray} className="flex-1 overflow-y-auto p-3 pb-14 space-y-3 custom-scrollbar">
             {displayedGroups.length > 0 ? (
@@ -681,6 +736,15 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
         word={correctingWord || ''}
         onClose={() => setCorrectingWord(null)}
         fontFamily={fontFamily}
+      />
+
+      {/* Classical Zameen Matcher Modal */}
+      <ClassicalZameenModal
+        isOpen={isZameenModalOpen}
+        onClose={() => setIsZameenModalOpen(false)}
+        report={zameenReport}
+        fontFamily={fontFamily}
+        onLoadRhymesToTray={onLoadToTray}
       />
     </div>
   );

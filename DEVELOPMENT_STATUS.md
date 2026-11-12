@@ -4,7 +4,7 @@
 **Location:** `/DEVELOPMENT_STATUS.md` (Project Root)  
 **Last Updated:** November 12, 2026  
 **Localhost Environment:** `http://localhost:5173/` (Vite Dev Server Active)  
-**Local Build Status:** TypeScript and Vite build passed November 12, 2026 (`npm run test:prosody` 75/75, `npm run test:storage` 15/15, `npm run validate:benchmark` valid, `npm run build` passed).
+**Local Build Status:** TypeScript and Vite build passed November 12, 2026 (`npm run test:prosody` 76/76, `npm run test:storage` 15/15, `npm run validate:benchmark` valid, `npm run build` passed).
 
 ---
 
@@ -69,6 +69,15 @@ The planned **رہنمائے شعر و عروض** combines a reference atlas for
      - **Editor Scansion Card (`ScansionCard.tsx`):** Right-click on any word span or click `[ ✏️ صحیح وزن تجویز فرمائیں ]` inside the word intention menu.
    - **Continuous Master Lexicon Ingestion (`scripts/merge-corrections.mjs`):**
      - CLI script `node scripts/merge-corrections.mjs [file.json]` allowing seamless continuous merging of poet feedback into `sovereign-scansion.json`, automatic SHA-256 recalculation, and metadata synchronization.
+
+8. **Universal Right-to-Left (RTL) Prosodic Pattern Visualization (`ProsodicPatternView.tsx`):**
+   - Strictly renders all prosodic symbols (`=` بلند / `-` کوتاہ) right-to-left (`dir="rtl"`) across every modal, tab, and editor view so the first syllable of an Urdu word is always anchored on the right (e.g., `آشام` displays visually as `-==` with the two long bars `==` on the right and `-` on the left).
+
+9. **Classical Zameen Matcher & Tazmeen Workbench (`zameenMatcherService.ts`, `ClassicalZameenModal.tsx`):**
+   - Automatically matches the poet's active poem or searched rhyme/meter against the **10 Classical Masters' Corpus** (`CLASSICAL_DIWAN_POETS` — 307 Ghalib works + Mir, Iqbal, Dagh, Momin, Zauq, Hali, Akbar, Hasrat, Fani).
+   - Classifies matches into 4 clear literary tiers: `exact_zameen` (مکمل ہم زمین کلام), `same_radif_qafiya` (ہم قافیہ و ردیف), `same_radif` (ہم ردیف), and `same_meter` (ہم بحر).
+   - Surfaces live badges in both the Editor Metadata Header (`ہم زمین کلامِ اساتذہ`) and the Rhyme Treasury Tab (`خزانہ قوافی`).
+   - Provides 1-click loading of a classical master's used Qawafi directly onto the poet's rhyme tray (`یہ تمام قوافی اپنی تختی پر لائیں`) and 1-click couplet copying for *Tazmeen (تضمین / گرہ لگانا)*.
 
 ---
 

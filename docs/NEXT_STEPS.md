@@ -21,10 +21,9 @@ When the owner requests further learning work, expand source-checked meter refer
 
 ### 🚀 Prioritized Quick-to-Implement Features for Commercial Launch
 
-#### Feature 1: Classical Zameen Matcher (زمینِ مشاعرہ و تضمین — 15 mins)
+#### ✅ Feature 1: Classical Zameen Matcher (زمینِ مشاعرہ و تضمین — COMPLETED November 12, 2026)
 - **Objective:** Connect the poet's current draft with the 10 classical masters' corpus.
-- **Behavior:** When a poet selects/scans a meter and establishes a radif/qafiya, the companion automatically highlights existing classical master ghazals in the exact same *زمین* (e.g. "غالبؔ کی ۵ اور اقبالؔ کی ۲ غزلیں اس زمین میں ہیں").
-- **Implementation:** Query `CLASSICAL_DIWAN_POETS` in `src/data/sovereign/classicalDiwanCorpus.ts` by matching `meterId` + `radif`. Zero new dependencies required.
+- **Implemented Behavior:** `src/services/zameenMatcherService.ts` and `src/components/companion/ClassicalZameenModal.tsx` automatically detect the poet's active meter, radif, and qafiya, classifying matches across all 10 classical masters into 4 tiers (`exact_zameen`, `same_radif_qafiya`, `same_radif`, `same_meter`). Integrated live into both `PoetryCanvas.tsx` (metadata pill) and `RhymeTreasuryTab.tsx` (banner), with 1-click loading of classical master Qawafi into the poet's rhyme tray and couplet copy for *Tazmeen*. Cleaned and enriched all 307 Ghalib works in `diwanGhalibComplete.json` with authentic extracted radifs and qafiya samples (`76/76` prosody checks passing).
 
 #### Feature 2: Progressive Web App (PWA 1-Click Installation — 15 mins)
 - **Objective:** Allow poets to install Likho as a standalone native desktop (Mac/Windows) and mobile app with a single click.
