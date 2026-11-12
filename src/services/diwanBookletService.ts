@@ -159,6 +159,34 @@ export class DiwanBookletService {
   }
 
   /**
+   * Helper to wrap Urdu text into lines that fit within a maximum width in canvas.
+   */
+  static wrapUrduText(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    maxWidth: number
+  ): string[] {
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = ctx.measureText(testLine).width;
+      if (testWidth <= maxWidth || !currentLine) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+    return lines;
+  }
+
+  /**
    * Resolves physical and canvas dimensions, scale factors, and layout traits for all publication formats.
    */
   static getPageMetrics(pageSize: DiwanPageSize): {
@@ -597,6 +625,7 @@ export class DiwanBookletService {
       ctx.direction = 'rtl';
       ctx.textAlign = 'center';
 
+      const marginSide = isMobileHd ? 65 : isSmallFormat ? 55 : 80;
       let poemY = isMobileHd ? 220 : isSmallFormat ? 160 : 210;
 
       // 1. Form badge: with generous breathing clearance and serial numbering
@@ -645,54 +674,94 @@ export class DiwanBookletService {
       ctx.fillText('❦', canvasWidth / 2, poemY);
       poemY += Math.round((isMobileHd ? 110 : isSmallFormat ? 75 : 105) * spacingMultiplier);
 
-      // 5. Couplets rendering with generous line height and multi-page safety
-      const couplets = this.parsePoemCouplets(draft.content || '');
-      const misraFontSize = Math.round(26 * scale * fontMultiplier);
-      ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-      const misraLineHeight = Math.round((isMobileHd ? 96 : isSmallFormat ? 68 : 92) * fontMultiplier * spacingMultiplier);
-      const coupletGap = Math.round((isMobileHd ? 45 : isSmallFormat ? 28 : 42) * spacingMultiplier);
-
-      for (let cIdx = 0; cIdx < couplets.length; cIdx++) {
-        // Multi-page check: if next couplet would collide with footer, start continuation page
-        if (poemY + misraLineHeight * 2 > canvasHeight - (isMobileHd ? 140 : isSmallFormat ? 120 : 160)) {
-          ctx.restore();
-          renderedPages.push({
-            jpegBytes: await captureCurrentPage(),
-            width: canvasWidth,
-            height: canvasHeight,
-          });
-          currentPageNum++;
-
-          drawPageBorders(false);
-          drawHeaderFooter(`${config.title} (بقیہ)`, config.poet, currentPageNum);
-
-          ctx.save();
-          ctx.direction = 'rtl';
-          ctx.textAlign = 'center';
-          ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
-          poemY = isMobileHd ? 220 : isSmallFormat ? 160 : 210;
-        }
-
-        const c = couplets[cIdx];
-
-        // Misra 1
+      // 5. Verse Couplets or Prose Paragraphs rendering with multi-page safety
+      if (draft.form === 'prose') {
+        const proseFontSize = Math.round(22 * scale * fontMultiplier);
+        ctx.font = `${proseFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        ctx.textAlign = 'right';
         ctx.fillStyle = '#1a1612';
-        ctx.fillText(c.misra1, canvasWidth / 2, poemY);
-        poemY += misraLineHeight;
+        const proseLineHeight = Math.round((isMobileHd ? 72 : isSmallFormat ? 52 : 68) * fontMultiplier * spacingMultiplier);
+        const paragraphGap = Math.round(25 * spacingMultiplier);
+        const printableWidth = canvasWidth - marginSide * 2;
+        const paragraphs = (draft.content || '').split(/\n\s*\n/).filter((p) => p.trim());
 
-        // Misra 2
-        if (c.misra2) {
-          ctx.fillText(c.misra2, canvasWidth / 2, poemY);
-          poemY += misraLineHeight;
+        for (const p of paragraphs) {
+          const lines = this.wrapUrduText(ctx, p.trim(), printableWidth);
+          for (let lIdx = 0; lIdx < lines.length; lIdx++) {
+            if (poemY + proseLineHeight > canvasHeight - (isMobileHd ? 130 : isSmallFormat ? 110 : 150)) {
+              ctx.restore();
+              renderedPages.push({
+                jpegBytes: await captureCurrentPage(),
+                width: canvasWidth,
+                height: canvasHeight,
+              });
+              currentPageNum++;
+
+              drawPageBorders(false);
+              drawHeaderFooter(`${config.title} (بقیہ)`, config.poet, currentPageNum);
+
+              ctx.save();
+              ctx.direction = 'rtl';
+              ctx.textAlign = 'right';
+              ctx.fillStyle = '#1a1612';
+              ctx.font = `${proseFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+              poemY = isMobileHd ? 220 : isSmallFormat ? 160 : 210;
+            }
+
+            ctx.fillText(lines[lIdx], canvasWidth - marginSide, poemY);
+            poemY += proseLineHeight;
+          }
+          poemY += paragraphGap;
         }
+      } else {
+        const couplets = this.parsePoemCouplets(draft.content || '');
+        const misraFontSize = Math.round(26 * scale * fontMultiplier);
+        ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        const misraLineHeight = Math.round((isMobileHd ? 96 : isSmallFormat ? 68 : 92) * fontMultiplier * spacingMultiplier);
+        const coupletGap = Math.round((isMobileHd ? 45 : isSmallFormat ? 28 : 42) * spacingMultiplier);
 
-        // Couplet fleuron separator
-        if (cIdx < couplets.length - 1) {
-          ctx.fillStyle = '#b3823d';
-          ctx.font = `${Math.round(13 * scale)}px serif`;
-          ctx.fillText('✦', canvasWidth / 2, poemY - 12);
-          poemY += coupletGap;
-          ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        for (let cIdx = 0; cIdx < couplets.length; cIdx++) {
+          // Multi-page check: if next couplet would collide with footer, start continuation page
+          if (poemY + misraLineHeight * 2 > canvasHeight - (isMobileHd ? 140 : isSmallFormat ? 120 : 160)) {
+            ctx.restore();
+            renderedPages.push({
+              jpegBytes: await captureCurrentPage(),
+              width: canvasWidth,
+              height: canvasHeight,
+            });
+            currentPageNum++;
+
+            drawPageBorders(false);
+            drawHeaderFooter(`${config.title} (بقیہ)`, config.poet, currentPageNum);
+
+            ctx.save();
+            ctx.direction = 'rtl';
+            ctx.textAlign = 'center';
+            ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+            poemY = isMobileHd ? 220 : isSmallFormat ? 160 : 210;
+          }
+
+          const c = couplets[cIdx];
+
+          // Misra 1
+          ctx.fillStyle = '#1a1612';
+          ctx.fillText(c.misra1, canvasWidth / 2, poemY);
+          poemY += misraLineHeight;
+
+          // Misra 2
+          if (c.misra2) {
+            ctx.fillText(c.misra2, canvasWidth / 2, poemY);
+            poemY += misraLineHeight;
+          }
+
+          // Couplet fleuron separator
+          if (cIdx < couplets.length - 1) {
+            ctx.fillStyle = '#b3823d';
+            ctx.font = `${Math.round(13 * scale)}px serif`;
+            ctx.fillText('✦', canvasWidth / 2, poemY - 12);
+            poemY += coupletGap;
+            ctx.font = `${misraFontSize}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+          }
         }
       }
       ctx.restore();
@@ -895,6 +964,18 @@ export class DiwanBookletService {
         })
         .join('');
 
+      let bodyHTML = '';
+      if (draft.form === 'prose') {
+        const paragraphs = (draft.content || '')
+          .split(/\n\s*\n/)
+          .filter((p) => p.trim())
+          .map((p) => `<p class="prose-paragraph">${this.escapeHtml(p.trim())}</p>`)
+          .join('');
+        bodyHTML = `<div class="prose-content">${paragraphs || '<p class="empty-poem">خالی نثری تحریر</p>'}</div>`;
+      } else {
+        bodyHTML = coupletsHTML || '<p class="empty-poem">خالی مسودہ</p>';
+      }
+
       pagesHTML += `
         <section class="book-page poem-page" style="page-break-after: always; break-after: page;">
           <div class="page-header">
@@ -917,7 +998,7 @@ export class DiwanBookletService {
           </div>
 
           <div class="poem-body">
-            ${coupletsHTML || '<p class="empty-poem">خالی مسودہ</p>'}
+            ${bodyHTML}
           </div>
 
           <div class="page-footer">
@@ -1266,6 +1347,23 @@ export class DiwanBookletService {
       font-size: 9pt;
       margin-top: 6px;
       opacity: 0.7;
+    }
+
+    .prose-content {
+      width: 100%;
+      max-width: 660px;
+      margin: 0 auto;
+      text-align: right;
+    }
+
+    .prose-paragraph {
+      font-size: ${config.fontSize === 'compact' ? '13pt' : config.fontSize === 'royal' ? '18pt' : config.fontSize === 'large' ? '16pt' : '14.5pt'};
+      line-height: 2.6;
+      color: #1a1612;
+      margin-bottom: 22px;
+      text-align: justify;
+      text-justify: inter-word;
+      text-indent: 26px;
     }
 
     @media print {

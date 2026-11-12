@@ -25,6 +25,7 @@ import {
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
 import { DiwanBookletService, DiwanBookletConfig, DiwanFontSize, DiwanSpacing, DiwanPageSize, PdfProgress } from '../../services/diwanBookletService';
+import { KarachiPublishingModal } from '../commercial/KarachiPublishingModal';
 
 interface DiwanBookletExportModalProps {
   isOpen: boolean;
@@ -54,6 +55,9 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
   const [includeTOC, setIncludeTOC] = useState(true);
   const [includeMeters, setIncludeMeters] = useState(true);
   const [previewPageIdx, setPreviewPageIdx] = useState(0);
+
+  // Karachi Publishing Modal State
+  const [isKarachiModalOpen, setIsKarachiModalOpen] = useState(false);
 
   // Direct PDF Download Generation States
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -205,6 +209,16 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsKarachiModalOpen(true)}
+              className="px-3.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/40 hover:bg-amber-500/25 text-amber-800 dark:text-amber-200 font-nastaliq font-bold text-xs flex items-center gap-1.5 transition-colors leading-[2.2] cursor-pointer"
+              title="کراچی میں اپنی کتاب طبع کروائیں"
+            >
+              <Printer className="w-4 h-4 text-[var(--accent-gold)] flex-shrink-0" />
+              <span>🖨️ کراچی میں طبع کروائیں</span>
+            </button>
+
             <button
               type="button"
               disabled={isGeneratingPdf}
@@ -652,6 +666,28 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                   <span>نئے ٹیب میں</span>
                 </button>
               </div>
+
+              {/* Karachi Publishing Desk Callout */}
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsKarachiModalOpen(true)}
+                  className="w-full p-3 rounded-2xl bg-gradient-to-r from-[#8a5615] via-[#a86a1a] to-[#6b3e0c] text-white font-nastaliq font-bold text-xs flex items-center justify-between shadow-md hover:opacity-95 transition-all cursor-pointer leading-[2.2]"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-white/20">
+                      <Printer className="w-4 h-4 text-amber-200" />
+                    </div>
+                    <div className="text-right">
+                      <span className="block font-bold">🖨️ کراچی میں کتاب طبع کروائیں (Print in Karachi)</span>
+                      <span className="text-[10px] text-amber-100/90 font-sans">ہارڈ باؤنڈ، آئی ایس بی این، پروف ریڈنگ و براہِ راست واٹس ایپ ڈیسک</span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-white text-[#8a5615] font-sans text-[10px] font-bold flex-shrink-0">
+                    تخمینہ و آرڈر ←
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -929,6 +965,16 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
               براہِ کرم چند لمحے انتظار فرمائیں، پی ڈی ایف فائل خودکار طور پر ڈاؤنلوڈ ہو جائے گی
             </p>
           </div>
+        )}
+
+        {/* Karachi Publishing Desk Modal */}
+        {isKarachiModalOpen && (
+          <KarachiPublishingModal
+            isOpen={isKarachiModalOpen}
+            onClose={() => setIsKarachiModalOpen(false)}
+            config={currentConfig}
+            estimatedPages={previewPagesCount}
+          />
         )}
       </div>
     </div>

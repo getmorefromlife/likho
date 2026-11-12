@@ -23,6 +23,21 @@ class TestDiwanBookletService {
     return couplets;
   }
 
+  static wrapUrduText(words, maxWordsPerLine = 8) {
+    const lines = [];
+    let currentLine = [];
+    for (const w of words) {
+      if (currentLine.length < maxWordsPerLine) {
+        currentLine.push(w);
+      } else {
+        lines.push(currentLine.join(' '));
+        currentLine = [w];
+      }
+    }
+    if (currentLine.length > 0) lines.push(currentLine.join(' '));
+    return lines;
+  }
+
   static escapeHtml(str) {
     return str
       .replace(/&/g, '&amp;')
@@ -288,4 +303,14 @@ test('ghazal serial numbering and breathing space configuration format correctly
   assert.ok(royal.netBreathingSpace >= 80, 'Royal spacing must preserve ample clearance even with large fonts');
 });
 
-console.log('7 diwan booklet generator checks passed.');
+test('prose text wrapping preserves all words without dropping content', () => {
+  const paragraph = 'اردو ادب میں نثری مضامین اور دیباچے کو شعر و سخن میں ایک اعلیٰ اور وقیع مقام حاصل ہے۔';
+  const words = paragraph.split(' ');
+  const lines = TestDiwanBookletService.wrapUrduText(words, 5);
+  
+  assert.ok(lines.length >= 3);
+  const reassembled = lines.join(' ');
+  assert.equal(reassembled, paragraph, 'Reassembled wrapped lines must match the original paragraph byte-for-byte');
+});
+
+console.log('8 diwan booklet generator checks passed.');
