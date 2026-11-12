@@ -206,3 +206,4 @@ export function usePWAInstall() {
     promptInstall: install,
   };
 }
+

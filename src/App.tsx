@@ -41,6 +41,11 @@ const LazyProUpgradeModal = lazy(() =>
     default: m.ProUpgradeModal,
   }))
 );
+const LazyDiwanBookletExportModal = lazy(() =>
+  import('./components/export/DiwanBookletExportModal').then((m) => ({
+    default: m.DiwanBookletExportModal,
+  }))
+);
 
 export function App() {
   // Preload and cache offline Arooz Lexicon & Sovereign Lexicon asynchronously after initial shell mount
@@ -118,6 +123,7 @@ export function App() {
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isDiwanModalOpen, setIsDiwanModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [isBookletModalOpen, setIsBookletModalOpen] = useState(false);
 
   // Main container ref for drag splitter calculations
   const workspaceContainerRef = useRef<HTMLDivElement | null>(null);
@@ -356,6 +362,7 @@ export function App() {
                     onSelectDraft={loadDraft}
                     onDeleteDraft={deleteDraft}
                     onPortfolioRestored={handlePortfolioRestored}
+                    onOpenBookletModal={() => setIsBookletModalOpen(true)}
                     fontFamily={prefs.fontFamily}
                     onClose={toggleCompanion}
                   />
@@ -433,6 +440,7 @@ export function App() {
                     onSelectDraft={loadDraft}
                     onDeleteDraft={deleteDraft}
                     onPortfolioRestored={handlePortfolioRestored}
+                    onOpenBookletModal={() => setIsBookletModalOpen(true)}
                     fontFamily={prefs.fontFamily}
                     onClose={toggleCompanion}
                   />
@@ -479,6 +487,19 @@ export function App() {
             poet={currentDraft.poet}
             content={currentDraft.content}
             onOpenCardModal={() => setIsCardModalOpen(true)}
+            onOpenBookletModal={() => setIsBookletModalOpen(true)}
+          />
+        </Suspense>
+      )}
+
+      {/* 5b. Diwan Booklet Multi-Poem Book Exporter */}
+      {isBookletModalOpen && (
+        <Suspense fallback={null}>
+          <LazyDiwanBookletExportModal
+            isOpen={isBookletModalOpen}
+            onClose={() => setIsBookletModalOpen(false)}
+            initialTitle={currentDraft.title ? `دیوانِ ${currentDraft.poet || 'قلم و قافیہ'}` : 'دیوانِ قلم و قافیہ'}
+            initialPoetName={currentDraft.poet || ''}
           />
         </Suspense>
       )}

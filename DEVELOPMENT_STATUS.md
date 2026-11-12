@@ -345,6 +345,21 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
   - 1-Click Install Button in `TopNavBar.tsx`: Automatically surfaces `📲 ایپ انسٹال کریں` when browser supports native install, and provides a dedicated status card and iOS installation instructions in the Settings Drawer.
 - **Verification:** `npm run build` (**passed** in 5.26s, `0` errors); `npm run test:license` (**6/6 passed**); `npm run test:prosody` (**78/78 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**).
 
+## 21. Printable Classical Diwan Booklet Exporter (A4/A5 Print-Ready & Standalone HTML Book) — November 12, 2026
+
+- **Classical Multi-Poem Book Compilation Engine (`src/services/diwanBookletService.ts`):**
+  - Formats multi-poem collections or the poet's complete portfolio into a publication-ready literary booklet with traditional Mughal double-borders, fleuron ornaments, and dual-misra alignment.
+  - Authentic Urdu/Eastern numerals conversion (`toUrduDigits`) for page numbering, dates, and verse counts.
+  - Classical couplet pair parsing (`parsePoemCouplets`) preserving hemistich alignment, radif/qafiya slots, and stanza spacing.
+  - Standalone HTML generation (`generateStandaloneBookletHTML`) embedding Google Fonts, responsive paper styles, and CSS Paged Media `@page` rules for vector PDF printing without blur or layout clipping.
+- **Interactive Diwan Booklet Designer Modal (`src/components/export/DiwanBookletExportModal.tsx`):**
+  - Real-time book customizer: Diwan title, poet/author name, subtitle, dedication/preface (انتساب و دیباچہ), page size (A4 / A5), table of contents toggle, and meter/radif annotations toggle.
+  - Multi-draft selection from portfolio with 1-click select all / individual toggles.
+  - Realistic live dual-page paper preview with page navigation (`صفحہ ۱ از ۱۰...`).
+  - Actions: 1-click native PDF print dialog trigger, standalone self-contained `.html` book download, and new-tab preview.
+  - Integrated into `ExportModal.tsx` as a premier export card and into `PortfolioTab.tsx` as a direct header action.
+- **Verification:** `npm run test:booklet` (**5/5 passed**); `npm run test:license` (**6/6 passed**); `npm run test:prosody` (**78/78 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**); `npm run build` (**passed** in 5.31s, `0` errors).
+
 
 
 

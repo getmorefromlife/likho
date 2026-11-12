@@ -6,6 +6,7 @@ import {
   Copy,
   Download,
   Image,
+  BookOpen,
 } from 'lucide-react';
 import { ExportService } from '../../services/exportService';
 
@@ -16,6 +17,7 @@ interface ExportModalProps {
   poet: string;
   content: string;
   onOpenCardModal: () => void;
+  onOpenBookletModal?: () => void;
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -25,6 +27,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   poet,
   content,
   onOpenCardModal,
+  onOpenBookletModal,
 }) => {
   const [copiedGoogleDocs, setCopiedGoogleDocs] = useState(false);
 
@@ -71,6 +74,37 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         {/* Modal Body / Export Options Grid */}
         <div className="p-5 space-y-3">
+          {/* 0. Diwan Booklet Export (Premier Feature) */}
+          {onOpenBookletModal && (
+            <div
+              onClick={() => {
+                onClose();
+                onOpenBookletModal();
+              }}
+              className="group p-3.5 rounded-xl border-2 border-[var(--accent-gold)] bg-[var(--accent-gold)]/10 hover:bg-[var(--accent-gold)]/20 cursor-pointer transition-all flex items-center justify-between shadow-xs"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[var(--accent-gold)] text-white flex items-center justify-center shadow-xs">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-nastaliq font-bold text-sm text-[var(--text-primary)] flex items-center gap-2">
+                    <span>مکمل دیوان کتابچہ برآمد (Printable Diwan Booklet / PDF)</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--accent-gold)] text-white font-sans">
+                      A4 / A5
+                    </span>
+                  </h4>
+                  <p className="font-nastaliq text-[11px] text-[var(--text-muted)]">
+                    شاہانہ سرورق، فہرستِ کلام اور حاشیوں کے ساتھ مکمل کتابچہ طباعت و پی ڈی ایف کے لیے تیار کریں۔
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-nastaliq text-[var(--accent-gold)] font-bold group-hover:translate-x-[-4px] transition-transform">
+                کتابچہ بنائیں ←
+              </span>
+            </div>
+          )}
+
           {/* 1. PDF Print */}
           <div
             onClick={handlePrintPDF}

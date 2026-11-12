@@ -6,6 +6,7 @@ import {
   Upload,
   CheckCircle,
   Clock,
+  BookOpen,
 } from 'lucide-react';
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
@@ -15,6 +16,7 @@ interface PortfolioTabProps {
   onSelectDraft: (draft: PoemDraft) => void;
   onDeleteDraft?: (id: string) => boolean;
   onPortfolioRestored?: (drafts: PoemDraft[]) => void;
+  onOpenBookletModal?: () => void;
   fontFamily: string;
 }
 
@@ -23,6 +25,7 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
   onSelectDraft,
   onDeleteDraft,
   onPortfolioRestored,
+  onOpenBookletModal,
   fontFamily,
 }) => {
   const [drafts, setDrafts] = useState<PoemDraft[]>([]);
@@ -123,6 +126,18 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
           </span>
 
           <div className="flex items-center gap-1.5">
+            {onOpenBookletModal && (
+              <button
+                type="button"
+                onClick={onOpenBookletModal}
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-nastaliq font-bold bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/40 text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/25 transition-all shadow-2xs leading-[2.2] cursor-pointer"
+                title="پورٹ فولیو کے تمام یا منتخب کلام سے خوبصورت دیوان کتابچہ تیار کریں"
+              >
+                <BookOpen className="w-3 h-3 text-[var(--accent-gold)]" />
+                <span>کتابچہ برآمد</span>
+              </button>
+            )}
+
             <button
               onClick={handleExportBackup}
               className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-nastaliq border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-secondary)] hover:bg-[var(--bg-card)]"
