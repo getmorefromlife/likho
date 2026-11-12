@@ -51,6 +51,11 @@ const LazyVoiceRecitationStudioPage = lazy(() =>
     default: m.VoiceRecitationStudioPage,
   }))
 );
+const LazyGoogleDriveBackupModal = lazy(() =>
+  import('./components/cloud/GoogleDriveBackupModal').then((m) => ({
+    default: m.GoogleDriveBackupModal,
+  }))
+);
 
 export function App() {
   // Preload and cache offline Arooz Lexicon & Sovereign Lexicon asynchronously after initial shell mount
@@ -131,6 +136,7 @@ export function App() {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isBookletModalOpen, setIsBookletModalOpen] = useState(false);
   const [isVoiceStudioOpen, setIsVoiceStudioOpen] = useState(false);
+  const [isGoogleDriveModalOpen, setIsGoogleDriveModalOpen] = useState(false);
 
   // Main container ref for drag splitter calculations
   const workspaceContainerRef = useRef<HTMLDivElement | null>(null);
@@ -235,6 +241,7 @@ export function App() {
           onToggleZen={toggleZenMode}
           onNewPoem={startNewPoem}
           onOpenExport={() => setIsExportModalOpen(true)}
+          onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
           onOpenVoiceStudio={() => setIsVoiceStudioOpen(true)}
           hasVoiceRecording={!!currentDraft.voiceRecording}
           onOpenDiwan={() => setIsDiwanModalOpen(true)}
@@ -385,6 +392,7 @@ export function App() {
                     onDeleteDraft={deleteDraft}
                     onPortfolioRestored={handlePortfolioRestored}
                     onOpenBookletModal={() => setIsBookletModalOpen(true)}
+                    onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
                     fontFamily={prefs.fontFamily}
                     onClose={toggleCompanion}
                   />
@@ -464,6 +472,7 @@ export function App() {
                     onDeleteDraft={deleteDraft}
                     onPortfolioRestored={handlePortfolioRestored}
                     onOpenBookletModal={() => setIsBookletModalOpen(true)}
+                    onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
                     fontFamily={prefs.fontFamily}
                     onClose={toggleCompanion}
                   />
@@ -511,6 +520,7 @@ export function App() {
             content={currentDraft.content}
             onOpenCardModal={() => setIsCardModalOpen(true)}
             onOpenBookletModal={() => setIsBookletModalOpen(true)}
+            onOpenGoogleDrive={() => setIsGoogleDriveModalOpen(true)}
           />
         </Suspense>
       )}
@@ -563,7 +573,24 @@ export function App() {
         </Suspense>
       )}
 
-      {/* 9. Dedicated Print Container for High-Resolution PDF Printing */}
+      {/* 9. Google Drive & Docs Cloud Backup Modal */}
+      {isGoogleDriveModalOpen && (
+        <Suspense fallback={null}>
+          <LazyGoogleDriveBackupModal
+            isOpen={isGoogleDriveModalOpen}
+            onClose={() => setIsGoogleDriveModalOpen(false)}
+            currentDraft={currentDraft}
+            fontFamily={prefs.fontFamily}
+            onPortfolioRestored={(drafts) => {
+              if (drafts.length > 0) {
+                loadDraft(drafts[0]);
+              }
+            }}
+          />
+        </Suspense>
+      )}
+
+      {/* 10. Dedicated Print Container for High-Resolution PDF Printing */}
       <div className="hidden print-poetry-container">
         <h1 className="print-poetry-title">{currentDraft.title || 'کلام'}</h1>
         <p className="print-poetry-poet">شاعر: {currentDraft.poet || 'نامعلوم'}</p>

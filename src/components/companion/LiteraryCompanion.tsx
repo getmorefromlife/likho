@@ -27,6 +27,7 @@ interface LiteraryCompanionProps {
   onDeleteDraft?: (id: string) => boolean;
   onPortfolioRestored?: (drafts: PoemDraft[]) => void;
   onOpenBookletModal?: () => void;
+  onOpenGoogleDrive?: () => void;
   fontFamily: string;
   onClose?: () => void;
 }
@@ -41,6 +42,7 @@ export const LiteraryCompanion: React.FC<LiteraryCompanionProps> = ({
   onDeleteDraft,
   onPortfolioRestored,
   onOpenBookletModal,
+  onOpenGoogleDrive,
   fontFamily,
   onClose,
 }) => {
@@ -135,6 +137,7 @@ export const LiteraryCompanion: React.FC<LiteraryCompanionProps> = ({
             onDeleteDraft={onDeleteDraft}
             onPortfolioRestored={onPortfolioRestored}
             onOpenBookletModal={onOpenBookletModal}
+            onOpenGoogleDrive={onOpenGoogleDrive}
             fontFamily={fontFamily}
           />
         )}

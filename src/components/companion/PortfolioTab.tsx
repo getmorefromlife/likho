@@ -8,6 +8,7 @@ import {
   Clock,
   BookOpen,
   Mic,
+  Cloud,
 } from 'lucide-react';
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
@@ -18,6 +19,7 @@ interface PortfolioTabProps {
   onDeleteDraft?: (id: string) => boolean;
   onPortfolioRestored?: (drafts: PoemDraft[]) => void;
   onOpenBookletModal?: () => void;
+  onOpenGoogleDrive?: () => void;
   fontFamily: string;
 }
 
@@ -27,6 +29,7 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
   onDeleteDraft,
   onPortfolioRestored,
   onOpenBookletModal,
+  onOpenGoogleDrive,
   fontFamily,
 }) => {
   const [drafts, setDrafts] = useState<PoemDraft[]>([]);
@@ -136,6 +139,18 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
               >
                 <BookOpen className="w-3 h-3 text-[var(--accent-gold)]" />
                 <span>کتابچہ برآمد</span>
+              </button>
+            )}
+
+            {onOpenGoogleDrive && (
+              <button
+                type="button"
+                onClick={onOpenGoogleDrive}
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-nastaliq font-bold bg-[#4285F4]/15 border border-[#4285F4]/40 text-[#4285F4] hover:bg-[#4285F4]/25 transition-all shadow-2xs leading-[2.2] cursor-pointer"
+                title="گوگل ڈرائیو اور گوگل ڈاکس میں بیک اپ یا برآمد کریں"
+              >
+                <Cloud className="w-3 h-3 text-[#4285F4]" />
+                <span>گوگل ڈرائیو</span>
               </button>
             )}
 

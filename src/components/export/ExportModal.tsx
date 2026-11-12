@@ -7,6 +7,7 @@ import {
   Download,
   Image,
   BookOpen,
+  Cloud,
 } from 'lucide-react';
 import { ExportService } from '../../services/exportService';
 
@@ -18,6 +19,7 @@ interface ExportModalProps {
   content: string;
   onOpenCardModal: () => void;
   onOpenBookletModal?: () => void;
+  onOpenGoogleDrive?: () => void;
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -28,6 +30,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   content,
   onOpenCardModal,
   onOpenBookletModal,
+  onOpenGoogleDrive,
 }) => {
   const [copiedGoogleDocs, setCopiedGoogleDocs] = useState(false);
 
@@ -177,6 +180,35 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               {copiedGoogleDocs ? 'کاپی ہو گیا ✓' : 'کاپی کریں ←'}
             </span>
           </div>
+
+          {/* Google Drive & Docs Cloud Backup & Export */}
+          {onOpenGoogleDrive && (
+            <div
+              onClick={() => {
+                onClose();
+                onOpenGoogleDrive();
+              }}
+              className="group p-3.5 rounded-xl border border-[var(--border-subtle)] hover:border-[#4285F4] bg-[#4285F4]/5 hover:bg-[#4285F4]/15 cursor-pointer transition-all flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#4285F4]/15 text-[#4285F4] border border-[#4285F4]/30 flex items-center justify-center">
+                  <Cloud className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-nastaliq font-bold text-sm text-[var(--text-primary)] flex items-center gap-1.5">
+                    <span>گوگل ڈرائیو و دستاویز (Google Drive & Docs)</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#4285F4]/20 text-[#4285F4] font-sans font-bold">Cloud</span>
+                  </h4>
+                  <p className="font-nastaliq text-[11px] text-[var(--text-muted)]">
+                    کلام کو گوگل کلاؤڈ پر بیک اپ کریں یا گوگل ڈاکس میں برآمد فرما کر محفوظ رکھیں۔
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-nastaliq text-[#4285F4] font-medium group-hover:translate-x-[-4px] transition-transform">
+                کھولیں ←
+              </span>
+            </div>
+          )}
 
           {/* 4. Calligraphy Image Card */}
           <div

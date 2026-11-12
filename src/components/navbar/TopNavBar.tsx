@@ -22,6 +22,7 @@ import {
   Mic,
   FolderDown,
   LayoutGrid,
+  Cloud,
 } from 'lucide-react';
 import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont } from '../../types/workspace';
 import type { PersistenceState } from '../../hooks/usePoemEditor';
@@ -42,6 +43,7 @@ interface TopNavBarProps {
   onToggleZen: () => void;
   onNewPoem: () => void;
   onOpenExport: () => void;
+  onOpenGoogleDrive?: () => void;
   onOpenVoiceStudio?: () => void;
   hasVoiceRecording?: boolean;
   onOpenDiwan?: () => void;
@@ -63,6 +65,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   onToggleZen,
   onNewPoem,
   onOpenExport,
+  onOpenGoogleDrive,
   onOpenVoiceStudio,
   hasVoiceRecording = false,
   onOpenDiwan,
@@ -357,6 +360,29 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                     <div className="text-[11px] text-[var(--text-secondary)] leading-[1.6]">پی ڈی ایف، واٹس ایپ سائز اور کراچی پرنٹ ڈیسک</div>
                   </div>
                 </button>
+
+                {/* Option: Google Drive & Google Docs */}
+                {onOpenGoogleDrive && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowFileMenu(false);
+                      onOpenGoogleDrive();
+                    }}
+                    className="w-full text-right px-3 py-2.5 rounded-xl text-xs sm:text-sm font-nastaliq transition-all flex items-center gap-2.5 hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] leading-[2.2] group cursor-pointer"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-[#4285F4]/15 border border-[#4285F4]/30 flex items-center justify-center flex-shrink-0 text-[#4285F4] group-hover:scale-105 transition-transform">
+                      <Cloud className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold flex items-center justify-between">
+                        <span>گوگل ڈرائیو و دستاویز</span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#4285F4]/20 text-[#4285F4] font-sans font-bold">Cloud</span>
+                      </div>
+                      <div className="text-[11px] text-[var(--text-secondary)] leading-[1.6]">گوگل کلاؤڈ بیک اپ اور ڈاکس میں برآمد</div>
+                    </div>
+                  </button>
+                )}
 
                 {/* Option: PWA App Install if available */}
                 {canInstall && !isStandalone && (
