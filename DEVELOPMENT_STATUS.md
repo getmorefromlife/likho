@@ -345,7 +345,37 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
   - 1-Click Install Button in `TopNavBar.tsx`: Automatically surfaces `📲 ایپ انسٹال کریں` when browser supports native install, and provides a dedicated status card and iOS installation instructions in the Settings Drawer.
 - **Verification:** `npm run build` (**passed** in 5.26s, `0` errors); `npm run test:license` (**6/6 passed**); `npm run test:prosody` (**78/78 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**).
 
-## 21. Printable Classical Diwan Booklet Exporter (A4/A5 Print-Ready & Standalone HTML Book) — November 12, 2026
+## 22. Voice Recitation & Tarannum Studio with Acoustic Rhythm Accompaniment (صوتی ترنم و مشاعرہ اسٹوڈیو) — November 12, 2026
+
+- **Client-Side Voice Recording & Audio Engine (`src/services/voiceRecitationService.ts`):**
+  - High-fidelity in-browser audio capture via HTML5 `MediaRecorder` API with multi-browser audio format negotiation (`audio/webm;codecs=opus`, `audio/webm`, `audio/mp4`, `audio/ogg`, and `audio/wav`).
+  - Web Audio API `AudioContext` and `AnalyserNode` delivering real-time normalized frequency and amplitude streams for live visual waveform display.
+  - Duration calculations and bilingual time formatting (`formatDurationMMSS` e.g. `02:15` and `toUrduNumerals` e.g. `۰۲:۱۵`).
+  - Base64 serialization via `FileReader` allowing 100% offline persistence within `PoemDraft.voiceRecording` in local IndexedDB/localStorage.
+  - Zero external cloud services, API keys, or server uploads; 100% private to the poet's device.
+  - Direct audio file export and download helper (`downloadRecording`).
+
+- **Interactive Mushaira & Tarannum Studio (`src/components/studio/VoiceRecitationStudioModal.tsx`):**
+  - **Recitation Modes:** Quick toggle between *ترنم (Tarannum / Melodic chanting)* and *تحت اللفظ (Taht-ul-Lafz / Rhythmic recitation)*.
+  - **Live Dynamic Waveform & Elapsed Timer:** 24 animated frequency visualizer bars pulsing with voice volume, live red indicator dot, and real-time elapsed counter.
+  - **Recitation Teleprompter (کلام کا اسکرولر):** Displays the full kalam with large, comfortable Nastaliq typography, adjustable font size (`A-` / `A+`), and separated couplet cards with Eastern Urdu numbering (`شعر ۱، شعر ۲...`).
+  - **Acoustic Bahar Cadence Synchronization:** Integrates directly with `rhythmicCadenceAudioService`, allowing the poet to hear the exact classical prosodic rhythm (`= / -`) metronome in headphones while recording with selectable tempo (75, 100, 130 BPM).
+  - **Playback & Scrubber Hub:** Built-in audio player with play/pause, range scrubber, duration timestamps, re-record take, direct audio file download (`.webm` / `.mp4`), and draft attachment.
+
+- **Workspace & Portfolio Integration:**
+  - `TopNavBar.tsx`: Surfaces a dedicated `🎙️ ترنم اسٹوڈیو` button with an active pulse indicator when a recording exists.
+  - `PoetryCanvas.tsx`: Displays an interactive recording badge (`🎙️ صوتی ریکارڈنگ موجود ہے (42s)`) in the metadata header and a toolbar launcher.
+  - `PortfolioTab.tsx`: Highlights poems with saved recitations with a subtle `🎙️ صوت` badge.
+  - `storageService.ts`: Defensively validates `voiceRecording` metadata to prevent corruption.
+
+- **Verification:**
+  - `npm run test:voice`: **4/4 passed** (duration formatting, Urdu numerals, persistence round-trip, malformed payload rejection).
+  - `npm run test:storage`: **15/15 passed**.
+  - `npm run test:booklet`: **6/6 passed**.
+  - `npm run test:license`: **6/6 passed**.
+  - `npm run test:prosody`: **78/78 passed**.
+  - `npm run build`: **passed** in 5.14s with zero errors; separate lazy-loaded chunk `VoiceRecitationStudioModal-B0GDGGKo.js` (23.73 kB).
+
 
 - **Classical Multi-Poem Book Compilation Engine (`src/services/diwanBookletService.ts`):**
   - Formats multi-poem collections or the poet's complete portfolio into a publication-ready literary booklet with traditional Mughal double-borders, fleuron ornaments, and dual-misra alignment.
