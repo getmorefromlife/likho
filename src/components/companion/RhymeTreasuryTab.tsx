@@ -12,6 +12,7 @@ import {
   BookOpen,
   Download,
   Copy,
+  Edit3,
 } from 'lucide-react';
 import { RHYME_TREASURY } from '../../data/rhymeTreasury';
 import {
@@ -23,8 +24,10 @@ import {
   RhymeMatchTier,
   LetterCountFilterMode,
 } from '../../services/qafiyaEngine';
+import { AroozLexiconService } from '../../services/aroozLexiconService';
 import { VisualSlotRhymeBuilder } from './VisualSlotRhymeBuilder';
 import { FileImportModal } from './FileImportModal';
+import { QuickScansionCorrectionModal } from './QuickScansionCorrectionModal';
 
 interface RhymeTreasuryTabProps {
   onLoadToTray: (words: string[]) => void;
@@ -49,6 +52,10 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<TreasuryViewMode>('algorithmic');
   const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [correctingWord, setCorrectingWord] = useState<string | null>(null);
+  const [lexiconRevision, setLexiconRevision] = useState(AroozLexiconService.getRevision());
+
+  useEffect(() => AroozLexiconService.subscribe(() => setLexiconRevision(AroozLexiconService.getRevision())), []);
 
   const vocabStats = useMemo(() => getTotalRhymeVocabularyStats(), []);
 
@@ -82,7 +89,7 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
       mode: letterFilterMode,
       count: letterFilterCount,
     });
-  }, [search, activeCategory, letterFilterMode, letterFilterCount]);
+  }, [search, activeCategory, letterFilterMode, letterFilterCount, lexiconRevision]);
 
   const displayedGroups = useMemo(() => {
     if (tierFilter === 'all') return algorithmicResults.groups;
@@ -209,6 +216,16 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
           >
             <BookOpen className="w-3.5 h-3.5" />
             <span>موضوعاتی اوزان</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCorrectingWord(search.trim() || 'کلام')}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-nastaliq transition-all whitespace-nowrap text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/30 mr-auto font-bold"
+            title="کسی بھی لفظ کی عروضی تقطیع یا وزن درست فرمائیں"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+            <span>تصحیحِ وزن</span>
           </button>
         </div>
       </div>
@@ -481,6 +498,15 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
                         <span className="text-[10px] font-nastaliq text-[var(--text-muted)]">
                           ({group.words.length} الفاظ)
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => setCorrectingWord(group.words[0])}
+                          className="text-[10px] text-[var(--text-muted)] hover:text-[var(--accent-gold)] inline-flex items-center gap-0.5 cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[var(--accent-gold)]/10"
+                          title="اس گروہ کے کسی لفظ کا وزن درست کریں"
+                        >
+                          <Edit3 className="w-2.5 h-2.5" />
+                          <span>وزن درست کریں</span>
+                        </button>
                       </div>
 
                       <button
@@ -511,22 +537,42 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
                       {group.words.map((word) => {
                         const isWordLoaded = loadedId === `word-${word}`;
                         return (
-                          <button
+                          <div
                             key={word}
-                            data-selectable-id={`${groupId}:${word}`}
-                            data-selectable-word={word}
-                            type="button"
-                            onClick={() => handleLoadSingleWord(word)}
-                            style={{ fontFamily }}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-nastaliq border transition-all cursor-pointer ${
-                              isWordLoaded
-                                ? 'bg-emerald-500 text-white border-emerald-500 font-bold scale-105'
-                                : 'bg-[var(--bg-subtle)] text-[var(--text-primary)] border-[var(--border-subtle)]/70 hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 hover:text-[var(--accent-gold)]'
-                            }`}
-                            title="تختی میں شامل کرنے کے لیے کلک فرمائیں"
+                            className="inline-flex items-center group/chip relative"
                           >
-                            {word}
-                          </button>
+                            <button
+                              data-selectable-id={`${groupId}:${word}`}
+                              data-selectable-word={word}
+                              type="button"
+                              onClick={() => handleLoadSingleWord(word)}
+                              onContextMenu={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setCorrectingWord(word);
+                              }}
+                              style={{ fontFamily }}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-nastaliq border transition-all cursor-pointer ${
+                                isWordLoaded
+                                  ? 'bg-emerald-500 text-white border-emerald-500 font-bold scale-105'
+                                  : 'bg-[var(--bg-subtle)] text-[var(--text-primary)] border-[var(--border-subtle)]/70 hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 hover:text-[var(--accent-gold)]'
+                              }`}
+                              title="تختی میں شامل کرنے کے لیے کلک فرمائیں — وزن درست کرنے کے لیے رائٹ کلک فرمائیں"
+                            >
+                              <span>{word}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCorrectingWord(word);
+                              }}
+                              className="opacity-0 group-hover/chip:opacity-100 -mr-2 text-[var(--text-muted)] hover:text-[var(--accent-gold)] p-0.5 rounded transition-opacity cursor-pointer z-10"
+                              title="اس لفظ کا عروضی وزن درست کریں"
+                            >
+                              <Edit3 className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -617,8 +663,14 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
                       data-selectable-word={word}
                       type="button"
                       onClick={() => handleLoadSingleWord(word)}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCorrectingWord(word);
+                      }}
                       style={{ fontFamily }}
                       className="px-2.5 py-0.5 rounded text-xs bg-[var(--bg-subtle)] text-[var(--text-primary)] border border-[var(--border-subtle)]/60 font-nastaliq hover:border-[var(--accent-gold)]"
+                      title="تختی میں شامل کرنے کے لیے کلک فرمائیں — وزن درست کرنے کے لیے رائٹ کلک فرمائیں"
                     >
                       {word}
                     </button>
@@ -629,6 +681,14 @@ export const RhymeTreasuryTab: React.FC<RhymeTreasuryTabProps> = ({
           })}
         </WordSelectionArea>
       )}
+
+      {/* Quick Scansion Correction Modal */}
+      <QuickScansionCorrectionModal
+        isOpen={Boolean(correctingWord)}
+        word={correctingWord || ''}
+        onClose={() => setCorrectingWord(null)}
+        fontFamily={fontFamily}
+      />
     </div>
   );
 };

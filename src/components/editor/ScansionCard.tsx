@@ -9,6 +9,7 @@ import {
   ChevronUp,
   Check,
   ArrowLeftRight,
+  Edit3,
 } from 'lucide-react';
 import { ScansionResult, patternToClassicalRukn, CLASSICAL_BUHUR, scanPoetryLine } from '../../services/aroozEngine';
 import { AroozLexiconService } from '../../services/aroozLexiconService';
@@ -26,6 +27,7 @@ import {
   PoeticSpellingChoice,
   WordReadingChoice,
 } from '../../services/wordIntentionService';
+import { QuickScansionCorrectionModal } from '../companion/QuickScansionCorrectionModal';
 
 interface ScansionCardProps {
   scansion?: ScansionResult;
@@ -58,6 +60,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
   const activeMeterId = selectedMeterId || preferredMeterId;
   const [pinnedWordPatterns, setPinnedWordPatterns] = useState<Record<number, string>>({});
   const [activeWordMenuIdx, setActiveWordMenuIdx] = useState<number | null>(null);
+  const [correctingWord, setCorrectingWord] = useState<string | null>(null);
 
   const effectiveRadif = radif ?? repairContext?.radif;
   const effectiveRhymeAnchor = rhymeAnchorWord ?? repairContext?.rhymeAnchorWord;
@@ -342,8 +345,13 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                   data-testid="word-reading"
                   key={`${span.charStart}-${idx}`}
                   onClick={() => setActiveWordMenuIdx(isOpen ? null : idx)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setCorrectingWord(span.word);
+                  }}
                   aria-expanded={isOpen}
-                  title="اس لفظ کی تمام ممکنہ قرأتیں، اوزان اور املا کے اختیارات دیکھنے کے لیے کلک کریں"
+                  title="اس لفظ کے اوزان دیکھنے کے لیے کلک کریں — وزن درست کرنے کے لیے رائٹ کلک کریں"
                   className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-0.5 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)]/50 ${
                     isOpen
                       ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/15 shadow-xs'
@@ -617,6 +625,22 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                   اس لفظ کا اندراج لغت میں موجود نہیں اور نہ ہی یہ کسی معروف مرکب لفظ میں تقسیم ہو سکا۔ آپ اوپر اعراب ٹول بار سے اس پر حرکات (زبر، زیر، پیش، جزم) لگا کر واضح تلفظ دے سکتے ہیں، یا «انتظامِ لغت» میں اس کا وزن محفوظ کر سکتے ہیں۔
                 </p>
               )}
+
+            {/* 5. Quick Scansion Correction Trigger */}
+            <div className="pt-2.5 mt-2 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2">
+              <span className="text-[11px] text-[var(--text-muted)] font-nastaliq">
+                کیا اس لفظ کا وزن یا تقطیع نامکمل یا غلط ہے؟
+              </span>
+              <button
+                type="button"
+                onClick={() => setCorrectingWord(activeWordMenu.word)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-nastaliq bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] border border-[var(--accent-gold)]/30 hover:bg-[var(--accent-gold)] hover:text-white transition-all font-bold cursor-pointer"
+                title="اس لفظ کا صحیح عروضی وزن تجویز یا درست فرمائیں"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>صحیح وزن تجویز فرمائیں</span>
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -907,6 +931,14 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
           )}
         </div>
       )}
+
+      {/* Quick Scansion Correction Modal */}
+      <QuickScansionCorrectionModal
+        isOpen={Boolean(correctingWord)}
+        word={correctingWord || ''}
+        onClose={() => setCorrectingWord(null)}
+        fontFamily={fontFamily}
+      />
     </div>
   );
 };

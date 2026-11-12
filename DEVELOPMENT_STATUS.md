@@ -57,6 +57,19 @@ The planned **رہنمائے شعر و عروض** combines a reference atlas for
    - Multi-gradient aesthetic card generator for Instagram, WhatsApp status, and X (Twitter).
    - High-resolution image export and text/PDF portfolio sharing.
 
+7. **Continuous Poet-Driven Scansion Improvement Mechanism (نظامِ مسلسل تصحیحِ وزن و تقطیع):**
+   - **Interactive Scansion Correction Modal (`QuickScansionCorrectionModal.tsx`):**
+     - 12 one-click preset rukn buttons (`فعولن`, `فاعلن`, `مفاعیلن`, `فاعلاتن`, `مستفعلن`, `مفعولن`, `فعلاتن`, `فعول`, `فاع`, `فعل`, `فَع`).
+     - Manual `-` (کوتاہ) and `=` (بلند) symbol builder and pattern input.
+     - Vocalized spelling (*اعراب*) and literary sanad / reasoning input.
+     - Saves directly to IndexedDB as an approved reading via `AroozLexiconService.saveProposal(..., status: 'approved')`, instantly overriding any existing dictionary entry and updating the studio via reactive revision subscriptions.
+     - "تجاویز ڈاؤنلوڈ" button allows poets to export all personal corrections as a clean JSON payload (`likho-corrections-*.json`).
+   - **Omnipresent Access in Studio:**
+     - **Rhyme Treasury (`RhymeTreasuryTab.tsx`):** Dedicated "تصحیحِ وزن" navbar button, "وزن درست کریں" on group headers, and hover edit pens + right-click context menu on all rhyming word chips. Correcting a word immediately re-groups it under its true afa'il/meter group in real time.
+     - **Editor Scansion Card (`ScansionCard.tsx`):** Right-click on any word span or click `[ ✏️ صحیح وزن تجویز فرمائیں ]` inside the word intention menu.
+   - **Continuous Master Lexicon Ingestion (`scripts/merge-corrections.mjs`):**
+     - CLI script `node scripts/merge-corrections.mjs [file.json]` allowing seamless continuous merging of poet feedback into `sovereign-scansion.json`, automatic SHA-256 recalculation, and metadata synchronization.
+
 ---
 
 ## 3. Pronunciation, Scansion and Deterministic Repair — October 29, 2026
