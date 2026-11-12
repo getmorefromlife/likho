@@ -154,6 +154,7 @@ class VoiceRecitationService {
         this.analyser.fftSize = 64; // Gives 32 frequency bins
         this.analyser.smoothingTimeConstant = 0.8;
         dspGraph.analyserInput.connect(this.analyser);
+        voiceDspService.startDuckingMonitor(this.analyser);
 
         // Route processed studio audio to MediaStreamDestination so MediaRecorder captures the broadcast sound
         if (typeof this.audioContext.createMediaStreamDestination === 'function') {
@@ -351,6 +352,8 @@ class VoiceRecitationService {
   }
 
   private cleanup(): void {
+    voiceDspService.stopDuckingMonitor();
+    voiceDspService.stopBackgroundMusic();
     voiceDspService.stopTanpuraDrone();
 
     if (this.animationFrameId !== null) {

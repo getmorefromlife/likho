@@ -20,6 +20,8 @@ import {
   Radio,
   SlidersHorizontal,
   X,
+  Upload,
+  Wand2,
 } from 'lucide-react';
 import { PoemDraft, VoiceRecordingMeta } from '../../types/editor';
 import {
@@ -39,9 +41,13 @@ import {
   VocalProfilePreset,
   ReverbPreset,
   EchoPreset,
+  DuckingDepthPreset,
+  DuckingSpeedPreset,
   VOCAL_PROFILE_PRESETS,
   REVERB_PRESET_LABELS,
   ECHO_PRESETS,
+  DUCKING_DEPTH_PRESETS,
+  DUCKING_SPEED_PRESETS,
 } from '../../services/voiceDspService';
 
 interface VoiceRecitationStudioPageProps {
@@ -98,6 +104,20 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
   const [isTanpuraPlaying, setIsTanpuraPlaying] = useState<boolean>(false);
   const [tanpuraVolume, setTanpuraVolume] = useState<number>(0.28);
 
+  // Background Music Mixer & Auto Audio Ducking State
+  const [bgMusicInfo, setBgMusicInfo] = useState<{ loaded: boolean; name: string; duration: number }>(() =>
+    voiceDspService.getBackgroundMusicInfo()
+  );
+  const [bgMusicVolume, setBgMusicVolume] = useState<number>(0.35);
+  const [bgMusicLoop, setBgMusicLoop] = useState<boolean>(true);
+  const [isBgMusicPlaying, setIsBgMusicPlaying] = useState<boolean>(false);
+
+  const [autoDuckingEnabled, setAutoDuckingEnabled] = useState<boolean>(true);
+  const [duckingDepth, setDuckingDepth] = useState<DuckingDepthPreset>('balanced');
+  const [duckingSpeed, setDuckingSpeed] = useState<DuckingSpeedPreset>('cinematic');
+  const [liveDuckGain, setLiveDuckGain] = useState<number>(1.0);
+  const [isRenderingWav, setIsRenderingWav] = useState<boolean>(false);
+
   // Auto-Scrolling Prompter State
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState<boolean>(true);
   const [autoScrollSpeed, setAutoScrollSpeed] = useState<'slow' | 'normal' | 'fast'>('normal');
@@ -151,7 +171,7 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isRecording, onExit]);
 
-  // Clean up recording, monitoring, metronome, and drone on unmount
+  // Clean up recording, monitoring, metronome, music, ducking, and drone on unmount
   useEffect(() => {
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -159,9 +179,23 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
       voiceRecitationService.cancelRecording();
       rhythmicCadenceAudioService.stop();
       voiceDspService.setLiveMonitoring(false);
+      voiceDspService.stopDuckingMonitor();
+      voiceDspService.stopBackgroundMusic();
       voiceDspService.stopTanpuraDrone();
     };
   }, []);
+
+  // Poll live Auto-Ducking gain while recording for smooth visual meter feedback
+  useEffect(() => {
+    if (!isRecording || !autoDuckingEnabled) {
+      setLiveDuckGain(1.0);
+      return;
+    }
+    const id = window.setInterval(() => {
+      setLiveDuckGain(voiceDspService.getCurrentDuckingGain());
+    }, 60);
+    return () => window.clearInterval(id);
+  }, [isRecording, autoDuckingEnabled]);
 
   // Continuous Hands-Free Auto-Scrolling during recording
   useEffect(() => {
@@ -270,6 +304,88 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
     const audioCtx = await voiceRecitationService.ensureAudioContext();
     if (audioCtx) {
       voiceDspService.setLiveMonitoring(nextState);
+    }
+  };
+
+  // Background Music Mixer Handlers
+  const handleUploadBgMusic = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErrorMessage(null);
+    try {
+      const audioCtx = await voiceRecitationService.ensureAudioContext();
+      const info = await voiceDspService.loadBackgroundMusicFile(file, audioCtx || undefined);
+      setBgMusicInfo({ loaded: true, name: info.name, duration: info.duration });
+      setIsBgMusicPlaying(false);
+    } catch {
+      setErrorMessage('آڈیو فائل پڑھی نہیں جا سکی۔ براہِ کرم MP3 یا WAV فائل منتخب فرمائیں۔');
+    }
+    e.target.value = '';
+  };
+
+  const handleToggleBgMusic = async () => {
+    if (!bgMusicInfo.loaded) return;
+    if (isBgMusicPlaying) {
+      voiceDspService.stopBackgroundMusic();
+      setIsBgMusicPlaying(false);
+    } else {
+      const audioCtx = await voiceRecitationService.ensureAudioContext();
+      await voiceDspService.startBackgroundMusic(bgMusicVolume, bgMusicLoop, audioCtx || undefined);
+      setIsBgMusicPlaying(true);
+    }
+  };
+
+  const handleBgMusicVolumeChange = (vol: number) => {
+    setBgMusicVolume(vol);
+    voiceDspService.setBackgroundMusicVolume(vol);
+  };
+
+  const handleClearBgMusic = () => {
+    voiceDspService.clearBackgroundMusic();
+    setBgMusicInfo({ loaded: false, name: '', duration: 0 });
+    setIsBgMusicPlaying(false);
+  };
+
+  // Auto Audio Ducking Handlers
+  const handleToggleAutoDucking = (enabled: boolean) => {
+    setAutoDuckingEnabled(enabled);
+    voiceDspService.setAutoDuckingConfig({ enabled });
+  };
+
+  const handleDuckingDepthChange = (depth: DuckingDepthPreset) => {
+    setDuckingDepth(depth);
+    voiceDspService.setAutoDuckingConfig({ depth });
+  };
+
+  const handleDuckingSpeedChange = (speed: DuckingSpeedPreset) => {
+    setDuckingSpeed(speed);
+    voiceDspService.setAutoDuckingConfig({ speed });
+  };
+
+  // Offline Master WAV Render & Download
+  const handleDownloadMasteredWav = async () => {
+    if (!currentRecording) return;
+    setIsRenderingWav(true);
+    setErrorMessage(null);
+    try {
+      const wavBlob = await voiceDspService.renderMasteredWav(currentRecording.blobDataUrl, {
+        musicVolume: bgMusicVolume,
+        musicLoop: bgMusicLoop,
+        includeBgMusic: bgMusicInfo.loaded,
+      });
+      const url = URL.createObjectURL(wavBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeName = (draft.title || 'کلام').replace(/[^\w\u0600-\u06FF\s-]/g, '').trim() || 'kalam';
+      a.download = `${safeName}_mastered.wav`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      setErrorMessage('ماسٹر WAV فائل تیار کرنے میں دقت پیش آئی۔');
+    } finally {
+      setIsRenderingWav(false);
     }
   };
 
@@ -1063,6 +1179,183 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
             </div>
           </div>
 
+          {/* 5b. Background Music & Ambience Mixer (بیک گراؤنڈ موسیقی) */}
+          <div className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-xs space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold flex items-center gap-1.5 text-[var(--accent-gold)]">
+                <Music className="w-4 h-4" />
+                <span>بیک گراؤنڈ موسیقی مکسر (Background Track)</span>
+              </span>
+
+              {!bgMusicInfo.loaded ? (
+                <label className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-nastaliq border border-[var(--accent-gold)]/50 bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/20 cursor-pointer font-bold">
+                  <Upload className="w-3 h-3" />
+                  <span>دھن شامل کریں</span>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleUploadBgMusic}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleToggleBgMusic}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-nastaliq border cursor-pointer ${
+                      isBgMusicPlaying
+                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold'
+                        : 'border-[var(--border-subtle)] bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                    }`}
+                  >
+                    {isBgMusicPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
+                    <span>{isBgMusicPlaying ? 'روکیں' : 'چلائیں'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClearBgMusic}
+                    className="p-1 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 cursor-pointer"
+                    title="موسیقی ہٹائیں"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {bgMusicInfo.loaded ? (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)] bg-[var(--bg-subtle)] px-2.5 py-1.5 rounded-lg">
+                  <span className="truncate max-w-[180px] font-sans">{bgMusicInfo.name}</span>
+                  <span className="font-mono text-[10px] text-[var(--text-muted)]">
+                    {formatDurationMMSS(bgMusicInfo.duration)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span className="text-[11px] text-[var(--text-muted)] font-nastaliq">موسیقی والیم:</span>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="0.9"
+                    step="0.05"
+                    value={bgMusicVolume}
+                    onChange={(e) => handleBgMusicVolumeChange(parseFloat(e.target.value))}
+                    className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer bg-[var(--border-subtle)] accent-[var(--accent-gold)]"
+                  />
+                  <span className="font-mono text-[10px] text-[var(--text-muted)] w-8 text-left">
+                    {Math.round(bgMusicVolume * 100)}%
+                  </span>
+                </div>
+
+                <label className="flex items-center justify-between cursor-pointer text-[11px] select-none text-[var(--text-secondary)]">
+                  <span>مسلسل دہرائیں (Auto-Loop Track):</span>
+                  <input
+                    type="checkbox"
+                    checked={bgMusicLoop}
+                    onChange={(e) => setBgMusicLoop(e.target.checked)}
+                    className="w-3.5 h-3.5 rounded text-[var(--accent-gold)] accent-[var(--accent-gold)] cursor-pointer"
+                  />
+                </label>
+              </div>
+            ) : (
+              <p className="text-[11px] text-[var(--text-muted)] font-nastaliq leading-relaxed">
+                اپنی پسند کی بانسری، ستار یا ہلکی دھن (.mp3 / .wav) شامل کریں — آٹو ڈکنگ اسے آپ کی آواز کے ساتھ خودکار متوازن رکھے گی۔
+              </p>
+            )}
+          </div>
+
+          {/* 5c. Smart Auto Audio Ducking (خودکار آڈیو ڈکنگ) */}
+          <div className="p-4 rounded-2xl border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold flex items-center gap-1.5 text-[var(--accent-gold)]">
+                <Wand2 className="w-4 h-4" />
+                <span>خودکار آڈیو ڈکنگ (Auto Audio Ducking)</span>
+              </span>
+
+              <label className="flex items-center gap-1.5 cursor-pointer text-xs select-none">
+                <input
+                  type="checkbox"
+                  checked={autoDuckingEnabled}
+                  onChange={(e) => handleToggleAutoDucking(e.target.checked)}
+                  className="w-4 h-4 rounded text-[var(--accent-gold)] accent-[var(--accent-gold)] cursor-pointer"
+                />
+                <span className="font-bold text-[var(--text-primary)]">
+                  {autoDuckingEnabled ? 'فعال' : 'بند'}
+                </span>
+              </label>
+            </div>
+
+            <p className="text-[11px] text-[var(--text-muted)] font-nastaliq leading-relaxed">
+              مصرعہ پڑھتے وقت موسیقی و تنبورہ خودکار مدہم ہو جائیں گے اور اشعار کے درمیان وقفے میں سنیمائی انداز میں دوبارہ ابھریں گے۔
+            </p>
+
+            {autoDuckingEnabled && (
+              <div className="space-y-2.5 pt-2 border-t border-[var(--border-subtle)]/40">
+                {/* Live Ducking Gain Meter */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-nastaliq">
+                    <span>لائیو ڈکنگ میٹر (Music Ducking Level):</span>
+                    <span className="font-mono text-[var(--accent-gold)] font-bold">
+                      {Math.round(liveDuckGain * 100)}%
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-[var(--bg-canvas)] border border-[var(--border-subtle)] overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-75"
+                      style={{ width: `${Math.round(liveDuckGain * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Depth Selector */}
+                <div className="space-y-1">
+                  <span className="text-[11px] text-[var(--text-secondary)] font-nastaliq block">
+                    ڈکنگ کی گہرائی (Duck Depth):
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(Object.keys(DUCKING_DEPTH_PRESETS) as DuckingDepthPreset[]).map((dKey) => (
+                      <button
+                        key={dKey}
+                        type="button"
+                        onClick={() => handleDuckingDepthChange(dKey)}
+                        className={`px-2 py-1 rounded-lg text-[10px] border cursor-pointer font-nastaliq ${
+                          duckingDepth === dKey
+                            ? 'bg-[var(--accent-gold)] text-white font-bold border-[var(--accent-gold)]'
+                            : 'border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]'
+                        }`}
+                      >
+                        {DUCKING_DEPTH_PRESETS[dKey].label.split(' ')[0]} ({DUCKING_DEPTH_PRESETS[dKey].db}dB)
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Speed Selector */}
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] text-[var(--text-secondary)] font-nastaliq">بحالی کی رفتار:</span>
+                  <div className="flex gap-1.5">
+                    {(Object.keys(DUCKING_SPEED_PRESETS) as DuckingSpeedPreset[]).map((sKey) => (
+                      <button
+                        key={sKey}
+                        type="button"
+                        onClick={() => handleDuckingSpeedChange(sKey)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] border cursor-pointer font-nastaliq ${
+                          duckingSpeed === sKey
+                            ? 'bg-[var(--accent-gold)] text-white font-bold border-[var(--accent-gold)]'
+                            : 'border-[var(--border-subtle)] text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]'
+                        }`}
+                      >
+                        {DUCKING_SPEED_PRESETS[sKey].label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 6. Acoustic Bahar Metronome (بحر کی تال) */}
           <div className="p-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-xs space-y-2.5">
             <div className="flex items-center justify-between text-xs">
@@ -1166,9 +1459,19 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
+                    onClick={handleDownloadMasteredWav}
+                    disabled={isRenderingWav}
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[var(--accent-gold)]/50 bg-[var(--accent-gold)]/10 hover:bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] font-nastaliq text-[11px] font-bold cursor-pointer disabled:opacity-50"
+                    title="آواز + بیک گراؤنڈ موسیقی + آٹو ڈکنگ کے ساتھ اسٹوڈیو WAV ماسٹر برآمد کریں"
+                  >
+                    <Wand2 className="w-3.5 h-3.5" />
+                    <span>{isRenderingWav ? 'تیار ہو رہا ہے...' : 'ماسٹر WAV'}</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleDownload}
                     className="p-2 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
-                    title="آڈیو فائل برآمد کریں (Download)"
+                    title="خام آڈیو فائل برآمد کریں (WebM)"
                   >
                     <Download className="w-4 h-4" />
                   </button>

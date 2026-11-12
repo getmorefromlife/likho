@@ -37,7 +37,15 @@ try {
   const { formatDurationMMSS, toUrduNumerals } = await import(
     pathToFileURL(join(temporary, 'voiceRecitationService.js'))
   );
-  const { voiceDspService, VOCAL_PROFILE_PRESETS, REVERB_PRESET_LABELS, ECHO_PRESETS } = await import(
+  const {
+    voiceDspService,
+    VOCAL_PROFILE_PRESETS,
+    REVERB_PRESET_LABELS,
+    ECHO_PRESETS,
+    DuckingEnvelopeFollower,
+    DUCKING_DEPTH_PRESETS,
+    encodeAudioBufferToWav,
+  } = await import(
     pathToFileURL(join(temporary, 'voiceDspService.js'))
   );
   const { StorageService } = await import(
@@ -45,9 +53,9 @@ try {
   );
 
   let passed = 0;
-  const test = (name, fn) => {
+  const test = async (name, fn) => {
     memory.clear();
-    fn();
+    await fn();
     passed++;
     console.log(`✓ ${name}`);
   };
@@ -164,6 +172,58 @@ try {
 
     const saved = StorageService.saveDraft(corruptedDraft);
     assert.equal(saved, false, 'Malformed voice recording metadata must be rejected');
+  });
+
+  await test('DuckingEnvelopeFollower attenuates during speech and swells back up during pauses', () => {
+    const follower = new DuckingEnvelopeFollower();
+    const config = {
+      enabled: true,
+      depth: 'balanced',
+      speed: 'fast',
+      thresholdDb: -34,
+    };
+
+    // 1. Speech active (-12 dB -> rms ~0.25): gain should drop toward balanced (-12 dB = 0.25)
+    let gain = 1.0;
+    for (let i = 0; i < 15; i++) {
+      gain = follower.processFrame(0.25, 0.03, config);
+    }
+    assert.ok(gain < 0.4, `Expected ducked gain < 0.4 during active speech, got ${gain}`);
+    assert.ok(gain >= DUCKING_DEPTH_PRESETS.balanced.linearGain - 0.01);
+
+    // 2. Silence (-70 dB -> rms ~0.0003) for 1.5 seconds: gain should swell back near 1.0
+    for (let i = 0; i < 50; i++) {
+      gain = follower.processFrame(0.0003, 0.03, config);
+    }
+    assert.ok(gain > 0.9, `Expected gain to swell back > 0.9 after pause, got ${gain}`);
+
+    // 3. Disabled ducking always returns 1.0
+    const offGain = follower.processFrame(0.5, 0.03, { ...config, enabled: false });
+    assert.equal(offGain, 1.0);
+  });
+
+  await test('encodeAudioBufferToWav writes valid 44-byte RIFF/WAVE 16-bit PCM header', async () => {
+    const sampleRate = 44100;
+    const length = 100;
+    const ch0 = new Float32Array(length).fill(0.5);
+    const ch1 = new Float32Array(length).fill(-0.5);
+
+    const mockBuffer = {
+      numberOfChannels: 2,
+      sampleRate,
+      length,
+      getChannelData: (c) => (c === 0 ? ch0 : ch1),
+    };
+
+    const blob = encodeAudioBufferToWav(mockBuffer);
+    assert.equal(blob.type, 'audio/wav');
+    assert.equal(blob.size, 44 + length * 2 * 2);
+
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    const riff = String.fromCharCode(buf[0], buf[1], buf[2], buf[3]);
+    const wave = String.fromCharCode(buf[8], buf[9], buf[10], buf[11]);
+    assert.equal(riff, 'RIFF');
+    assert.equal(wave, 'WAVE');
   });
 
   console.log(`${passed} voice recitation & DSP studio checks passed.`);

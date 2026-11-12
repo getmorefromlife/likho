@@ -14,6 +14,161 @@
 export type ReverbPreset = 'dry' | 'chamber' | 'mushaira' | 'cathedral';
 export type EchoPreset = 'off' | 'mushaira' | 'slapback' | 'valley';
 export type VocalProfilePreset = 'broadcast' | 'tarannum_sheen' | 'natural' | 'raw';
+export type DuckingDepthPreset = 'subtle' | 'balanced' | 'deep';
+export type DuckingSpeedPreset = 'fast' | 'cinematic';
+
+export interface AutoDuckingConfig {
+  enabled: boolean;
+  depth: DuckingDepthPreset;
+  speed: DuckingSpeedPreset;
+  thresholdDb: number;
+}
+
+export const DUCKING_DEPTH_PRESETS: Record<
+  DuckingDepthPreset,
+  { label: string; db: number; linearGain: number; desc: string }
+> = {
+  subtle: {
+    label: 'ہلکا (Subtle -6 dB)',
+    db: -6,
+    linearGain: 0.5,
+    desc: 'موسیقی ہلکی سی مدہم ہو، ترنم کے ساتھ ہم آہنگ',
+  },
+  balanced: {
+    label: 'متوازن براڈکاسٹ (-12 dB)',
+    db: -12,
+    linearGain: 0.25,
+    desc: 'ریڈیو اور مشاعرے کے لیے معیاری توازن',
+  },
+  deep: {
+    label: 'گہرا پوڈکاسٹ (-18 dB)',
+    db: -18,
+    linearGain: 0.125,
+    desc: 'لفظوں کو نمایاں ترین رکھنے کے لیے گہری ڈکنگ',
+  },
+};
+
+export const DUCKING_SPEED_PRESETS: Record<
+  DuckingSpeedPreset,
+  { label: string; attackSec: number; holdSec: number; releaseSec: number }
+> = {
+  fast: {
+    label: 'تیز بحالی (400ms)',
+    attackSec: 0.045,
+    holdSec: 0.2,
+    releaseSec: 0.4,
+  },
+  cinematic: {
+    label: 'سنیمائی بحالی (950ms)',
+    attackSec: 0.06,
+    holdSec: 0.35,
+    releaseSec: 0.95,
+  },
+};
+
+/**
+ * Pure Sidechain Envelope Follower for Auto Audio Ducking.
+ * Smoothly attenuates background music/drone when vocal RMS exceeds thresholdDb,
+ * holds briefly during micro-pauses, and swells smoothly back up between couplets.
+ */
+export class DuckingEnvelopeFollower {
+  private currentGain = 1.0;
+  private holdRemainingSec = 0;
+
+  public reset(): void {
+    this.currentGain = 1.0;
+    this.holdRemainingSec = 0;
+  }
+
+  public getCurrentGain(): number {
+    return this.currentGain;
+  }
+
+  public processFrame(
+    rmsLinear: number,
+    dtSeconds: number,
+    config: AutoDuckingConfig
+  ): number {
+    if (!config.enabled || dtSeconds <= 0) {
+      this.currentGain = 1.0;
+      this.holdRemainingSec = 0;
+      return 1.0;
+    }
+
+    const safeRms = Math.max(1e-6, rmsLinear);
+    const rmsDb = 20 * Math.log10(safeRms);
+    const speedMeta = DUCKING_SPEED_PRESETS[config.speed] || DUCKING_SPEED_PRESETS.cinematic;
+    const depthMeta = DUCKING_DEPTH_PRESETS[config.depth] || DUCKING_DEPTH_PRESETS.balanced;
+
+    const isVocalActive = rmsDb >= config.thresholdDb;
+
+    if (isVocalActive) {
+      this.holdRemainingSec = speedMeta.holdSec;
+      const alpha = 1 - Math.exp(-dtSeconds / Math.max(0.01, speedMeta.attackSec));
+      this.currentGain += (depthMeta.linearGain - this.currentGain) * alpha;
+    } else if (this.holdRemainingSec > 0) {
+      this.holdRemainingSec = Math.max(0, this.holdRemainingSec - dtSeconds);
+    } else {
+      const alpha = 1 - Math.exp(-dtSeconds / Math.max(0.05, speedMeta.releaseSec));
+      this.currentGain += (1.0 - this.currentGain) * alpha;
+    }
+
+    this.currentGain = Math.max(depthMeta.linearGain, Math.min(1.0, this.currentGain));
+    return this.currentGain;
+  }
+}
+
+/**
+ * Encode an AudioBuffer into a standard 16-bit PCM RIFF/WAVE Blob (100% client-side).
+ */
+export function encodeAudioBufferToWav(buffer: AudioBuffer): Blob {
+  const numChannels = Math.min(2, buffer.numberOfChannels);
+  const sampleRate = buffer.sampleRate;
+  const numFrames = buffer.length;
+  const bytesPerSample = 2; // 16-bit PCM
+  const blockAlign = numChannels * bytesPerSample;
+  const dataByteSize = numFrames * blockAlign;
+  const headerSize = 44;
+
+  const arrayBuffer = new ArrayBuffer(headerSize + dataByteSize);
+  const view = new DataView(arrayBuffer);
+
+  const writeString = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  };
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataByteSize, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true); // PCM chunk size
+  view.setUint16(20, 1, true); // AudioFormat = 1 (PCM)
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, 16, true); // BitsPerSample
+  writeString(36, 'data');
+  view.setUint32(40, dataByteSize, true);
+
+  const channels: Float32Array[] = [];
+  for (let c = 0; c < numChannels; c++) {
+    channels.push(buffer.getChannelData(c));
+  }
+
+  let offset = 44;
+  for (let i = 0; i < numFrames; i++) {
+    for (let c = 0; c < numChannels; c++) {
+      const sample = Math.max(-1, Math.min(1, channels[c][i]));
+      view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+      offset += 2;
+    }
+  }
+
+  return new Blob([arrayBuffer], { type: 'audio/wav' });
+}
 
 export interface EchoConfig {
   preset: EchoPreset;
@@ -181,6 +336,27 @@ export class VoiceDspEngine {
   private tanpuraStopTimer: ReturnType<typeof setTimeout> | null = null;
   private tanpuraPluckTimer: ReturnType<typeof setInterval> | null = null;
   private isTanpuraPlaying = false;
+
+  // Background Music Mixer & Sidechain Auto-Ducking
+  private bgMusicBuffer: AudioBuffer | null = null;
+  private bgMusicFileName = '';
+  private bgMusicSource: AudioBufferSourceNode | null = null;
+  private bgMusicGain: GainNode | null = null;
+  private bgMusicVolume = 0.35;
+  private bgMusicLoop = true;
+  private isBgMusicPlaying = false;
+
+  private duckingGainNode: GainNode | null = null;
+  private duckingFollower = new DuckingEnvelopeFollower();
+  private duckingTimer: ReturnType<typeof setInterval> | null = null;
+  private duckingListener: ((gain: number) => void) | null = null;
+
+  public duckingConfig: AutoDuckingConfig = {
+    enabled: true,
+    depth: 'balanced',
+    speed: 'cinematic',
+    thresholdDb: -34,
+  };
 
   public currentConfig: VocalDspConfig = {
     profilePreset: 'broadcast',
@@ -485,7 +661,7 @@ export class VoiceDspEngine {
     const safeVolume = Math.max(0.05, Math.min(1.0, volume));
     this.tanpuraGain.gain.setValueAtTime(0.01, ctx.currentTime);
     this.tanpuraGain.gain.linearRampToValueAtTime(safeVolume, ctx.currentTime + 0.15);
-    this.tanpuraGain.connect(ctx.destination);
+    this.tanpuraGain.connect(this.getOrCreateDuckingNode(ctx));
 
     // Warm resonant tone filter (preserves rich harmonics up to 2.4kHz so it cuts through small phone/laptop speakers)
     const toneFilter = ctx.createBiquadFilter();
@@ -601,6 +777,292 @@ export class VoiceDspEngine {
 
   public getIsTanpuraPlaying(): boolean {
     return this.isTanpuraPlaying;
+  }
+
+  // =========================================================================
+  // Auto Audio Ducking & Sidechain Envelope Follower
+  // =========================================================================
+
+  private getOrCreateDuckingNode(ctx: AudioContext): GainNode {
+    if (!this.duckingGainNode || this.duckingGainNode.context !== ctx) {
+      this.duckingGainNode = ctx.createGain();
+      this.duckingGainNode.gain.setValueAtTime(1.0, ctx.currentTime);
+      this.duckingGainNode.connect(ctx.destination);
+    }
+    return this.duckingGainNode;
+  }
+
+  public setAutoDuckingConfig(config: Partial<AutoDuckingConfig>): void {
+    this.duckingConfig = { ...this.duckingConfig, ...config };
+    if (!this.duckingConfig.enabled && this.duckingGainNode && this.ctx) {
+      this.duckingFollower.reset();
+      this.duckingGainNode.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.05);
+      this.duckingListener?.(1.0);
+    }
+  }
+
+  public getCurrentDuckingGain(): number {
+    return this.duckingFollower.getCurrentGain();
+  }
+
+  public startDuckingMonitor(
+    analyser: AnalyserNode,
+    onGainChange?: (gain: number) => void
+  ): void {
+    this.stopDuckingMonitor();
+    this.duckingFollower.reset();
+    this.duckingListener = onGainChange || null;
+
+    const bufferLength = analyser.fftSize;
+    const dataArray = new Float32Array(bufferLength);
+    const intervalMs = 30;
+    const dtSec = intervalMs / 1000;
+
+    this.duckingTimer = setInterval(() => {
+      if (!this.ctx) return;
+      analyser.getFloatTimeDomainData(dataArray);
+      let sumSquares = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sumSquares += dataArray[i] * dataArray[i];
+      }
+      const rms = Math.sqrt(sumSquares / Math.max(1, dataArray.length));
+      const gain = this.duckingFollower.processFrame(rms, dtSec, this.duckingConfig);
+
+      const node = this.getOrCreateDuckingNode(this.ctx);
+      node.gain.setTargetAtTime(gain, this.ctx.currentTime, 0.02);
+      this.duckingListener?.(gain);
+    }, intervalMs);
+  }
+
+  public stopDuckingMonitor(): void {
+    if (this.duckingTimer) {
+      clearInterval(this.duckingTimer);
+      this.duckingTimer = null;
+    }
+    this.duckingFollower.reset();
+    if (this.duckingGainNode && this.ctx) {
+      try {
+        this.duckingGainNode.gain.setTargetAtTime(1.0, this.ctx.currentTime, 0.05);
+      } catch {
+        // Ignored
+      }
+    }
+    this.duckingListener?.(1.0);
+    this.duckingListener = null;
+  }
+
+  // =========================================================================
+  // Background Music / Instrumental Track Mixer
+  // =========================================================================
+
+  public async loadBackgroundMusicFile(
+    file: File,
+    externalCtx?: AudioContext
+  ): Promise<{ name: string; duration: number }> {
+    let ctx = externalCtx || this.ctx;
+    if (!ctx) {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctx = new AudioCtx();
+    }
+    this.ctx = ctx;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const decoded = await ctx.decodeAudioData(arrayBuffer);
+    this.bgMusicBuffer = decoded;
+    this.bgMusicFileName = file.name;
+
+    return {
+      name: file.name,
+      duration: decoded.duration,
+    };
+  }
+
+  public getBackgroundMusicInfo(): { loaded: boolean; name: string; duration: number } {
+    return {
+      loaded: !!this.bgMusicBuffer,
+      name: this.bgMusicFileName,
+      duration: this.bgMusicBuffer ? this.bgMusicBuffer.duration : 0,
+    };
+  }
+
+  public clearBackgroundMusic(): void {
+    this.stopBackgroundMusic();
+    this.bgMusicBuffer = null;
+    this.bgMusicFileName = '';
+  }
+
+  public async startBackgroundMusic(
+    volume = this.bgMusicVolume,
+    loop = this.bgMusicLoop,
+    externalCtx?: AudioContext
+  ): Promise<void> {
+    if (!this.bgMusicBuffer) return;
+    this.stopBackgroundMusic();
+
+    let ctx = externalCtx || this.ctx;
+    if (!ctx) {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      ctx = new AudioCtx();
+    }
+    this.ctx = ctx;
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+      } catch {
+        // Ignored
+      }
+    }
+
+    this.bgMusicVolume = Math.max(0, Math.min(1, volume));
+    this.bgMusicLoop = loop;
+
+    const source = ctx.createBufferSource();
+    source.buffer = this.bgMusicBuffer;
+    source.loop = loop;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0.01, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(this.bgMusicVolume, ctx.currentTime + 0.35);
+
+    source.connect(gainNode);
+    gainNode.connect(this.getOrCreateDuckingNode(ctx));
+
+    source.onended = () => {
+      if (this.bgMusicSource === source) {
+        this.isBgMusicPlaying = false;
+      }
+    };
+
+    source.start();
+    this.bgMusicSource = source;
+    this.bgMusicGain = gainNode;
+    this.isBgMusicPlaying = true;
+  }
+
+  public setBackgroundMusicVolume(volume: number): void {
+    this.bgMusicVolume = Math.max(0, Math.min(1, volume));
+    if (this.bgMusicGain && this.ctx) {
+      this.bgMusicGain.gain.setTargetAtTime(this.bgMusicVolume, this.ctx.currentTime, 0.05);
+    }
+  }
+
+  public stopBackgroundMusic(): void {
+    if (this.bgMusicSource) {
+      try {
+        this.bgMusicSource.stop();
+        this.bgMusicSource.disconnect();
+      } catch {
+        // Ignored
+      }
+      this.bgMusicSource = null;
+    }
+    if (this.bgMusicGain) {
+      try {
+        this.bgMusicGain.disconnect();
+      } catch {
+        // Ignored
+      }
+      this.bgMusicGain = null;
+    }
+    this.isBgMusicPlaying = false;
+  }
+
+  public getIsBgMusicPlaying(): boolean {
+    return this.isBgMusicPlaying;
+  }
+
+  // =========================================================================
+  // Offline Master WAV Export (Bakes Voice + Background Music + Auto-Ducking)
+  // =========================================================================
+
+  public async renderMasteredWav(
+    vocalDataUrl: string,
+    options: {
+      musicVolume?: number;
+      musicLoop?: boolean;
+      includeBgMusic?: boolean;
+      trimStartSec?: number;
+      trimEndSec?: number;
+    } = {}
+  ): Promise<Blob> {
+    const response = await fetch(vocalDataUrl);
+    const arrayBuffer = await response.arrayBuffer();
+
+    const tempCtx =
+      this.ctx ||
+      new (window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const decodedVocal = await tempCtx.decodeAudioData(arrayBuffer);
+
+    const sampleRate = decodedVocal.sampleRate;
+    const startSec = Math.max(0, options.trimStartSec ?? 0);
+    const endSec = Math.min(decodedVocal.duration, options.trimEndSec ?? decodedVocal.duration);
+    const renderDuration = Math.max(0.1, endSec - startSec);
+    const frameCount = Math.ceil(renderDuration * sampleRate);
+
+    const offlineCtx = new OfflineAudioContext(2, frameCount, sampleRate);
+
+    // 1. Vocal Track (sliced to trim window)
+    const vocalSource = offlineCtx.createBufferSource();
+    vocalSource.buffer = decodedVocal;
+    vocalSource.connect(offlineCtx.destination);
+    vocalSource.start(0, startSec, renderDuration);
+
+    // 2. Background Music Track with Baked Auto-Ducking Envelope
+    if (options.includeBgMusic !== false && this.bgMusicBuffer) {
+      const musicSource = offlineCtx.createBufferSource();
+      musicSource.buffer = this.bgMusicBuffer;
+      musicSource.loop = options.musicLoop ?? this.bgMusicLoop;
+
+      const musicGain = offlineCtx.createGain();
+      const baseVol = options.musicVolume ?? this.bgMusicVolume;
+
+      if (this.duckingConfig.enabled) {
+        const vocalChannel = decodedVocal.getChannelData(0);
+        const startSample = Math.floor(startSec * sampleRate);
+        const stepSec = 0.03; // 30ms envelope resolution
+        const stepSamples = Math.max(1, Math.floor(stepSec * sampleRate));
+        const follower = new DuckingEnvelopeFollower();
+
+        musicGain.gain.setValueAtTime(baseVol, 0);
+        for (let t = 0; t < renderDuration; t += stepSec) {
+          const offset = startSample + Math.floor(t * sampleRate);
+          let sumSq = 0;
+          let count = 0;
+          for (let j = 0; j < stepSamples && offset + j < vocalChannel.length; j++) {
+            const s = vocalChannel[offset + j];
+            sumSq += s * s;
+            count++;
+          }
+          const rms = count > 0 ? Math.sqrt(sumSq / count) : 0;
+          const duckMul = follower.processFrame(rms, stepSec, this.duckingConfig);
+          musicGain.gain.linearRampToValueAtTime(baseVol * duckMul, Math.min(renderDuration, t + stepSec));
+        }
+      } else {
+        musicGain.gain.setValueAtTime(baseVol, 0);
+      }
+
+      // Gentle 0.4s Fade-In and 1.2s Fade-Out on background music
+      const fadeInGain = offlineCtx.createGain();
+      fadeInGain.gain.setValueAtTime(0.01, 0);
+      fadeInGain.gain.linearRampToValueAtTime(1.0, Math.min(0.4, renderDuration * 0.2));
+      if (renderDuration > 1.5) {
+        fadeInGain.gain.setValueAtTime(1.0, renderDuration - 1.2);
+        fadeInGain.gain.linearRampToValueAtTime(0.01, renderDuration);
+      }
+
+      musicSource.connect(musicGain);
+      musicGain.connect(fadeInGain);
+      fadeInGain.connect(offlineCtx.destination);
+      musicSource.start(0);
+    }
+
+    const renderedBuffer = await offlineCtx.startRendering();
+    return encodeAudioBufferToWav(renderedBuffer);
   }
 }
 
