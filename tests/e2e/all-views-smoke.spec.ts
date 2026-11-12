@@ -25,9 +25,10 @@ test('all main views, dropdowns, companion tabs, modals, and Voice Studio render
   for (const vName of viewNames) {
     await page.getByTitle('طرزِ تقسیم اور نمونے').click();
     await page.getByRole('button', { name: vName, exact: true }).last().click();
-    if (vName === 'صرف تحریر (Writing only)') {
-      await expect(page.locator('#poem-title-input')).toBeVisible();
-      await page.keyboard.press('Escape');
+    if (vName === 'صرف تحریر (Writing only)' || vName === 'تحریر و قوافی (70 / 30)') {
+      await expect(page.getByTestId('quiet-workspace')).toBeVisible();
+      await page.getByRole('button', { name: 'اسٹوڈیو میں واپس (Esc)', exact: true }).click();
+      await expect(page.getByTitle('طرزِ تقسیم اور نمونے')).toBeVisible();
     } else if (vName === 'من پسند (Custom Studio)') {
       await expect(page.getByText('من پسند اسٹوڈیو')).toBeVisible();
     }
