@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { initSecurityShield } from './services/securityShield';
+
+// Initialize proprietary anti-tampering and security shield
+initSecurityShield();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

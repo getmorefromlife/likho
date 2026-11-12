@@ -5,11 +5,15 @@ import tailwindcss from '@tailwindcss/vite';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  esbuild: {
+    legalComments: 'none',
+  },
   build: {
     modulePreload: {
       resolveDependencies: (_filename, deps) =>
         deps.filter((dep) => !dep.includes('sovereign-prosody-lexicon')),
     },
+    sourcemap: false,
     chunkSizeWarningLimit: 7500,
     rollupOptions: {
       output: {

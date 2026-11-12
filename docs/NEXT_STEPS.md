@@ -10,9 +10,38 @@ A basic first-lesson prototype now exists at `src/components/reference/FirstTaqt
 
 When the owner requests further learning work, expand source-checked meter reference articles and lessons module-by-module (`Module 1` through `Module 12`). Source and answer-key review must precede release of graded teaching material. Do not begin the next phase solely because it appears here.
 
-## Broader goals
+## Current priorities & quick-to-implement features (November 2026)
 
-These preserve the earlier next-steps discussion; they are priorities to coordinate with the owner's latest direction, not a compulsory execution order.
+### ✅ Completed Foundation Milestones
+1. **100% Clean-Room Sovereign Lexicon (104,170 words / 105,670 entries):** Complete cutover achieved. Pinned clean-room compilation (`likho:sovereign:...`), zero GPL/copyleft files, zero third-party dictionary dependencies, 75/75 prosody checks passing.
+2. **Complete Diwan-e-Ghalib Ingestion:** All 307 canonical works (2,763 couplets) across radifs الف تا ے indexed with 100% vocabulary coverage, fast sanad couplets search, and in-modal filters.
+3. **Royal Seal Logo & Navbar Polish:** Circular gold seal presentation with generous vertical clearance (`min-h-[5.5rem] md:h-[5.75rem] py-2`) eliminating text-to-border touching.
+
+---
+
+### 🚀 Prioritized Quick-to-Implement Features for Commercial Launch
+
+#### Feature 1: Classical Zameen Matcher (زمینِ مشاعرہ و تضمین — 15 mins)
+- **Objective:** Connect the poet's current draft with the 10 classical masters' corpus.
+- **Behavior:** When a poet selects/scans a meter and establishes a radif/qafiya, the companion automatically highlights existing classical master ghazals in the exact same *زمین* (e.g. "غالبؔ کی ۵ اور اقبالؔ کی ۲ غزلیں اس زمین میں ہیں").
+- **Implementation:** Query `CLASSICAL_DIWAN_POETS` in `src/data/sovereign/classicalDiwanCorpus.ts` by matching `meterId` + `radif`. Zero new dependencies required.
+
+#### Feature 2: Progressive Web App (PWA 1-Click Installation — 15 mins)
+- **Objective:** Allow poets to install Likho as a standalone native desktop (Mac/Windows) and mobile app with a single click.
+- **Behavior:** Shows an elegant "ایپ انسٹال کریں" button in the navbar/modal. Launches in full-screen windowed mode with the royal gold seal icon on desktop dock/homescreen.
+- **Implementation:** Standard `manifest.webmanifest`, service worker registration, and app icon links. Operates 100% offline.
+
+#### Feature 3: Cryptographic Offline License Key System (لائسنس کی تصدیق و ایکٹیویشن — 20 mins)
+- **Objective:** Enable immediate software sales without waiting for merchant bank approval.
+- **Behavior:** User enters a license key (e.g. `LKHO-XXXX-XXXX-XXXX-XXXX`) in `ProUpgradeModal.tsx`. The key is validated using a cryptographic checksum offline, permanently unlocking Lifetime Pro in `localStorage` and adding a gold verified badge to the navbar.
+- **Implementation:** Client-side HMAC/checksum algorithm; owner can generate license keys using a private utility script for any paying customer.
+
+#### Feature 4: Web Audio Rhythmic Metronome (صوتی بحری تال و مترونم — 20 mins)
+- **Objective:** Enable poets to listen to the acoustic cadence of their chosen meter.
+- **Behavior:** A "لے سنیں (Play Beat)" toggle in `ScansionCard.tsx` and `ProsodyTab.tsx` with a tempo slider (BPM 60-140). Plays rhythmic acoustic beats matching short (`-`) and long (`=`) syllables (e.g., `تن تنا تن تن تنا تن`).
+- **Implementation:** Browser's native `AudioContext` with zero external audio assets. Zero bundle bloat.
+
+---
 
 1. **Finish the desktop composing experience:** `CustomStudioWorkspace.tsx` (`من پسند` / Writing Only view) now provides a zero-selected default (`منتخب سہولیات: 0 / 12`), 12 independent feature checkboxes, 6 screen division geometries (`single`, `two_cols`, `three_cols`, `two_rows`, `t_split`, `quad_grid`), 9 per-pane modules, a persistent poet's scratchpad (`تخلیقی بیاض`), and independent per-pane scrolling. Continue using complete poems to find friction in writing, selection, drafts, rhyme discovery and export.
 2. **Poet-led pronunciation and rhythm review:** record intended readings and specific disagreements, then make evidence-backed corrections. Previously deferred; the owner must resume review. Owner review is distinct from independent validation.
