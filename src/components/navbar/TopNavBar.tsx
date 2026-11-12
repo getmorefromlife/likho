@@ -162,7 +162,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
       {/* Invisible backdrop to dismiss open dropdown menus smoothly */}
       {(showFileMenu || showPresetMenu) && (
         <div
-          className="fixed inset-0 z-40 bg-transparent"
+          className="fixed inset-0 z-30 bg-transparent"
           onClick={() => {
             setShowFileMenu(false);
             setShowPresetMenu(false);
@@ -171,7 +171,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
         />
       )}
 
-      <header className="min-h-[5.5rem] md:h-[5.75rem] px-3 sm:px-5 lg:px-6 py-2 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/95 backdrop-blur-md z-30 select-none flex-shrink-0 transition-all">
+      <header className="min-h-[5.5rem] md:h-[5.75rem] px-3 sm:px-5 lg:px-6 py-2 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/95 backdrop-blur-md z-40 select-none flex-shrink-0 transition-all">
         {/* ========================================================================= */}
         {/* Right Side: Identity & Auto-Save Status (Unclipped Nastaliq)              */}
         {/* ========================================================================= */}
