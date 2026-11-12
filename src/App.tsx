@@ -46,6 +46,11 @@ const LazyDiwanBookletExportModal = lazy(() =>
     default: m.DiwanBookletExportModal,
   }))
 );
+const LazyVoiceRecitationStudioModal = lazy(() =>
+  import('./components/studio/VoiceRecitationStudioModal').then((m) => ({
+    default: m.VoiceRecitationStudioModal,
+  }))
+);
 
 export function App() {
   // Preload and cache offline Arooz Lexicon & Sovereign Lexicon asynchronously after initial shell mount
@@ -89,6 +94,7 @@ export function App() {
     setForm,
     setMeter,
     setQafiyaList,
+    setVoiceRecording,
     updateContent,
     insertErab,
     insertCoupletTemplate,
@@ -124,6 +130,7 @@ export function App() {
   const [isDiwanModalOpen, setIsDiwanModalOpen] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [isBookletModalOpen, setIsBookletModalOpen] = useState(false);
+  const [isVoiceStudioOpen, setIsVoiceStudioOpen] = useState(false);
 
   // Main container ref for drag splitter calculations
   const workspaceContainerRef = useRef<HTMLDivElement | null>(null);
@@ -215,6 +222,8 @@ export function App() {
           onToggleZen={toggleZenMode}
           onNewPoem={startNewPoem}
           onOpenExport={() => setIsExportModalOpen(true)}
+          onOpenVoiceStudio={() => setIsVoiceStudioOpen(true)}
+          hasVoiceRecording={!!currentDraft.voiceRecording}
           onOpenDiwan={() => setIsDiwanModalOpen(true)}
           onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
           trialDaysRemaining={7}
@@ -408,6 +417,7 @@ export function App() {
               onSelect={handleSelect}
               onToggleLiveScansion={toggleLiveScansion}
               onSelectMeter={setMeter}
+              onOpenVoiceStudio={() => setIsVoiceStudioOpen(true)}
             />
           </div>
 
@@ -500,6 +510,19 @@ export function App() {
             onClose={() => setIsBookletModalOpen(false)}
             initialTitle={currentDraft.title ? `دیوانِ ${currentDraft.poet || 'قلم و قافیہ'}` : 'دیوانِ قلم و قافیہ'}
             initialPoetName={currentDraft.poet || ''}
+          />
+        </Suspense>
+      )}
+
+      {/* 5c. Voice Recitation & Tarannum Studio (صوتی ترنم و مشاعرہ اسٹوڈیو) */}
+      {isVoiceStudioOpen && (
+        <Suspense fallback={null}>
+          <LazyVoiceRecitationStudioModal
+            isOpen={isVoiceStudioOpen}
+            onClose={() => setIsVoiceStudioOpen(false)}
+            draft={currentDraft}
+            fontFamily={prefs.fontFamily}
+            onSaveVoiceRecording={setVoiceRecording}
           />
         </Suspense>
       )}

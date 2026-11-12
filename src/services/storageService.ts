@@ -66,7 +66,17 @@ function isDraft(value: unknown): value is PoemDraft {
     ['ghazal', 'nazm', 'rubai', 'qataa', 'fard', 'prose'].includes(String(d.form)) &&
     ['tags', 'qafiyaList'].every(field => Array.isArray(d[field]) && (d[field] as unknown[]).every(v => typeof v === 'string')) &&
     ['createdAt', 'updatedAt'].every(field => typeof d[field] === 'number' && Number.isFinite(d[field])) &&
-    ['meterName', 'meterRukn', 'radif'].every(field => d[field] === undefined || typeof d[field] === 'string');
+    ['meterName', 'meterRukn', 'radif'].every(field => d[field] === undefined || typeof d[field] === 'string') &&
+    (d.voiceRecording === undefined || (
+      typeof d.voiceRecording === 'object' && d.voiceRecording !== null &&
+      typeof (d.voiceRecording as Record<string, unknown>).id === 'string' &&
+      typeof (d.voiceRecording as Record<string, unknown>).blobDataUrl === 'string' &&
+      typeof (d.voiceRecording as Record<string, unknown>).mimeType === 'string' &&
+      typeof (d.voiceRecording as Record<string, unknown>).durationSeconds === 'number' &&
+      Number.isFinite((d.voiceRecording as Record<string, unknown>).durationSeconds) &&
+      typeof (d.voiceRecording as Record<string, unknown>).recordedAt === 'number' &&
+      Number.isFinite((d.voiceRecording as Record<string, unknown>).recordedAt)
+    ));
 }
 
 function isValidDraftList(value: unknown): value is PoemDraft[] {

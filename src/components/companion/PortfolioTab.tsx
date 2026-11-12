@@ -7,6 +7,7 @@ import {
   CheckCircle,
   Clock,
   BookOpen,
+  Mic,
 } from 'lucide-react';
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
@@ -232,9 +233,20 @@ export const PortfolioTab: React.FC<PortfolioTabProps> = ({
 
                 {/* Footer Badges */}
                 <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] pt-1.5 border-t border-[var(--border-subtle)]/40 font-nastaliq">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{dateStr}</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{dateStr}</span>
+                    </div>
+                    {draft.voiceRecording && (
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[10px]"
+                        title="صوتی ترنم محفوظ ہے"
+                      >
+                        <Mic className="w-2.5 h-2.5" />
+                        <span>صوت</span>
+                      </span>
+                    )}
                   </div>
 
                   {draft.meterName && (

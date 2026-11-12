@@ -11,6 +11,7 @@
     "test:prosody": "node tests/prosody.test.mjs",
     "test:license": "node tests/license.test.mjs",
     "test:booklet": "node tests/booklet.test.mjs",
+    "test:voice": "node tests/voice.test.mjs",
     "test:benchmark": "node tests/benchmark.test.mjs",
     "validate:benchmark": "node scripts/validate-benchmark.mjs",
     "test:e2e": "playwright test",

@@ -9,6 +9,7 @@ import {
   Plus,
   Keyboard,
   HelpCircle,
+  Mic,
 } from 'lucide-react';
 import { PoemDraft, PoeticForm } from '../../types/editor';
 import { WorkspacePrefs } from '../../types/workspace';
@@ -49,6 +50,7 @@ interface PoetryCanvasProps {
   onSelect: (e: React.SyntheticEvent<HTMLTextAreaElement>) => void;
   onToggleLiveScansion: () => void;
   onSelectMeter?: (meterName: string, meterRukn: string) => void;
+  onOpenVoiceStudio?: () => void;
 }
 
 export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
@@ -70,6 +72,7 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
   onSelect,
   onToggleLiveScansion,
   onSelectMeter,
+  onOpenVoiceStudio,
 }) => {
   const [textAlign, setTextAlign] = useState<TextAlignment>('center');
   const [showErabToolbar, setShowErabToolbar] = useState(true);
@@ -481,6 +484,19 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                 )}
               </span>
             )}
+            {currentDraft.voiceRecording && onOpenVoiceStudio && (
+              <button
+                type="button"
+                onClick={onOpenVoiceStudio}
+                className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all font-nastaliq text-[11px] font-bold cursor-pointer shadow-2xs"
+                title="اس کلام کی ریکارڈ شدہ آواز سنیں یا نیا ٹیک لیں"
+              >
+                <Mic className="w-3 h-3 text-red-500 animate-pulse" />
+                <span>
+                  صوتی ریکارڈنگ موجود ہے ({Math.round(currentDraft.voiceRecording.durationSeconds)}s)
+                </span>
+              </button>
+            )}
             {zameenReport && zameenReport.totalMatches > 0 && (
               <button
                 type="button"
@@ -558,6 +574,23 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
 
         {/* Live Scansion Toggle & Undo/Redo Controls */}
         <div className="flex items-center gap-2">
+          {/* Voice Studio Button */}
+          {onOpenVoiceStudio && (
+            <button
+              type="button"
+              onClick={onOpenVoiceStudio}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-nastaliq cursor-pointer border transition-all select-none shadow-2xs ${
+                currentDraft.voiceRecording
+                  ? 'border-red-500/40 text-red-600 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20'
+                  : 'border-[var(--border-subtle)] hover:border-[var(--accent-gold)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+              }`}
+              title="صوتی ترنم و مشاعرہ اسٹوڈیو کھولیں"
+            >
+              <Mic className={`w-3.5 h-3.5 ${currentDraft.voiceRecording ? 'text-red-500 animate-pulse' : 'text-[var(--accent-gold)]'}`} />
+              <span className="font-bold">{currentDraft.voiceRecording ? 'ترنم سنیں' : 'ترنم اسٹوڈیو'}</span>
+            </button>
+          )}
+
           {/* Sticky Toggle Checkbox for Live Scansion (Only shown for poetry) */}
           {!isProseMode && (
             <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-nastaliq cursor-pointer border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] bg-[var(--bg-card)] text-[var(--text-primary)] transition-all select-none shadow-2xs">

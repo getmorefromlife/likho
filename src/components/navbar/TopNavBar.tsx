@@ -19,6 +19,7 @@ import {
   Settings,
   X,
   Smartphone,
+  Mic,
 } from 'lucide-react';
 import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont } from '../../types/workspace';
 import type { PersistenceState } from '../../hooks/usePoemEditor';
@@ -39,6 +40,8 @@ interface TopNavBarProps {
   onToggleZen: () => void;
   onNewPoem: () => void;
   onOpenExport: () => void;
+  onOpenVoiceStudio?: () => void;
+  hasVoiceRecording?: boolean;
   onOpenDiwan?: () => void;
   onOpenUpgrade?: () => void;
   trialDaysRemaining?: number;
@@ -58,6 +61,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   onToggleZen,
   onNewPoem,
   onOpenExport,
+  onOpenVoiceStudio,
+  hasVoiceRecording = false,
   onOpenDiwan,
   onOpenUpgrade,
   trialDaysRemaining = 7,
@@ -338,6 +343,23 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             <PlusCircle className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
             <span>نیا کلام</span>
           </button>
+
+          {/* Voice Studio (مشاعرہ و ترنم اسٹوڈیو) */}
+          {onOpenVoiceStudio && (
+            <button
+              type="button"
+              onClick={onOpenVoiceStudio}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold border transition-all leading-[2.2] cursor-pointer ${
+                hasVoiceRecording
+                  ? 'bg-red-500/10 border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/20'
+                  : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+              }`}
+              title="صوتی ترنم و مشاعرہ اسٹوڈیو (Voice Recitation & Tarannum Studio)"
+            >
+              <Mic className={`w-3.5 h-3.5 ${hasVoiceRecording ? 'text-red-500 animate-pulse' : 'text-[var(--accent-gold)]'}`} />
+              <span>ترنم اسٹوڈیو</span>
+            </button>
+          )}
 
           {/* Export Action */}
           <button

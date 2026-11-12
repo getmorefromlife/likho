@@ -20,9 +20,22 @@ export interface PoemMetadata {
   updatedAt: number;
 }
 
+export interface VoiceRecordingMeta {
+  id: string;
+  blobDataUrl: string;
+  mimeType: string;
+  durationSeconds: number;
+  recordedAt: number;
+  title?: string;
+  poet?: string;
+  mode?: 'tarannum' | 'taht-ul-lafz';
+  withMetronome?: boolean;
+}
+
 export interface PoemDraft extends PoemMetadata {
   content: string;
   qafiyaList: string[];
+  voiceRecording?: VoiceRecordingMeta;
 }
 
 export interface PoeticMeter {

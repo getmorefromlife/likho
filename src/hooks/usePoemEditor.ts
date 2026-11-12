@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { PoemDraft, PoeticForm } from '../types/editor';
+import { PoemDraft, PoeticForm, VoiceRecordingMeta } from '../types/editor';
 import { StorageService } from '../services/storageService';
 import { cleanPastedUrduText, calculatePoemStats } from '../services/unicodeNormalizer';
 
@@ -180,6 +180,14 @@ export function usePoemEditor(initialDraft?: PoemDraft) {
 
   const setRadif = useCallback((radif: string) => {
     applyEdit((prev) => ({ ...prev, radif }));
+  }, [applyEdit]);
+
+  const setVoiceRecording = useCallback((recording?: VoiceRecordingMeta) => {
+    applyEdit((prev) => ({
+      ...prev,
+      voiceRecording: recording,
+      updatedAt: Date.now(),
+    }));
   }, [applyEdit]);
 
   // Erab / Diacritic insertion helper at cursor position
@@ -373,6 +381,7 @@ export function usePoemEditor(initialDraft?: PoemDraft) {
     setMeter,
     setRadif,
     setQafiyaList,
+    setVoiceRecording,
     updateContent: updateContentWithHistory,
     insertErab,
     insertCoupletTemplate,
