@@ -20,6 +20,8 @@ import {
   X,
   Smartphone,
   Mic,
+  FolderDown,
+  LayoutGrid,
 } from 'lucide-react';
 import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont } from '../../types/workspace';
 import type { PersistenceState } from '../../hooks/usePoemEditor';
@@ -71,6 +73,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
   onRetrySave,
 }) => {
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
+  const [showFileMenu, setShowFileMenu] = useState(false);
   const [showPresetMenu, setShowPresetMenu] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const { canInstall, isInstalled, isStandalone, isIOS, promptInstall } = usePWAInstall();
@@ -87,12 +90,13 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (isSettingsDrawerOpen) setIsSettingsDrawerOpen(false);
+        if (showFileMenu) setShowFileMenu(false);
         if (showPresetMenu) setShowPresetMenu(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSettingsDrawerOpen, showPresetMenu]);
+  }, [isSettingsDrawerOpen, showFileMenu, showPresetMenu]);
 
   const saveStatus = {
     idle: {
@@ -152,6 +156,18 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 
   return (
     <>
+      {/* Invisible backdrop to dismiss open dropdown menus smoothly */}
+      {(showFileMenu || showPresetMenu) && (
+        <div
+          className="fixed inset-0 z-40 bg-transparent"
+          onClick={() => {
+            setShowFileMenu(false);
+            setShowPresetMenu(false);
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       <header className="min-h-[5.5rem] md:h-[5.75rem] px-3 sm:px-5 lg:px-6 py-2 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/95 backdrop-blur-md z-30 select-none flex-shrink-0 transition-all">
         {/* ========================================================================= */}
         {/* Right Side: Identity & Auto-Save Status (Unclipped Nastaliq)              */}
@@ -166,15 +182,14 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             />
           </div>
 
-          {/* Brand Name */}
+          {/* Brand Name & Status Indicator */}
           <div className="flex items-center gap-2 pb-0.5">
             <h1 className="text-2xl sm:text-3xl font-bold font-nastaliq text-[var(--text-primary)] leading-[1.8] sm:leading-[1.9] tracking-tight">
               قلم و قافیہ
             </h1>
-            {/* Subtle Auto-save indicator dot */}
             <span
               className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0 hidden sm:inline-block"
-              title="تبدیلیاں خودکار طور پر کمپیوٹر میں محفوظ ہیں"
+              title="خودکار محفوظ سازی فعال ہے"
             ></span>
           </div>
 
@@ -268,159 +283,267 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* Left Side: Commercial SaaS Elements & Consolidated Studio Actions         */}
+        {/* Left Side: Consolidated, Eye-Pleasing Dropdowns & Pro Studio Actions       */}
         {/* ========================================================================= */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Commercial SaaS Elements: Verified Pro Badge OR Trial & Upgrade */}
-          {activeLicense ? (
+          {/* ----------------------------------------------------------------------- */}
+          {/* Dropdown 1: File & Export Menu (فائل و اشاعت)                          */}
+          {/* ----------------------------------------------------------------------- */}
+          <div className="relative z-50">
             <button
               type="button"
-              onClick={onOpenUpgrade}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-200 hover:bg-amber-500/25 transition-all leading-[2.2] shadow-2xs cursor-pointer"
-              title="آپ کا قلم و قافیہ پرو لائف ٹائم لائسنس تصدیق شدہ اور فعال ہے — تفصیلات کے لیے کلک کریں"
-            >
-              <Crown className="w-3.5 h-3.5 text-[var(--accent-gold)] flex-shrink-0" />
-              <span>👑 پرو مصدقہ</span>
-            </button>
-          ) : (
-            <>
-              {/* Free Trial Countdown Pill */}
-              {onOpenUpgrade && (
-                <button
-                  type="button"
-                  onClick={onOpenUpgrade}
-                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 hover:bg-amber-500/20 transition-all leading-[2.2] shadow-2xs cursor-pointer"
-                  title="مفت آزمائشی میعاد — مکمل پرو ورژن کی تفصیلات کے لیے کلک کریں"
-                >
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                  <span>مفت آزمائش: {trialDaysRemaining} دن باقی</span>
-                </button>
-              )}
-
-              {/* High-Converting Golden Shimmer Upgrade / Buy Button */}
-              {onOpenUpgrade && (
-                <button
-                  type="button"
-                  onClick={onOpenUpgrade}
-                  className="btn-gold-shimmer text-black font-bold font-nastaliq px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform leading-[2.2] cursor-pointer"
-                  title="قلم و قافیہ پرو — تاحیات لائسنس، لامحدود عروضی تقطیع اور مکمل لغت"
-                >
-                  <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black flex-shrink-0" />
-                  <span>پرو حاصل کریں</span>
-                </button>
-              )}
-            </>
-          )}
-
-          {/* PWA 1-Click Desktop/Mobile Install Button */}
-          {canInstall && !isStandalone && (
-            <button
-              type="button"
-              onClick={async () => {
-                const outcome = await promptInstall();
-                if (outcome === 'ios_guide') {
-                  setShowInstallHelp(true);
-                  setIsSettingsDrawerOpen(true);
-                }
+              onClick={() => {
+                setShowFileMenu(!showFileMenu);
+                setShowPresetMenu(false);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-emerald-500/15 border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-500/25 transition-all leading-[2.2] shadow-2xs cursor-pointer animate-in fade-in"
-              title="قلم و قافیہ کو اپنے کمپیوٹر یا موبائل پر براہِ راست انسٹال کریں (آف لائن دستیاب)"
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold border transition-all leading-[2.2] cursor-pointer ${
+                showFileMenu
+                  ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] shadow-xs'
+                  : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+              }`}
+              title="فائل، نیا کلام اور برآمد و اشاعت مینو"
+              aria-expanded={showFileMenu}
             >
-              <Smartphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-              <span>📲 ایپ انسٹال کریں</span>
+              <FolderDown className="w-3.5 h-3.5 text-[var(--accent-gold)] flex-shrink-0" />
+              <span>فائل و اشاعت</span>
+              <ChevronDown className={`w-3 h-3 text-[var(--text-muted)] transition-transform duration-200 ${showFileMenu ? 'rotate-180 text-[var(--accent-gold)]' : ''}`} />
             </button>
-          )}
 
-          <div className="h-6 w-px bg-[var(--border-subtle)] mx-0.5 hidden sm:block"></div>
+            {showFileMenu && (
+              <div
+                dir="rtl"
+                className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 w-72 p-2 rounded-2xl shadow-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/98 backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2"
+              >
+                <div className="text-[11px] font-bold text-[var(--text-muted)] px-3 py-1 font-nastaliq leading-[2.2] border-b border-[var(--border-subtle)] mb-1 flex items-center justify-between">
+                  <span>مسودہ و اشاعت</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] text-[var(--text-secondary)]">Ctrl+S خودکار</span>
+                </div>
 
-          {/* New Poem Action */}
-          <button
-            type="button"
-            onClick={onNewPoem}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] transition-all leading-[2.2]"
-            title="نیا کلام شروع کریں"
-          >
-            <PlusCircle className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
-            <span>نیا کلام</span>
-          </button>
+                {/* Option: New Poem */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFileMenu(false);
+                    onNewPoem();
+                  }}
+                  className="w-full text-right px-3 py-2.5 rounded-xl text-xs sm:text-sm font-nastaliq transition-all flex items-center gap-2.5 hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] leading-[2.2] group cursor-pointer"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 flex items-center justify-center flex-shrink-0 text-[var(--accent-gold)] group-hover:scale-105 transition-transform">
+                    <PlusCircle className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold">نیا کلام (New Poem)</div>
+                    <div className="text-[11px] text-[var(--text-secondary)] leading-[1.6]">خالی کینوس پر نیا مسودہ شروع کریں</div>
+                  </div>
+                </button>
 
-          {/* Voice Studio (مشاعرہ و ترنم اسٹوڈیو) */}
+                {/* Option: Export / Booklet / WhatsApp */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFileMenu(false);
+                    onOpenExport();
+                  }}
+                  className="w-full text-right px-3 py-2.5 rounded-xl text-xs sm:text-sm font-nastaliq transition-all flex items-center gap-2.5 hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] leading-[2.2] group cursor-pointer"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition-transform">
+                    <Download className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-bold flex items-center justify-between">
+                      <span>برآمد و دیوان کتابچہ</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-sans font-bold">HD</span>
+                    </div>
+                    <div className="text-[11px] text-[var(--text-secondary)] leading-[1.6]">پی ڈی ایف، واٹس ایپ سائز اور کراچی پرنٹ ڈیسک</div>
+                  </div>
+                </button>
+
+                {/* Option: PWA App Install if available */}
+                {canInstall && !isStandalone && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setShowFileMenu(false);
+                      const outcome = await promptInstall();
+                      if (outcome === 'ios_guide') {
+                        setShowInstallHelp(true);
+                        setIsSettingsDrawerOpen(true);
+                      }
+                    }}
+                    className="w-full text-right px-3 py-2.5 rounded-xl text-xs sm:text-sm font-nastaliq transition-all flex items-center gap-2.5 hover:bg-emerald-500/10 text-emerald-800 dark:text-emerald-200 border-t border-[var(--border-subtle)] mt-1 pt-2 leading-[2.2] cursor-pointer"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 text-emerald-600 dark:text-emerald-300">
+                      <Smartphone className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold">ایپ کمپیوٹر پر انسٹال کریں</div>
+                      <div className="text-[11px] opacity-80 leading-[1.6]">بغیر انٹرنیٹ آف لائن استعمال کے لیے</div>
+                    </div>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ----------------------------------------------------------------------- */}
+          {/* Action 2: Voice Recitation & Tarannum Studio (صوتی اسٹوڈیو)              */}
+          {/* ----------------------------------------------------------------------- */}
           {onOpenVoiceStudio && (
             <button
               type="button"
               onClick={onOpenVoiceStudio}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold border transition-all leading-[2.2] cursor-pointer ${
                 hasVoiceRecording
-                  ? 'bg-red-500/10 border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-500/20'
+                  ? 'bg-red-500/15 border-red-500/50 text-red-700 dark:text-red-300 hover:bg-red-500/25 shadow-xs'
                   : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
               }`}
               title="صوتی ترنم و مشاعرہ اسٹوڈیو (Voice Recitation & Tarannum Studio)"
             >
-              <Mic className={`w-3.5 h-3.5 ${hasVoiceRecording ? 'text-red-500 animate-pulse' : 'text-[var(--accent-gold)]'}`} />
-              <span>ترنم اسٹوڈیو</span>
+              <Mic className={`w-3.5 h-3.5 flex-shrink-0 ${hasVoiceRecording ? 'text-red-500 animate-pulse' : 'text-[var(--accent-gold)]'}`} />
+              <span className="hidden sm:inline">ترنم اسٹوڈیو</span>
+              <span className="sm:hidden">ترنم</span>
+              {hasVoiceRecording && (
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+              )}
             </button>
           )}
 
-          {/* Export Action */}
-          <button
-            type="button"
-            onClick={onOpenExport}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] transition-all leading-[2.2]"
-            title="کلام برآمد کریں (Export / PDF / Image)"
-          >
-            <Download className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
-            <span>برآمد</span>
-          </button>
-
-          {/* Layout Presets Dropdown (Preserves exact title for automated suite) */}
-          <div className="relative">
+          {/* ----------------------------------------------------------------------- */}
+          {/* Dropdown 3: View & Workspace Layout Presets (منظر و ترتیب)                */}
+          {/* Preserves title="طرزِ تقسیم اور نمونے" for Playwright test compatibility */}
+          {/* ----------------------------------------------------------------------- */}
+          <div className="relative z-50">
             <button
               type="button"
-              onClick={() => setShowPresetMenu(!showPresetMenu)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] transition-all leading-[2.2]"
+              onClick={() => {
+                setShowPresetMenu(!showPresetMenu);
+                setShowFileMenu(false);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold border transition-all leading-[2.2] cursor-pointer ${
+                showPresetMenu
+                  ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] shadow-xs'
+                  : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]'
+              }`}
               title="طرزِ تقسیم اور نمونے"
+              aria-expanded={showPresetMenu}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+              <LayoutGrid className="w-3.5 h-3.5 text-[var(--accent-gold)] flex-shrink-0" />
               <span className="hidden md:inline">{presetLabels[prefs.activePreset]}</span>
-              <ChevronDown className="w-3 h-3 text-[var(--text-muted)]" />
+              <span className="md:hidden">منظر</span>
+              <ChevronDown className={`w-3 h-3 text-[var(--text-muted)] transition-transform duration-200 ${showPresetMenu ? 'rotate-180 text-[var(--accent-gold)]' : ''}`} />
             </button>
 
             {showPresetMenu && (
-              <div className="absolute top-full mt-2 left-0 sm:right-0 sm:left-auto w-60 p-2 rounded-2xl shadow-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)] z-50 animate-in fade-in slide-in-from-top-2">
-                <div className="text-[11px] font-bold text-[var(--text-muted)] px-3 py-1 font-nastaliq leading-[2.2] border-b border-[var(--border-subtle)] mb-1">
-                  طرزِ منظر منتخب کریں:
+              <div
+                dir="rtl"
+                className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 w-64 p-2 rounded-2xl shadow-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/98 backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2"
+              >
+                <div className="text-[11px] font-bold text-[var(--text-muted)] px-3 py-1 font-nastaliq leading-[2.2] border-b border-[var(--border-subtle)] mb-1 flex items-center justify-between">
+                  <span>طرزِ منظر منتخب کریں:</span>
+                  <Sparkles className="w-3 h-3 text-[var(--accent-gold)]" />
                 </div>
-                {(Object.keys(presetLabels) as LayoutPreset[]).map((preset) => (
+
+                {/* Preset List */}
+                <div className="space-y-0.5">
+                  {(Object.keys(presetLabels) as LayoutPreset[]).map((preset) => (
+                    <button
+                      key={preset}
+                      onClick={() => {
+                        onApplyPreset(preset);
+                        setShowPresetMenu(false);
+                      }}
+                      className={`w-full text-right px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq transition-all flex items-center justify-between leading-[2.2] cursor-pointer ${
+                        prefs.activePreset === preset
+                          ? 'bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] font-bold'
+                          : 'hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
+                      }`}
+                    >
+                      <span>{presetLabels[preset]}</span>
+                      {prefs.activePreset === preset && <Check className="w-4 h-4 text-[var(--accent-gold)] flex-shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Quick Canvas Lock Toggle inside Layout Menu */}
+                <div className="pt-1.5 mt-1 border-t border-[var(--border-subtle)]">
                   <button
-                    key={preset}
+                    type="button"
                     onClick={() => {
-                      onApplyPreset(preset);
+                      onToggleLock();
                       setShowPresetMenu(false);
                     }}
-                    className={`w-full text-right px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq transition-all flex items-center justify-between leading-[2.2] ${
-                      prefs.activePreset === preset
-                        ? 'bg-[var(--accent-gold)]/20 text-[var(--accent-gold)] font-bold'
-                        : 'hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]'
-                    }`}
+                    className="w-full text-right px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq transition-all flex items-center justify-between hover:bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] leading-[2.2] cursor-pointer"
                   >
-                    <span>{presetLabels[preset]}</span>
-                    {prefs.activePreset === preset && <Check className="w-4 h-4 text-[var(--accent-gold)]" />}
+                    <span className="flex items-center gap-2">
+                      {prefs.isLocked ? <Lock className="w-3.5 h-3.5 text-amber-500" /> : <Unlock className="w-3.5 h-3.5 text-[var(--accent-gold)]" />}
+                      <span>{prefs.isLocked ? 'کینوس مقفل ہے (ان لاک کریں)' : 'کینوس کو مقفل کریں'}</span>
+                    </span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-surface)] text-[var(--text-muted)] font-mono">
+                      {prefs.isLocked ? 'Locked' : 'Unlocked'}
+                    </span>
                   </button>
-                ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Consolidated Studio Settings Drawer Trigger (Typography, Theme, Workspace Lock) */}
+          {/* ----------------------------------------------------------------------- */}
+          {/* Action 4: Settings Drawer Trigger (خطاطی، فونٹ و موضوع)                 */}
+          {/* ----------------------------------------------------------------------- */}
           <button
             type="button"
-            onClick={() => setIsSettingsDrawerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent-gold)] text-[var(--accent-gold)] transition-all leading-[2.2]"
+            onClick={() => {
+              setIsSettingsDrawerOpen(true);
+              setShowFileMenu(false);
+              setShowPresetMenu(false);
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent-gold)] text-[var(--accent-gold)] hover:bg-[var(--bg-subtle)] transition-all leading-[2.2] cursor-pointer"
             title="خطاطی، فونٹ اور موضوع کی ترتیبات"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 h-4 flex-shrink-0" />
             <span className="hidden lg:inline">تنظیمات</span>
           </button>
+
+          {/* ----------------------------------------------------------------------- */}
+          {/* Commercial SaaS Pro Pill or Upgrade Button                             */}
+          {/* ----------------------------------------------------------------------- */}
+          {activeLicense ? (
+            <button
+              type="button"
+              onClick={onOpenUpgrade}
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-200 hover:bg-amber-500/25 transition-all leading-[2.2] shadow-2xs cursor-pointer flex-shrink-0"
+              title="آپ کا قلم و قافیہ پرو لائف ٹائم لائسنس تصدیق شدہ اور فعال ہے — تفصیلات کے لیے کلک کریں"
+            >
+              <Crown className="w-3.5 h-3.5 text-[var(--accent-gold)] flex-shrink-0" />
+              <span>👑 پرو مصدقہ</span>
+            </button>
+          ) : (
+            onOpenUpgrade && (
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {/* Trial Pill (shown on wider displays) */}
+                <button
+                  type="button"
+                  onClick={onOpenUpgrade}
+                  className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-nastaliq font-bold bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 hover:bg-amber-500/20 transition-all leading-[2.2] cursor-pointer"
+                  title="مفت آزمائشی میعاد — مکمل پرو ورژن کی تفصیلات کے لیے کلک کریں"
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span>آزمائش: {trialDaysRemaining} دن</span>
+                </button>
+
+                {/* Shimmer Upgrade Button */}
+                <button
+                  type="button"
+                  onClick={onOpenUpgrade}
+                  className="btn-gold-shimmer text-black font-bold font-nastaliq px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform leading-[2.2] cursor-pointer flex-shrink-0"
+                  title="قلم و قافیہ پرو — تاحیات لائسنس، لامحدود عروضی تقطیع اور مکمل لغت"
+                >
+                  <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black flex-shrink-0" />
+                  <span>پرو حاصل کریں</span>
+                </button>
+              </div>
+            )
+          )}
         </div>
       </header>
 
