@@ -35,12 +35,12 @@ The planned **رہنمائے شعر و عروض** combines a reference atlas for
    - Eliminated buggy `contentEditable` behavior where Backspace and Delete keys stopped responding.
    - Migrated to a controlled high-performance `<input id="poem-title-input">` supporting full Urdu phonetic mapping, bidirectional cursor tracking, and seamless Backspace/Delete text manipulation.
 
-### ✅ B. Core Prosody Engine & Lexicon
-3. **Source-attributed Offline Pronunciation Lexicon & Parallel Clean-Room Sovereign Dictionary:**
-   - 40,434 dictionary keys and 43,556 reading records from a pinned Aruuz lexical database extraction; source IDs, vocalizations and pronunciation divisions are retained.
-   - 1,007 unsupported/impossible source records are quarantined for inspection. Generated spelling-length weights no longer participate in the engine.
-   - Source data loads synchronously; personal imports keep separate provenance. GPL-2.0 attribution, license and corresponding editable data/conversion source ship with the app.
-   - **Parallel Sovereign Clean-Room Urdu Prosodic & Literary Dictionary (`likho-sovereign-lexicon.json` — Batches 1–7, `v0.6.0-batch6-7`):** `68,037` unique Urdu words (`69,537` vocalized & defined entries, including `100%` / `64/64` of the Ghalib classical benchmark words) compiled 100% via `src/services/urduPhonology.ts` with zero GPL-2.0 or third-party copyleft inputs. Serves both as a user-facing Urdu Literary & Prosodic Dictionary (`ThesaurusTab.tsx`) with vocalization, POS, root, meaning, rukn, and root-family derivatives, and as a parallel scansion/rhyme fallback via `sovereignLexiconService.ts` and `aroozLexiconService.ts`.
+### ✅ B. Core Prosody Engine & Sovereign Lexicon
+3. **100% Clean-Room Sovereign Prosodic & Literary Dictionary (لغتِ قلم و قافیہ — 104,170 الفاظ):**
+   - **Zero Copyleft / Third-Party Dependencies:** Completely decoupled and permanently purged all legacy third-party files (`aruuz-dictionary.json`, `aruuz-quarantine.json`, `qaafiyahVocabulary.json`, `Aruuz-GPL-2.0.txt`, `Aruuz-NOTICE.txt`).
+   - **104,170 Normalized Words & 105,670 Entries:** 100% compiled clean-room via `src/services/urduPhonology.ts` and classical corpus analysis. Every single entry contains vocalized pronunciation (*اعراب*), syllable breakdown (*ہجے*), prosodic weight and feet (*وزن و رکن*), grammatical part-of-speech (*قواعد*), triliteral root (*مادہ*), and classical Urdu definition.
+   - **Synchronous Offline Scansion & Real-Time Reverse Rhyme:** Direct in-memory scansion dictionary (`sovereign-scansion.json`) powering real-time scansion, automated meter repair, the Rhyme Treasury, and the Visual Slot Rhyme Builder across the full 104,170 words with zero network latency.
+   - **Complete Diwan-e-Ghalib (دیوانِ غالب متداول و کلیات — 307 کلام، 2,763 اشعار):** Fully ingested across all radifs الف تا ے, verified with 100.00% vocabulary coverage, and indexed for instant illustrative couplets (*اشعارِ سند*) across 10 classical masters.
 
 4. **Dynamic Rhyme Tray (`QafiyaTray.tsx`, `qafiyaEngine.ts`):**
    - Docked rhyming workbench dynamically tracking written verses.

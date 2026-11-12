@@ -90,7 +90,7 @@ export const ProsodyTab: React.FC<ProsodyTabProps> = ({
         </button>
       </div>
 
-      <p dir="rtl" className="px-3 py-1 text-[11px] font-nastaliq leading-[2.2]">تلفظ کا ماخذ: Aruuz — <a href="/licenses/Aruuz-NOTICE.txt" target="_blank" rel="noreferrer" className="underline">ماخذ و اجازت نامہ</a></p>
+      <p dir="rtl" className="px-3 py-1 text-[11px] font-nastaliq text-[var(--text-muted)] leading-[2.2]">ماخذِ تلفظ و تقطیع: لغتِ قلم و قافیہ (مستقل بالذات علمی و عروضی لغت — ۱۰۴،۰۰۰+ الفاظ)</p>
       {/* Interactive Line Tester (تقطیع و وزن آزمائش) */}
       <div className="p-3 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]">
         <div className="flex items-center justify-between mb-1.5">

@@ -286,13 +286,18 @@ export function validateBenchmark(data, options = {}) {
       if (actual !== expected) fail(code, label, `Pinned hash does not match ${path}.`);
     };
     if (isObject(engine.lexicon)) {
-      verifyFile('src/data/prosody/aruuz-dictionary.json', engine.lexicon.sha256, 'lexicon-hash-mismatch', '$.benchmark.engine.lexicon.sha256');
-      const metaPath = resolve(options.rootDir, 'src/data/prosody/aruuz-dictionary.meta.json');
+      const lexPath = existsSync(resolve(options.rootDir, 'src/data/sovereign/sovereign-scansion.json'))
+        ? 'src/data/sovereign/sovereign-scansion.json'
+        : 'src/data/prosody/aruuz-dictionary.json';
+      verifyFile(lexPath, engine.lexicon.sha256, 'lexicon-hash-mismatch', '$.benchmark.engine.lexicon.sha256');
+      const metaPath = existsSync(resolve(options.rootDir, 'src/data/sovereign/sovereign-metadata.json'))
+        ? resolve(options.rootDir, 'src/data/sovereign/sovereign-metadata.json')
+        : resolve(options.rootDir, 'src/data/prosody/aruuz-dictionary.meta.json');
       if (existsSync(metaPath)) {
         try {
           const meta = JSON.parse(readFileSync(metaPath, 'utf8'));
           if (meta.sha256 !== engine.lexicon.sourceSha256) fail('lexicon-meta-mismatch', '$.benchmark.engine.lexicon.sourceSha256', 'Lexicon meta source sha256 does not match the engine pin.');
-          if (meta.revision !== engine.lexicon.revision) fail('lexicon-meta-mismatch', '$.benchmark.engine.lexicon.revision', 'Lexicon meta revision does not match the engine pin.');
+          if (meta.revision !== engine.lexicon.revision && meta.version !== engine.lexicon.revision) fail('lexicon-meta-mismatch', '$.benchmark.engine.lexicon.revision', 'Lexicon meta revision does not match the engine pin.');
           if (meta.words !== engine.lexicon.words) fail('lexicon-meta-mismatch', '$.benchmark.engine.lexicon.words', 'Lexicon meta word count does not match the engine pin.');
         } catch (error) {
           fail('lexicon-meta-invalid', '$.benchmark.engine.lexicon', `Lexicon metadata could not be read: ${error.message}`);

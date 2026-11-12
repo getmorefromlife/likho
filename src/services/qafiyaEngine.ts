@@ -10,7 +10,6 @@ import { AroozLexiconService, LexicalReading } from './aroozLexiconService';
 import { pronunciationLetters } from './urduPhonology';
 import { normalizeUrduChars, stripDiacritics, stripInvisibleChars } from './unicodeNormalizer';
 import { RHYME_TREASURY } from '../data/rhymeTreasury';
-import qaafiyahVocabularyRaw from '../data/qaafiyahVocabulary.json';
 
 export type RhymeMatchTier = 'strict' | 'near' | 'uncertain';
 export type LetterCountFilterMode = 'all' | 'max' | 'exact' | 'min';
@@ -438,23 +437,6 @@ function getRhymeLexiconIndex(): Map<string, IndexedLexiconWord> {
         patterns: variants.map((p) => p.replace(/\s+/g, '')).filter(Boolean),
         analyses,
         hasApprovedReading: analyses.length > 0,
-      });
-    }
-  }
-
-  // Index the additional 18,171 unweighted vocabulary entries from Qaafiyah Expert master Urdu_Dict.txt (qaafiyahVocabulary.json)
-  // Strictly kept as unweighted ('?') so no weights are ever fabricated from spelling length.
-  const extraVocab = qaafiyahVocabularyRaw as string[];
-  if (Array.isArray(extraVocab)) {
-    for (const rawW of extraVocab) {
-      const cleanW = cleanQafiyaWord(rawW);
-      if (!cleanW || cleanW.length < 2 || index.has(cleanW)) continue;
-      index.set(cleanW, {
-        word: cleanW,
-        primaryPattern: '?',
-        patterns: ['?'],
-        analyses: [],
-        hasApprovedReading: false,
       });
     }
   }

@@ -132,13 +132,13 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 
   return (
     <>
-      <header className="min-h-[5rem] md:h-[5.25rem] px-3 sm:px-5 lg:px-6 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/95 backdrop-blur-md z-30 select-none flex-shrink-0 transition-all">
+      <header className="min-h-[5.5rem] md:h-[5.75rem] px-3 sm:px-5 lg:px-6 py-2 flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-card)]/95 backdrop-blur-md z-30 select-none flex-shrink-0 transition-all">
         {/* ========================================================================= */}
         {/* Right Side: Identity & Auto-Save Status (Unclipped Nastaliq)              */}
         {/* ========================================================================= */}
         <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 py-1">
           {/* Brand Royal Seal Icon */}
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl overflow-hidden border border-[var(--accent-gold)]/40 shadow-sm flex-shrink-0 bg-[#0f141c] flex items-center justify-center ring-1 ring-[var(--accent-gold)]/20">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-[var(--accent-gold)] shadow-md flex-shrink-0 bg-[#0c1017] flex items-center justify-center ring-2 ring-[var(--accent-gold)]/25">
             <img
               src="/logo.jpg"
               alt="نشانِ قلم و قافیہ"
@@ -147,8 +147,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
           </div>
 
           {/* Brand Name */}
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-bold font-nastaliq text-[var(--text-primary)] leading-[2.2] tracking-tight">
+          <div className="flex items-center gap-2 pb-0.5">
+            <h1 className="text-2xl sm:text-3xl font-bold font-nastaliq text-[var(--text-primary)] leading-[1.8] sm:leading-[1.9] tracking-tight">
               قلم و قافیہ
             </h1>
             {/* Subtle Auto-save indicator dot */}
@@ -162,7 +162,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
           <div
             data-testid="save-status"
             title={saveError || saveStatus.label}
-            className={`hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs border flex-shrink-0 shadow-2xs font-nastaliq leading-[2.2] ${saveStatus.tone}`}
+            className={`hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs border flex-shrink-0 shadow-2xs font-nastaliq ${saveStatus.tone}`}
           >
             {saveStatus.icon}
             <span>{saveStatus.label}</span>

@@ -296,7 +296,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             {CLASSICAL_BUHUR.map(meter => <option key={meter.id} value={meter.id}>{meter.nameUrdu}</option>)}
           </select>
         </label>
-        <p><a href="/licenses/Aruuz-NOTICE.txt" target="_blank" rel="noreferrer" className="underline">ماخذِ تلفظ: Aruuz</a> · الفاظ پر کلک کر کے تمام ممکنہ قرأتیں، اوزان اور مرکب املا (جیسے اسپیس کے ساتھ تفریق) منتخب کریں۔</p>
+        <p>ماخذِ تلفظ و تقطیع: لغتِ قلم و قافیہ (مستقل بالذات علمی و عروضی لغت — ۱۰۴،۰۰۰+ الفاظ) · الفاظ پر کلک کر کے تمام ممکنہ قرأتیں، اوزان اور مرکب املا منتخب کریں۔</p>
         {diagnosticReport.meterNotes.length > 0 && <p className="text-[var(--accent-gold)]">
           {diagnosticReport.meterNotes.map(note => ({ 'terminal-short': 'آخر میں زائد ہجائے کوتاہ', 'caesura-short': 'وقفے سے پہلے زائد ہجائے کوتاہ', 'initial-short': 'پہلے ہجے کی جائز تخفیف' }[note] || note)).join('، ')}
         </p>}

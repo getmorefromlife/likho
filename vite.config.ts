@@ -8,23 +8,17 @@ export default defineConfig({
   build: {
     modulePreload: {
       resolveDependencies: (_filename, deps) =>
-        deps.filter((dep) => !dep.includes('prosody-lexicon') && !dep.includes('qaafiyah-vocab')),
+        deps.filter((dep) => !dep.includes('sovereign-prosody-lexicon')),
     },
-    chunkSizeWarningLimit: 4500,
+    chunkSizeWarningLimit: 7500,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (
-            id.includes('aruuz-dictionary.json') ||
-            id.includes('aruuz-quarantine.json')
+            id.includes('sovereign-scansion.json') ||
+            id.includes('sovereign-quarantine.json')
           ) {
-            return 'prosody-lexicon';
-          }
-          if (
-            id.includes('qaafiyahDataset.json') ||
-            id.includes('qaafiyahVocabulary.json')
-          ) {
-            return 'qaafiyah-vocab';
+            return 'sovereign-prosody-lexicon';
           }
           if (id.includes('node_modules')) {
             if (id.includes('lucide-react')) {

@@ -1,5 +1,5 @@
-/** Compatibility view of the attributed dictionary. No hand-entered estimated weights. */
-import dictionary from './prosody/aruuz-dictionary.json';
+/** Sovereign clean-room view of the 104,000+ word Urdu prosodic lexicon. */
+import dictionary from './sovereign/sovereign-scansion.json';
 import { FOOT_NAMES } from './prosodyMeters';
 import { normalizeUrduChars, stripDiacritics } from '../services/unicodeNormalizer';
 

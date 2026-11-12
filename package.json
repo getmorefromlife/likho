@@ -5,8 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node src/scripts/generateLexicon.js",
-    "generate:lexicon": "node src/scripts/generateLexicon.js",
     "build:sovereign-lexicon": "node scripts/build-sovereign-lexicon.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",

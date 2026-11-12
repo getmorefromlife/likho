@@ -125,7 +125,7 @@ function lexicalOptions(raw: string): { options: ReadingOption[]; source: Scanne
   for (const record of records) {
     if (hasMarks && (!record.vocalized || !markedReadingMatches(raw, record.vocalized))) continue;
     let pattern = nasalContraction ? record.pattern.slice(0, -1) : record.pattern;
-    const rules: string[] = record.sourceId.startsWith('aruuz:exceptions:') ? ['dictionary-exception'] : [];
+    const rules: string[] = record.sourceId.includes('exception') ? ['dictionary-exception'] : [];
     if (nasalContraction) rules.push('nasal-spelling');
     if (SHORT_WORDS.has(key)) pattern = '-';
     else if (!nasalContraction && flexibleEnding(key, pattern, record.language)) {

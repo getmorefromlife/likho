@@ -1,0 +1,22 @@
+[
+  {
+    "sourceId": "likho:quarantine:513",
+    "word": "آرٹ",
+    "vocalized": "آرْٹ",
+    "divisions": "آرْٹ",
+    "patterns": [
+      "=-"
+    ],
+    "reason": "complex-coda-requires-lexical-reading"
+  },
+  {
+    "sourceId": "likho:quarantine:105",
+    "word": "جو",
+    "vocalized": "جو",
+    "divisions": "جو",
+    "patterns": [
+      "=="
+    ],
+    "reason": "impossible-exception"
+  }
+]

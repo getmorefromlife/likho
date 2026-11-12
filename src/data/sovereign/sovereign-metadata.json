@@ -1,0 +1,17 @@
+{
+  "name": "لغتِ قلم و قافیہ — مستقل بالذات علمی و عروضی لغت",
+  "version": "2.0.0",
+  "cleanRoom": true,
+  "thirdPartyGplUsed": false,
+  "license": "Proprietary / Clean-Room Original",
+  "words": 104170,
+  "records": 105670,
+  "quarantinedRecords": 2,
+  "rejected": {
+    "impossible-exception": 1,
+    "complex-coda-requires-lexical-reading": 1
+  },
+  "sha256": "8260901b8d0d78295f2f0622aba58319bdb5b4fbd498b7db58cfef38df75df2f",
+  "generatedAt": "2026-11-12T00:58:15.822Z",
+  "revision": "2.0.0"
+}

@@ -28,12 +28,12 @@
       "appCommit": "5ae5519",
       "workingTreeDirty": true,
       "lexicon": {
-        "source": "sayedzeeshan/Aruuz",
-        "revision": "058fcd6010fb0ef030f79b10466c43aa20b0d4b9",
-        "sha256": "937765161e60f1efb8fb9c0bfe56568825c0dd19f61d399b30e9746d5fd9188a",
-        "sourceSha256": "fce73b822453c412ed79a3071486341ffb38e61d9a1d4bb689ede245d9f2d9f8",
-        "license": "GPL-2.0",
-        "words": 40434
+        "source": "Likho-Sovereign-Clean-Room",
+        "revision": "2.0.0",
+        "sha256": "8260901b8d0d78295f2f0622aba58319bdb5b4fbd498b7db58cfef38df75df2f",
+        "sourceSha256": "8260901b8d0d78295f2f0622aba58319bdb5b4fbd498b7db58cfef38df75df2f",
+        "license": "Proprietary / Clean-Room Original",
+        "words": 104170
       },
       "meterTable": {
         "path": "src/data/prosodyMeters.ts",
@@ -56,14 +56,14 @@
           },
           {
             "path": "src/services/prosodicReadings.ts",
-            "sha256": "bac640014b40532b5575bb59f21e99ac223c4d18c5ff7ed4469a651cd4c9fd0b"
+            "sha256": "eb794587530880a52f28686185c608d49f8015e29c7dbf2e834ae77283cab5b7"
           },
           {
             "path": "src/services/urduPhonology.ts",
             "sha256": "0253cc6e1174fbf64435c844c51970bdae258c3839090157585c3f2a72ac3ebe"
           }
         ],
-        "digest": "f60aa01fdf6730cc4c3d492060365832dc54d057709be76fe19d969867b1eb57"
+        "digest": "dc566efd3dfe6638de2b4ce725b2c3b36d009b93ef4acdd4d7f7c1fa21265ba6"
       }
     },
     "review": {

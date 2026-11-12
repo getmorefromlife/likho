@@ -7,7 +7,6 @@
 import { FOOT_NAMES } from '../data/prosodyMeters';
 import { AroozLexiconService } from './aroozLexiconService';
 import { cleanQafiyaWord } from './qafiyaEngine';
-import qaafiyahVocabulary from '../data/qaafiyahVocabulary.json';
 
 export type SlotState =
   | 'locked'
@@ -201,7 +200,7 @@ export function compileSlotRegex(
  * using compiled visual slot regex.
  */
 export function querySlotRhymes(options: SlotQueryOptions): SlotQueryResult {
-  const { slots, exactLength, meterFilter, includeUnweighted = true } = options;
+  const { slots, exactLength, meterFilter } = options;
   if (slots.length === 0) {
     return { regexString: '', totalMatches: 0, matches: [] };
   }
@@ -229,22 +228,6 @@ export function querySlotRhymes(options: SlotQueryOptions): SlotQueryResult {
         pattern: primaryPattern,
         afail,
       });
-    }
-  }
-
-  // Also search the unweighted Qaafiyah Expert vocabulary when no specific meter pattern is required
-  if (includeUnweighted && !normFilter && Array.isArray(qaafiyahVocabulary)) {
-    for (const rawWord of qaafiyahVocabulary) {
-      const clean = cleanQafiyaWord(rawWord);
-      if (!clean || seen.has(clean)) continue;
-      if (regex.test(clean)) {
-        seen.add(clean);
-        results.push({
-          word: clean,
-          pattern: '',
-          afail: 'تلفظ درکار',
-        });
-      }
     }
   }
 

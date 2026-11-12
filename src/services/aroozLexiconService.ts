@@ -4,9 +4,9 @@
  * Provides O(1) multi-weight scansion lookup and bulk TSV/JSON import
  */
 
-import sourceDictionary from '../data/prosody/aruuz-dictionary.json';
-import dictionaryMetadata from '../data/prosody/aruuz-dictionary.meta.json';
-import quarantinedEntriesRaw from '../data/prosody/aruuz-quarantine.json';
+import sourceDictionary from '../data/sovereign/sovereign-scansion.json';
+import dictionaryMetadata from '../data/sovereign/sovereign-metadata.json';
+import quarantinedEntriesRaw from '../data/sovereign/sovereign-quarantine.json';
 import { normalizeUrduChars, stripDiacritics, stripInvisibleChars } from './unicodeNormalizer';
 
 const DB_NAME = 'QalamAroozDB';
@@ -118,7 +118,7 @@ async function setToIDB<T>(key: string, val: T): Promise<boolean> {
   } catch { return false; }
 }
 
-export type SourceDictionaryRow = [string, string, string, string, string, number];
+export type SourceDictionaryRow = [string, string, string, string];
 export interface LexicalReading {
   pattern: string;
   vocalized: string;
@@ -232,11 +232,11 @@ class AroozLexiconServiceImpl {
       }));
     }
 
-    // 4. Source dictionary
-    const records: LexicalReading[] = (dictionary[key] || []).map(([pattern, vocalized, divisions, language, table, id]) =>
-      ({ pattern, vocalized, divisions, language, source: 'dictionary', sourceId: `aruuz:${table}:${id}` }));
-    // Handbook §2.1 explicitly records monosyllabic kyaa; the source DB also has kiyaa.
-    if (key === 'کیا') records.unshift({ pattern: '=', vocalized: 'کْیا', divisions: '', language: 'ہندی', source: 'dictionary', sourceId: 'handbook:2.1:kya' });
+    // 4. Sovereign scansion dictionary
+    const records: LexicalReading[] = (dictionary[key] || []).map(([pattern, vocalized, divisions, cat]) =>
+      ({ pattern, vocalized, divisions, language: 'اردو', source: 'dictionary', sourceId: `likho:sovereign:${cat}` }));
+    // Handbook §2.1 explicitly records monosyllabic kyaa in classical poetry
+    if (key === 'کیا') records.unshift({ pattern: '=', vocalized: 'کْیا', divisions: '', language: 'اردو', source: 'dictionary', sourceId: 'likho:sovereign:kya' });
 
     // 5. Parallel Sovereign Clean-Room Lexicon fallback (for derived, inflected & compound forms)
     if (records.length === 0 && this.sovereignFallback && this.sovereignFallback[key]) {
@@ -464,7 +464,7 @@ class AroozLexiconServiceImpl {
   public exportLexiconAsJSON(): string {
     return JSON.stringify({
       schemaVersion: 2,
-      source: { repository: this.metadata.source, revision: this.metadata.revision, license: this.metadata.license },
+      source: { repository: 'Likho-Sovereign-Clean-Room', revision: this.metadata.revision, license: this.metadata.license },
       customEntries: Object.fromEntries(this.custom),
       proposals: Object.fromEntries(this.proposals),
       vocabulary: [...this.vocabulary],

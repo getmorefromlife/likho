@@ -191,22 +191,24 @@ export function lookupSovereignWord(
   }
 
   const prefixMatches: string[] = [];
-  for (const k of sortedKeysCache) {
-    if (k !== matchedWord && k.startsWith(key)) {
-      prefixMatches.push(k);
-      if (prefixMatches.length >= maxSuggestions) break;
-    }
-  }
-
-  if (prefixMatches.length < maxSuggestions && key.length >= 2) {
+  if (maxSuggestions > 0) {
     for (const k of sortedKeysCache) {
-      if (
-        k !== matchedWord &&
-        !k.startsWith(key) &&
-        k.includes(key)
-      ) {
+      if (k !== matchedWord && k.startsWith(key)) {
         prefixMatches.push(k);
         if (prefixMatches.length >= maxSuggestions) break;
+      }
+    }
+
+    if (prefixMatches.length < maxSuggestions && key.length >= 2) {
+      for (const k of sortedKeysCache) {
+        if (
+          k !== matchedWord &&
+          !k.startsWith(key) &&
+          k.includes(key)
+        ) {
+          prefixMatches.push(k);
+          if (prefixMatches.length >= maxSuggestions) break;
+        }
       }
     }
   }
