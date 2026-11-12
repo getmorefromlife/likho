@@ -362,28 +362,37 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
   - Zero external cloud services, API keys, or server uploads; 100% private to the poet's device.
   - Direct audio file export and download helper (`downloadRecording`).
 
-- **Interactive Mushaira & Tarannum Studio (`src/components/studio/VoiceRecitationStudioModal.tsx`):**
-  - **Recitation Modes:** Quick toggle between *ترنم (Tarannum / Melodic chanting)* and *تحت اللفظ (Taht-ul-Lafz / Rhythmic recitation)*.
-  - **Studio Vocal Profiles:** 1-Click presets for *شاہی براڈکاسٹ (Broadcast Warmth)*, *ترنم و نغمگی (Tarannum Sheen)*, *قدرتی نکھار (Natural Studio)*, and *خام و اصلی (Raw Mic)*.
+- **Interactive Dedicated Mushaira & Tarannum Studio (`src/components/studio/VoiceRecitationStudioPage.tsx`):**
+  - **Full-Screen Dedicated Workspace View:** Transitioned from a modal into a dedicated 100vw x 100vh studio workstation with dual console architecture (60% Teleprompter / 40% Master Soundboard) and single-click return (`← کینوس پر واپسی`).
+  - **Live Earphone Direct Monitoring (Logic Pro / Pro Tools style):** Connects processed DSP audio directly to the user's headphones in real-time, allowing narrators and poets to audition their live voice with warmth EQ, Mushaira echo, and reverb BEFORE and during recording.
+  - **Audible Mushaira Echo & Delay Rack:**
+    - Four authentic echo modes: *بغیر ایکو (Off)*, *مشاعرہ ایکو (260ms delay, 42% feedback — iconic Pakistani/Indian mushaira speaker sound)*, *تھرتھراہٹ (120ms slapback)*, and *طویل بازگشت (440ms valley echo)*.
+    - Dedicated wet mix slider for fine-tuning echo repeats.
+  - **Dynamic Software Noise Gate & Hardware Filter:**
+    - High-pass 85Hz low-cut rumble filter coupled with browser noise suppression and software threshold ducking, eliminating room hum, fan hiss, and AC noise during pauses between verses.
+  - **Instant-Play Ambient Tanpura Drone (شاہی تنبورہ):**
+    - Independent play/pause control that works before, during, or after recording.
+    - 4-string acoustic synthesis (Pa 196Hz, dual Sa 261.6Hz/262.2Hz with acoustic jawari shimmer, and bass Kharaj Sa 130.8Hz) with volume slider.
   - **Hands-Free Auto-Scrolling Prompter:** Synchronized, speed-controlled (`slow`, `normal`, `fast`) teleprompter that automatically scrolls verses smoothly during recording so the narrator never has to touch the keyboard or screen.
   - **Interactive Couplet Focus:** Clicking any couplet highlights it with active gold illumination.
-  - **Live Dynamic Waveform & Elapsed Timer:** 24 animated frequency visualizer bars pulsing with voice volume, live red indicator dot, and real-time elapsed counter.
+  - **Live Dynamic Waveform & Elapsed Timer:** 28 animated frequency visualizer bars pulsing with voice volume, live red indicator dot, and real-time elapsed counter.
   - **Acoustic Bahar Cadence Synchronization:** Integrates directly with `rhythmicCadenceAudioService`, allowing the poet to hear the exact classical prosodic rhythm (`= / -`) metronome in headphones while recording with selectable tempo (75, 100, 130 BPM).
   - **Playback & Scrubber Hub:** Built-in audio player with play/pause, range scrubber, duration timestamps, re-record take, direct audio file download (`.webm` / `.mp4`), and draft attachment.
 
 - **Workspace & Portfolio Integration:**
+  - `App.tsx`: Renders the dedicated `VoiceRecitationStudioPage` when `isVoiceStudioOpen` is active.
   - `TopNavBar.tsx`: Surfaces a dedicated `🎙️ ترنم اسٹوڈیو` button with an active pulse indicator when a recording exists.
   - `PoetryCanvas.tsx`: Displays an interactive recording badge (`🎙️ صوتی ریکارڈنگ موجود ہے (42s)`) in the metadata header and a toolbar launcher.
   - `PortfolioTab.tsx`: Highlights poems with saved recitations with a subtle `🎙️ صوت` badge.
   - `storageService.ts`: Defensively validates `voiceRecording` metadata to prevent corruption.
 
 - **Verification:**
-  - `npm run test:voice`: **7/7 passed** (duration formatting, Urdu numerals, DSP presets, convolution impulse mathematics, persistence round-trip, malformed payload rejection).
+  - `npm run test:voice`: **8/8 passed** (duration formatting, Urdu numerals, DSP presets, Echo delay math, convolution impulse mathematics, persistence round-trip, malformed payload rejection).
   - `npm run test:storage`: **15/15 passed**.
   - `npm run test:booklet`: **6/6 passed**.
   - `npm run test:license`: **6/6 passed**.
   - `npm run test:prosody`: **78/78 passed**.
-  - `npm run build`: **passed** in 5.16s with zero errors; separate lazy-loaded chunk `VoiceRecitationStudioModal-DLU_EITt.js` (39.2 kB).
+  - `npm run build`: **passed** in 5.05s with zero errors; separate lazy-loaded chunk `VoiceRecitationStudioPage-gUnMn8tC.js` (46.89 kB).
 
 
 - **Classical Multi-Poem Book Compilation Engine (`src/services/diwanBookletService.ts`):**
