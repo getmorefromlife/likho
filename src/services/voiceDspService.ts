@@ -979,7 +979,36 @@ export class VoiceDspEngine {
   // Offline Master WAV Export (Bakes Voice + Background Music + Auto-Ducking)
   // =========================================================================
 
-  public async renderMasteredWav(
+  public async extractWaveformPeaks(dataUrl: string, barCount = 72): Promise<number[]> {
+    const response = await fetch(dataUrl);
+    const arrayBuffer = await response.arrayBuffer();
+    const tempCtx =
+      this.ctx ||
+      new (window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    const decoded = await tempCtx.decodeAudioData(arrayBuffer);
+    const channel = decoded.getChannelData(0);
+    const safeBars = Math.max(12, Math.min(200, Math.floor(barCount)));
+    const blockSize = Math.max(1, Math.floor(channel.length / safeBars));
+    const rawPeaks: number[] = [];
+    let maxPeak = 0.001;
+
+    for (let i = 0; i < safeBars; i++) {
+      const start = i * blockSize;
+      const end = Math.min(channel.length, start + blockSize);
+      let peak = 0;
+      for (let j = start; j < end; j++) {
+        const abs = Math.abs(channel[j]);
+        if (abs > peak) peak = abs;
+      }
+      rawPeaks.push(peak);
+      if (peak > maxPeak) maxPeak = peak;
+    }
+
+    return rawPeaks.map((p) => Math.max(0.08, Math.min(1, p / maxPeak)));
+  }
+
+  public async renderMasteredAudioBuffer(
     vocalDataUrl: string,
     options: {
       musicVolume?: number;
@@ -988,7 +1017,7 @@ export class VoiceDspEngine {
       trimStartSec?: number;
       trimEndSec?: number;
     } = {}
-  ): Promise<Blob> {
+  ): Promise<AudioBuffer> {
     const response = await fetch(vocalDataUrl);
     const arrayBuffer = await response.arrayBuffer();
 
@@ -1061,7 +1090,20 @@ export class VoiceDspEngine {
       musicSource.start(0);
     }
 
-    const renderedBuffer = await offlineCtx.startRendering();
+    return offlineCtx.startRendering();
+  }
+
+  public async renderMasteredWav(
+    vocalDataUrl: string,
+    options: {
+      musicVolume?: number;
+      musicLoop?: boolean;
+      includeBgMusic?: boolean;
+      trimStartSec?: number;
+      trimEndSec?: number;
+    } = {}
+  ): Promise<Blob> {
+    const renderedBuffer = await this.renderMasteredAudioBuffer(vocalDataUrl, options);
     return encodeAudioBufferToWav(renderedBuffer);
   }
 }

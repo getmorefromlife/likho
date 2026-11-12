@@ -27,12 +27,17 @@ try {
       'src/services/voiceRecitationService.ts',
       'src/services/voiceDspService.ts',
       'src/services/storageService.ts',
+      'src/services/mushairaReelService.ts',
     ],
     bundle: true,
     platform: 'node',
     format: 'esm',
     outdir: temporary,
   });
+
+  const { splitPoemIntoCouplets, computeReelActiveVerseIndex, REEL_THEMES } = await import(
+    pathToFileURL(join(temporary, 'mushairaReelService.js'))
+  );
 
   const { formatDurationMMSS, toUrduNumerals } = await import(
     pathToFileURL(join(temporary, 'voiceRecitationService.js'))
@@ -245,6 +250,21 @@ try {
     assert.ok(loaded && loaded.voiceRecording);
     assert.equal(loaded.voiceRecording.trimStartSeconds, 1.4);
     assert.equal(loaded.voiceRecording.trimEndSeconds, 16.2);
+  });
+
+  await test('mushairaReelService splits poem into couplets, maps progress, and exposes 3 themes', () => {
+    assert.equal(Object.keys(REEL_THEMES).length, 3);
+    assert.ok(REEL_THEMES.midnight_mushaira.label.includes('شب'));
+
+    const couplets = splitPoemIntoCouplets('مصرع اول\nمصرع ثانی\n\nمصرع سوم\nمصرع چہارم');
+    assert.equal(couplets.length, 2);
+    assert.deepEqual(couplets[0], ['مصرع اول', 'مصرع ثانی']);
+    assert.deepEqual(couplets[1], ['مصرع سوم', 'مصرع چہارم']);
+
+    assert.equal(computeReelActiveVerseIndex(0.0, 2), 0);
+    assert.equal(computeReelActiveVerseIndex(0.49, 2), 0);
+    assert.equal(computeReelActiveVerseIndex(0.51, 2), 1);
+    assert.equal(computeReelActiveVerseIndex(1.0, 2), 1);
   });
 
   console.log(`${passed} voice recitation & DSP studio checks passed.`);

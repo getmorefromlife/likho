@@ -22,6 +22,7 @@ import {
   X,
   Upload,
   Wand2,
+  Film,
 } from 'lucide-react';
 import { PoemDraft, VoiceRecordingMeta } from '../../types/editor';
 import {
@@ -35,6 +36,12 @@ import {
   CADENCE_TEMPO_LABELS,
 } from '../../services/rhythmicCadenceAudioService';
 import { ARKAN_TO_PATTERN } from '../../services/wordIntentionService';
+import { InteractiveWaveform } from './InteractiveWaveform';
+import {
+  REEL_THEMES,
+  ReelThemeId,
+  renderMushairaVideoReel,
+} from '../../services/mushairaReelService';
 import {
   voiceDspService,
   VocalDspConfig,
@@ -127,6 +134,13 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
   const [duckingSpeed, setDuckingSpeed] = useState<DuckingSpeedPreset>('cinematic');
   const [liveDuckGain, setLiveDuckGain] = useState<number>(1.0);
   const [isRenderingWav, setIsRenderingWav] = useState<boolean>(false);
+
+  // Interactive Waveform & 9:16 Mushaira Video Reel State
+  const [waveformPeaks, setWaveformPeaks] = useState<number[]>([]);
+  const [isLoadingWaveform, setIsLoadingWaveform] = useState<boolean>(false);
+  const [reelTheme, setReelTheme] = useState<ReelThemeId>('midnight_mushaira');
+  const [isRenderingReel, setIsRenderingReel] = useState<boolean>(false);
+  const [reelProgress, setReelProgress] = useState<number>(0);
 
   // Auto-Scrolling Prompter State
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState<boolean>(true);
@@ -663,10 +677,85 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
     }
   };
 
+  // Extract interactive waveform peaks when active recording changes
+  useEffect(() => {
+    let cancelled = false;
+    if (!currentRecording?.blobDataUrl) {
+      setWaveformPeaks([]);
+      return;
+    }
+    setIsLoadingWaveform(true);
+    voiceDspService
+      .extractWaveformPeaks(currentRecording.blobDataUrl, 72)
+      .then((peaks) => {
+        if (!cancelled) setWaveformPeaks(peaks);
+      })
+      .catch(() => {
+        if (!cancelled) setWaveformPeaks([]);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingWaveform(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentRecording?.id, currentRecording?.blobDataUrl]);
+
   // 8. Download Audio File
   const handleDownload = () => {
     if (!currentRecording) return;
     voiceRecitationService.downloadRecording(currentRecording, draft.title);
+  };
+
+  const handleSeekToSeconds = (seconds: number) => {
+    if (!audioPlayerRef.current || !currentRecording) return;
+    const clamped = Math.max(0, Math.min(currentRecording.durationSeconds, seconds));
+    audioPlayerRef.current.currentTime = clamped;
+    setAudioCurrentTime(clamped);
+    setAudioProgress((clamped / Math.max(0.1, currentRecording.durationSeconds)) * 100);
+  };
+
+  const handleExportVideoReel = async () => {
+    if (!currentRecording || isRenderingReel) return;
+    setIsRenderingReel(true);
+    setReelProgress(0);
+    setErrorMessage(null);
+    try {
+      const masteredBuffer = await voiceDspService.renderMasteredAudioBuffer(
+        currentRecording.blobDataUrl,
+        {
+          musicVolume: bgMusicVolume,
+          musicLoop: bgMusicLoop,
+          includeBgMusic: bgMusicInfo.loaded,
+          trimStartSec: trimStart,
+          trimEndSec: trimEnd > trimStart ? trimEnd : currentRecording.durationSeconds,
+        }
+      );
+
+      const videoBlob = await renderMushairaVideoReel({
+        title: draft.title || 'بلا عنوان کلام',
+        content: draft.content || '',
+        audioBuffer: masteredBuffer,
+        themeId: reelTheme,
+        onProgress: (pct) => setReelProgress(pct),
+      });
+
+      const url = URL.createObjectURL(videoBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeTitle = (draft.title || 'likho-mushaira-reel').replace(/[^\w\u0600-\u06FF-]+/g, '_');
+      a.download = `${safeTitle}-9x16-reel.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : 'ویڈیو ریل تیار کرنے میں دشواری پیش آئی۔'
+      );
+    } finally {
+      setIsRenderingReel(false);
+    }
   };
 
   return (
@@ -1543,8 +1632,17 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
                 preload="metadata"
               />
 
-              {/* Scrubber Bar */}
-              <div className="space-y-1.5">
+              {/* Interactive Waveform & Scrubber Bar */}
+              <div className="space-y-2">
+                <InteractiveWaveform
+                  peaks={waveformPeaks}
+                  durationSeconds={currentRecording.durationSeconds}
+                  currentTime={audioCurrentTime}
+                  trimStart={trimStart}
+                  trimEnd={trimEnd > trimStart ? trimEnd : currentRecording.durationSeconds}
+                  isLoading={isLoadingWaveform}
+                  onSeekSeconds={handleSeekToSeconds}
+                />
                 <input
                   type="range"
                   min="0"
@@ -1662,6 +1760,59 @@ export const VoiceRecitationStudioPage: React.FC<VoiceRecitationStudioPageProps>
                   </div>
                 </div>
               )}
+
+              {/* Mushaira 9:16 Video Reel Export (WhatsApp Status / Reels / Shorts) */}
+              <div className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)]/70 space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-nastaliq">
+                  <span className="font-bold text-[var(--accent-gold)] flex items-center gap-1.5">
+                    <Film className="w-3.5 h-3.5" />
+                    <span>مشاعرہ ویڈیو ریل (9:16 HD پورٹریٹ)</span>
+                  </span>
+                  <span className="text-[10px] text-[var(--text-muted)]">WhatsApp / Reels</span>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1">
+                    {(Object.keys(REEL_THEMES) as ReelThemeId[]).map((tid) => (
+                      <button
+                        key={tid}
+                        type="button"
+                        onClick={() => setReelTheme(tid)}
+                        disabled={isRenderingReel}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-nastaliq border transition-all cursor-pointer ${
+                          reelTheme === tid
+                            ? 'bg-[var(--accent-gold)] text-white font-bold border-[var(--accent-gold)]'
+                            : 'bg-[var(--bg-subtle)] border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-[var(--accent-gold)]'
+                        }`}
+                      >
+                        {REEL_THEMES[tid].label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleExportVideoReel}
+                    disabled={isRenderingReel || isRenderingWav}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--accent-gold)] text-white font-nastaliq text-[11px] font-bold hover:opacity-90 shadow-2xs cursor-pointer disabled:opacity-50"
+                    title="اشعار، عنوان، اور ڈکنگ شدہ آڈیو کے ساتھ 9:16 ویڈیو ریل برآمد کریں"
+                  >
+                    <Film className="w-3.5 h-3.5" />
+                    <span>
+                      {isRenderingReel ? `ریل تیار ہو رہی ہے (${reelProgress}%)` : 'ویڈیو ریل بنائیں (.webm)'}
+                    </span>
+                  </button>
+                </div>
+
+                {isRenderingReel && (
+                  <div className="h-1.5 w-full rounded-full bg-[var(--bg-subtle)] overflow-hidden">
+                    <div
+                      className="h-full bg-[var(--accent-gold)] transition-all duration-150"
+                      style={{ width: `${reelProgress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* Player Row */}
               <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--border-subtle)]/40">
