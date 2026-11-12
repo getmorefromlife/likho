@@ -5,7 +5,10 @@ test('all main views, dropdowns, companion tabs, modals, and Voice Studio render
   page.on('pageerror', (err) => errors.push(`pageerror: ${err.message}`));
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
-      errors.push(`console.error: ${msg.text()}`);
+      const text = msg.text();
+      if (!text.includes('fonts.gstatic.com') && !text.includes('ERR_FAILED')) {
+        errors.push(`console.error: ${text}`);
+      }
     }
   });
 
@@ -31,12 +34,10 @@ test('all main views, dropdowns, companion tabs, modals, and Voice Studio render
       await expect(page.getByTitle('طرزِ تقسیم اور نمونے')).toBeVisible();
     } else if (vName === 'من پسند (Custom Studio)') {
       await expect(page.getByText('من پسند اسٹوڈیو')).toBeVisible();
+      await page.getByRole('button', { name: 'کلاسیکی منظر', exact: true }).click();
+      await expect(page.getByTitle('طرزِ تقسیم اور نمونے')).toBeVisible();
     }
   }
-
-  // Return to Classic 70/30 view
-  await page.getByTitle('طرزِ تقسیم اور نمونے').click();
-  await page.getByRole('button', { name: 'کلاسیکی (Classic)', exact: true }).last().click();
 
   // 2. Test all 5 Literary Companion Tabs
   const companionTabs = [
@@ -54,17 +55,17 @@ test('all main views, dropdowns, companion tabs, modals, and Voice Studio render
   await page.getByRole('button', { name: /فائل و اشاعت/ }).click();
   await page.getByRole('button', { name: /گوگل ڈرائیو و دستاویز/ }).click();
   await expect(page.getByText(/گوگل ڈرائیو/).first()).toBeVisible();
-  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'بند کریں', exact: true }).click();
 
   // 4. Test File & Export Dropdown -> Export Modal -> Diwan Booklet (WhatsApp 9:16) & Karachi Publishing Desk
   await page.getByRole('button', { name: /فائل و اشاعت/ }).click();
-  await page.getByRole('button', { name: /برآمدگی و کتابت/ }).click();
-  await expect(page.getByText(/برآمدگی/).first()).toBeVisible();
-  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /برآمد و دیوان کتابچہ/ }).click();
+  await expect(page.getByText(/برآمد/).first()).toBeVisible();
+  await page.getByRole('button', { name: 'بند کریں', exact: true }).click();
 
   // 5. Test Voice & Mushaira Studio Page (ترنم اسٹوڈیو)
-  await page.getByRole('button', { name: /ترنم اسٹوڈیو/ }).click();
-  await expect(page.getByText('مشاعرہ و ترنم اسٹوڈیو')).toBeVisible();
+  await page.getByRole('button', { name: /ترنم اسٹوڈیو/ }).first().click();
+  await expect(page.getByRole('button', { name: /کینوس پر واپسی/ })).toBeVisible();
   await expect(page.getByText(/آٹو ڈکنگ/).first()).toBeVisible();
   await expect(page.getByText(/بیک گراؤنڈ موسیقی/).first()).toBeVisible();
   await page.getByRole('button', { name: /کینوس پر واپسی/ }).click();

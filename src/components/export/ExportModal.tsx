@@ -68,8 +68,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            aria-label="بند کریں"
+            className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
