@@ -98,6 +98,11 @@ textarea.leading-\[2\.4\],
   background: linear-gradient(90deg, #c59a27 0%, #f4e39b 45%, #ffffff 50%, #f4e39b 55%, #c59a27 100%);
   background-size: 250% 100%;
   animation: goldShimmer 5s infinite linear;
+  color: #111318 !important;
+}
+
+.btn-gold-shimmer * {
+  color: inherit !important;
 }
 
 .btn-gold-shimmer:hover {
@@ -124,8 +129,18 @@ button.font-nastaliq,
   color: var(--text-on-gold) !important;
 }
 
+.bg-\[var\(--accent-gold\)\] *,
+.hover\:bg-\[var\(--accent-gold\)\]:hover * {
+  color: inherit !important;
+}
+
 .hover\:bg-\[var\(--accent-gold\)\]:hover {
   color: var(--text-on-gold) !important;
+}
+
+/* Guarantee WCAG AAA text contrast for gold badges/links on parchment (Sepia) and white canvases */
+:root:not([data-theme="dark"]) .text-\[var\(--accent-gold\)\] {
+  color: #6b3e0c !important;
 }
 
 /* Strengthen semantic badge text contrast on light/parchment themes (Sepia & White) */

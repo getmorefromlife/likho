@@ -13,6 +13,8 @@ import {
   MeterAtlasEntry,
   REVIEW_STAGE_LABELS,
 } from '../../data/meterReferenceAtlas';
+import { BaharBeatPlayer } from '../common/BaharBeatPlayer';
+import { PlaybackTick } from '../../services/rhythmicCadenceAudioService';
 
 interface MeterReferenceViewProps {
   entry: MeterAtlasEntry;
@@ -35,6 +37,7 @@ export const MeterReferenceView: React.FC<MeterReferenceViewProps> = ({
   const [selectedWordIdx, setSelectedWordIdx] = useState<number>(0);
   const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
   const [hintStep, setHintStep] = useState<number>(0);
+  const [activeBeatTick, setActiveBeatTick] = useState<PlaybackTick | null>(null);
 
   const buttonClass =
     'rounded-xl border border-[var(--border-subtle)] px-3.5 py-1.5 text-xs hover:border-[var(--accent-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-gold)] transition-all cursor-pointer';
@@ -110,13 +113,35 @@ export const MeterReferenceView: React.FC<MeterReferenceViewProps> = ({
 
           {/* Persistent RTL Symbol Legend & Foot Strip */}
           <div className="pt-2 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+              <span className="text-xs font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
+                <span>صوتی آہنگ و ارکانِ بحر:</span>
+              </span>
+              <BaharBeatPlayer
+                pattern={entry.patternsList.join(' ')}
+                afailList={entry.afailList}
+                onActiveTick={setActiveBeatTick}
+              />
+            </div>
+
             <div className="flex flex-wrap items-center justify-center gap-2 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
               {entry.afailList.map((rukn, idx) => {
                 const rawPat = entry.patternsList[idx] || '';
+                const isRuknActive = activeBeatTick?.ruknIndex === idx;
+
+                let globalOffset = 0;
+                for (let i = 0; i < idx; i++) {
+                  globalOffset += (entry.patternsList[i] || '').length;
+                }
+
                 return (
                   <div
                     key={idx}
-                    className="flex flex-col items-center px-3 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-subtle)]"
+                    className={`flex flex-col items-center px-3.5 py-1.5 rounded-lg border transition-all ${
+                      isRuknActive
+                        ? 'border-[var(--accent-gold)] ring-2 ring-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/10 scale-105 shadow-xs'
+                        : 'bg-[var(--bg-card)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/40'
+                    }`}
                   >
                     <span className="text-sm font-bold text-[var(--accent-gold)]">{rukn}</span>
                     <span
@@ -124,18 +149,26 @@ export const MeterReferenceView: React.FC<MeterReferenceViewProps> = ({
                       title="دائیں سے بائیں: پہلا ہجا دائیں جانب"
                       className="inline-flex items-center gap-1 mt-1 font-mono text-xs font-bold text-[var(--text-primary)]"
                     >
-                      {rawPat.split('').map((sym, sIdx) => (
-                        <span
-                          key={sIdx}
-                          className={`px-1 rounded ${
-                            sym === '='
-                              ? 'bg-[var(--accent-gold)]/20 text-[var(--accent-gold)]'
-                              : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)]'
-                          }`}
-                        >
-                          {sym}
-                        </span>
-                      ))}
+                      {rawPat.split('').map((sym, sIdx) => {
+                        const globalSyllableIdx = globalOffset + sIdx;
+                        const isSyllableActive =
+                          activeBeatTick?.syllableGlobalIndex === globalSyllableIdx;
+
+                        return (
+                          <span
+                            key={sIdx}
+                            className={`px-1.5 py-0.5 rounded transition-all ${
+                              isSyllableActive
+                                ? 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] scale-125 shadow-xs font-bold'
+                                : sym === '='
+                                ? 'bg-[var(--accent-gold)]/20 text-[var(--accent-gold)]'
+                                : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)]'
+                            }`}
+                          >
+                            {sym}
+                          </span>
+                        );
+                      })}
                     </span>
                   </div>
                 );

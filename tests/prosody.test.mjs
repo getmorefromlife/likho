@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
 const temporary = await mkdtemp(join(tmpdir(), 'likho-prosody-'));
 try {
-  await build({ stdin: { contents: `export * from './src/services/aroozEngine'; export * from './src/services/meterRepairEngine'; export * from './src/services/urduPhonology'; export * from './src/services/prosodyEngine'; export * from './src/services/fileIngestionService'; export * from './src/services/qafiyaEngine'; export * from './src/services/wordIntentionService'; export * from './src/services/slotRhymeBuilder'; export * from './src/services/sovereignLexiconService'; export * from './src/services/zameenMatcherService'; export * from './src/data/meterReferenceAtlas'; export * from './src/data/sovereign/classicalDiwanCorpus';`, resolveDir: process.cwd() }, bundle: true, platform: 'node', format: 'esm', outfile: join(temporary, 'engine.mjs') });
+  await build({ stdin: { contents: `export * from './src/services/aroozEngine'; export * from './src/services/meterRepairEngine'; export * from './src/services/urduPhonology'; export * from './src/services/prosodyEngine'; export * from './src/services/fileIngestionService'; export * from './src/services/qafiyaEngine'; export * from './src/services/wordIntentionService'; export * from './src/services/slotRhymeBuilder'; export * from './src/services/sovereignLexiconService'; export * from './src/services/zameenMatcherService'; export * from './src/services/rhythmicCadenceAudioService'; export * from './src/data/meterReferenceAtlas'; export * from './src/data/sovereign/classicalDiwanCorpus';`, resolveDir: process.cwd() }, bundle: true, platform: 'node', format: 'esm', outfile: join(temporary, 'engine.mjs') });
   const e = await import(pathToFileURL(join(temporary, 'engine.mjs')));
   let passed = 0;
   async function test(name, fn) { await fn(); passed++; console.log(`✓ ${name}`); }
@@ -678,6 +678,31 @@ try {
     assert.equal(enforcedEval.report.defects.length, 0);
     assert.equal(enforcedEval.report.wordSpans[6].syllables, '-==');
     assert.ok(enforcedEval.report.wordSpans[6].readingRules.includes(e.POET_ENFORCED_BAHAR_RULE));
+  });
+  await test('acoustic cadence audio service parses meter patterns and maps syllables to rhythmic duration units', () => {
+    // Ramal pattern: =-== =-== =-== =-= with 4 feet
+    const schedule = e.rhythmicCadenceAudioService.parseCadenceSchedule(
+      '=-== =-== =-== =-=',
+      ['فاعلاتن', 'فاعلاتن', 'فاعلاتن', 'فاعلن']
+    );
+    assert.ok(schedule.length > 0);
+    // 4 feet with 4+4+4+3 = 15 audible syllables + 3 pauses between feet = 18 schedule items
+    const audibleSyllables = schedule.filter((s) => s.symbol !== 'pause');
+    assert.equal(audibleSyllables.length, 15);
+    // Long syllables take 2 duration units, short syllables take 1
+    assert.equal(audibleSyllables[0].symbol, '=');
+    assert.equal(audibleSyllables[0].durationUnits, 2);
+    assert.equal(audibleSyllables[0].ruknIndex, 0);
+    assert.equal(audibleSyllables[1].symbol, '-');
+    assert.equal(audibleSyllables[1].durationUnits, 1);
+    // Check pause between first and second foot
+    const firstPause = schedule.find((s) => s.symbol === 'pause');
+    assert.ok(firstPause);
+    assert.equal(firstPause.ruknIndex, 0);
+    // Check tempo configs
+    assert.equal(e.CADENCE_TEMPO_BPM.slow, 75);
+    assert.equal(e.CADENCE_TEMPO_BPM.medium, 100);
+    assert.equal(e.CADENCE_TEMPO_BPM.fast, 130);
   });
   console.log(`${passed} prosody checks passed.`);
 } finally { await rm(temporary,{recursive:true,force:true}); }

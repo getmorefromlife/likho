@@ -35,10 +35,13 @@ When the owner requests further learning work, expand source-checked meter refer
 - **Behavior:** User enters a license key (e.g. `LKHO-XXXX-XXXX-XXXX-XXXX`) in `ProUpgradeModal.tsx`. The key is validated using a cryptographic checksum offline, permanently unlocking Lifetime Pro in `localStorage` and adding a gold verified badge to the navbar.
 - **Implementation:** Client-side HMAC/checksum algorithm; owner can generate license keys using a private utility script for any paying customer.
 
-#### Feature 4: Web Audio Rhythmic Metronome (صوتی بحری تال و مترونم — 20 mins)
-- **Objective:** Enable poets to listen to the acoustic cadence of their chosen meter.
-- **Behavior:** A "لے سنیں (Play Beat)" toggle in `ScansionCard.tsx` and `ProsodyTab.tsx` with a tempo slider (BPM 60-140). Plays rhythmic acoustic beats matching short (`-`) and long (`=`) syllables (e.g., `تن تنا تن تن تنا تن`).
-- **Implementation:** Browser's native `AudioContext` with zero external audio assets. Zero bundle bloat.
+#### ✅ Feature 4: Web Audio Rhythmic Metronome (صوتی بحری تال و ترنم — COMPLETED November 12, 2026)
+- **Objective:** Enable poets and learners to hear the acoustic cadence/beat of any scanned line or meter form in real time.
+- **Implemented Behavior:** `src/services/rhythmicCadenceAudioService.ts` and `src/components/common/BaharBeatPlayer.tsx` synthesize natural percussion beats using native Web Audio (deep acoustic drum for long syllables `=`, crisp percussive strike for short `-`, and breath pauses between feet). Integrated into `ScansionCard.tsx` (per-line scansion) and `MeterReferenceView.tsx` (50-meter atlas) with synchronized real-time visual tracking of active syllables and Rukn cards. Zero external audio assets, zero bundle bloat (`78/78` prosody checks passing).
+
+#### ✅ Global WCAG AA/AAA Contrast & Legibility Overhaul (COMPLETED November 12, 2026)
+- **Objective:** Eliminate contrast issues across the website so literary text and interactive buttons are clear and readable in all 3 themes (کاغذ Sepia, شبینہ Obsidian, سادہ Clean White).
+- **Implemented Behavior:** Enforced high-contrast button styling (`text-[var(--text-on-gold)]` and `.bg-[var(--accent-gold)] *` inheritance), upgraded secondary action buttons (e.g. «یہ وزن مقرر کریں», «اس لفظ کا وزن تجویز کریں», and poetic spelling alternatives) from faint yellow tints to crisp cards with primary ink, enhanced gold text on light themes to deep rich bistre `#6b3e0c` (7.5+:1 AAA ratio), and fixed icon contrast across modals and toolbars.
 
 ---
 

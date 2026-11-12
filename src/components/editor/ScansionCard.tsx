@@ -34,6 +34,8 @@ import {
 } from '../../services/wordIntentionService';
 import { QuickScansionCorrectionModal } from '../companion/QuickScansionCorrectionModal';
 import { ProsodicPatternView } from '../common/ProsodicPatternView';
+import { BaharBeatPlayer } from '../common/BaharBeatPlayer';
+import { PlaybackTick } from '../../services/rhythmicCadenceAudioService';
 
 interface ScansionCardProps {
   scansion?: ScansionResult;
@@ -91,6 +93,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
   const [customBaharName, setCustomBaharName] = useState(poemMeterName || '');
   const [strictEnforceBahar, setStrictEnforceBahar] = useState(false);
   const [savedWordToast, setSavedWordToast] = useState<string | null>(null);
+  const [activeBeatTick, setActiveBeatTick] = useState<PlaybackTick | null>(null);
 
   // Resolve poem-level or card-level enforced meter (catalog or custom poet-defined Arkan)
   const resolvedEnforcedMeter = useMemo(
@@ -361,7 +364,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
               className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-nastaliq text-[11px] font-bold transition-all border shadow-2xs ${
                 isRepairOpen
                   ? 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] border-[var(--accent-gold)]'
-                  : 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/30 hover:bg-[var(--accent-gold)]/25'
+                  : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10'
               }`}
               title="شکستِ بحر کی نشان دہی اور تجاویز ملاحظہ فرمائیں"
             >
@@ -863,10 +866,10 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                           onClick={() =>
                             handlePinReading(activeWordMenu.wordIndex, reading.pattern)
                           }
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold leading-[2.1] transition-all cursor-pointer border ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold leading-[2.1] transition-all cursor-pointer border shadow-2xs ${
                             reading.isPinnedByPoet
-                              ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
-                              : 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/40 hover:bg-[var(--accent-gold)] hover:text-[var(--text-on-gold)]'
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold)] hover:text-[var(--text-on-gold)]'
                           }`}
                         >
                           <Check className="w-3.5 h-3.5 shrink-0" />
@@ -883,7 +886,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                             onClick={() =>
                               handleApplyVocalizedWord(activeWordMenu.wordIndex, reading)
                             }
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs leading-[2.1] bg-[var(--bg-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)] cursor-pointer"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs leading-[2.1] bg-[var(--bg-card)] text-[var(--text-primary)] hover:border-[var(--accent-gold)] hover:text-[var(--accent-gold)] border border-[var(--border-subtle)] cursor-pointer shadow-2xs"
                           >
                             <span>متن میں «{reading.vocalizedSpelling}» درج کریں</span>
                           </button>
@@ -898,7 +901,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             {/* 3. Attested Poetic Spelling Alternatives */}
             {activeWordMenu.poeticSpellings.length > 0 && (
               <div className="space-y-1.5">
-                <div className="text-[11px] font-bold text-sky-600 dark:text-sky-400">
+                <div className="text-[11px] font-bold text-sky-700 dark:text-sky-300">
                   <span>مستعمل شعری متبادل املا (تخفیف و اشباع):</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -924,7 +927,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                           onClick={() =>
                             handleApplyPoeticSpelling(activeWordMenu.wordIndex, alt)
                           }
-                          className="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-600 dark:text-sky-300 border border-sky-500/40 font-bold text-[11px] hover:bg-sky-500/30 cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-[11px] cursor-pointer shadow-2xs transition-all"
                         >
                           «{alt.alternativeWord}» درج کریں
                         </button>
@@ -938,20 +941,20 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             {/* 4. Fallback note if completely unknown with no splits */}
             {activeWordMenu.directReadings.length === 0 &&
               activeWordMenu.compoundSplits.length === 0 && (
-                <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                <p className="text-[11px] text-amber-700 dark:text-amber-300">
                   اس لفظ کا اندراج لغت میں موجود نہیں اور نہ ہی یہ کسی معروف مرکب لفظ میں تقسیم ہو سکا۔ آپ اوپر اعراب ٹول بار سے اس پر حرکات (زبر، زیر، پیش، جزم) لگا کر واضح تلفظ دے سکتے ہیں، یا «انتظامِ لغت» میں اس کا وزن محفوظ کر سکتے ہیں۔
                 </p>
               )}
 
             {/* 5. Quick Scansion Correction Trigger */}
             <div className="pt-2.5 mt-2 border-t border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[11px] text-[var(--text-muted)] font-nastaliq">
+              <span className="text-[11px] text-[var(--text-secondary)] font-nastaliq">
                 کیا اس لفظ کا وزن یا تقطیع نامکمل یا غلط ہے؟
               </span>
               <button
                 type="button"
                 onClick={() => setCorrectingWord(activeWordMenu.word)}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-nastaliq bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 hover:bg-[var(--accent-gold)] hover:text-[var(--text-on-gold)] transition-all font-bold cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-nastaliq bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold)] hover:text-[var(--text-on-gold)] transition-all font-bold cursor-pointer shadow-2xs"
                 title="اس لفظ کا صحیح عروضی وزن تجویز یا درست فرمائیں"
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -976,16 +979,42 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
       {/* Middle & Bottom Row: Afa'il Breakdown & Rhythmic Pattern (- and =) in RTL order */}
       {displayedScansion.isMatched && displayedScansion.afailList.length > 0 ? (
         <div className="pt-2 border-t border-[var(--border-subtle)]/60 space-y-2">
+          {/* Audio Rhythm Player & Title Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+            <span className="font-nastaliq text-xs font-bold text-[var(--accent-gold)] flex items-center gap-1.5">
+              <span>صوتی بحری تال و ارکانِ تقطیع:</span>
+            </span>
+            <BaharBeatPlayer
+              pattern={
+                displayedScansion.groupedPatternList
+                  .map((g) => g.replace(/\s+/g, ''))
+                  .join(' ') || displayedScansion.rawSyllables
+              }
+              afailList={displayedScansion.afailList}
+              onActiveTick={setActiveBeatTick}
+            />
+          </div>
+
           {/* Afa'il Breakdown: rendered right-to-left */}
           <div dir="rtl" className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
             {displayedScansion.afailList.map((rukn, idx) => {
               const rawPattern = displayedScansion.groupedPatternList[idx] || '';
               const symbols = rawPattern.replace(/\s+/g, '').split('');
+              const isRuknActive = activeBeatTick?.ruknIndex === idx;
+
+              let globalOffset = 0;
+              for (let i = 0; i < idx; i++) {
+                globalOffset += (displayedScansion.groupedPatternList[i] || '').replace(/\s+/g, '').length;
+              }
 
               return (
                 <div
                   key={idx}
-                  className="flex flex-col items-center px-3.5 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)]/70 shadow-2xs transition-all hover:border-[var(--accent-gold)]/50"
+                  className={`flex flex-col items-center px-3.5 py-1.5 rounded-lg border transition-all ${
+                    isRuknActive
+                      ? 'border-[var(--accent-gold)] ring-2 ring-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/10 scale-105 shadow-xs'
+                      : 'bg-[var(--bg-surface)] border border-[var(--border-subtle)]/70 shadow-2xs hover:border-[var(--accent-gold)]/50'
+                  }`}
                 >
                   <span
                     style={{ fontFamily }}
@@ -997,13 +1026,19 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                   <div dir="rtl" className="flex items-center justify-center gap-1 mt-1">
                     {symbols.map((sym, sIdx) => {
                       const isLong = sym === '=';
+                      const globalSyllableIdx = globalOffset + sIdx;
+                      const isSyllableActive =
+                        activeBeatTick?.syllableGlobalIndex === globalSyllableIdx;
+
                       return (
                         <span
                           key={sIdx}
-                          className={`inline-flex items-center justify-center min-w-[18px] h-5 px-1 rounded text-xs font-mono font-bold leading-none select-none transition-transform hover:scale-110 ${
-                            isLong
-                              ? 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 shadow-2xs'
-                              : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
+                          className={`inline-flex items-center justify-center min-w-[18px] h-5 px-1 rounded text-xs font-mono font-bold leading-none select-none transition-all ${
+                            isSyllableActive
+                              ? 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] border border-[var(--accent-gold)] scale-125 shadow-sm font-extrabold'
+                              : isLong
+                              ? 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 shadow-2xs hover:scale-110'
+                              : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:scale-110'
                           }`}
                           title={isLong ? 'ہجائے بلند (Long Syllable: =)' : 'ہجائے کوتاہ (Short Syllable: -)'}
                         >
@@ -1055,42 +1090,76 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
       ) : (
         <div className="pt-2 border-t border-[var(--border-subtle)]/60 space-y-2">
           {displayedScansion.groupedPatternList.length > 0 && (
-            <div dir="rtl" className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-              {displayedScansion.groupedPatternList.map((grp, idx) => {
-                const symbols = grp.replace(/\s+/g, '').split('');
-                return (
-                  <div
-                    key={idx}
-                    className="flex flex-col items-center px-3.5 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)]/70 shadow-2xs transition-all hover:border-[var(--accent-gold)]/50"
-                  >
-                    <span
-                      style={{ fontFamily }}
-                      className="font-nastaliq font-bold text-xs text-[var(--accent-gold)] leading-relaxed"
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+                <span className="font-nastaliq text-xs font-bold text-[var(--accent-gold)] flex items-center gap-1.5">
+                  <span>صوتی بحری تال:</span>
+                </span>
+                <BaharBeatPlayer
+                  pattern={
+                    displayedScansion.groupedPatternList
+                      .map((g) => g.replace(/\s+/g, ''))
+                      .join(' ') || diagnosticReport.targetPattern
+                  }
+                  afailList={displayedScansion.afailList}
+                  onActiveTick={setActiveBeatTick}
+                />
+              </div>
+
+              <div dir="rtl" className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                {displayedScansion.groupedPatternList.map((grp, idx) => {
+                  const symbols = grp.replace(/\s+/g, '').split('');
+                  const isRuknActive = activeBeatTick?.ruknIndex === idx;
+
+                  let globalOffset = 0;
+                  for (let i = 0; i < idx; i++) {
+                    globalOffset += (displayedScansion.groupedPatternList[i] || '').replace(/\s+/g, '').length;
+                  }
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex flex-col items-center px-3.5 py-1.5 rounded-lg border transition-all ${
+                        isRuknActive
+                          ? 'border-[var(--accent-gold)] ring-2 ring-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/10 scale-105 shadow-xs'
+                          : 'bg-[var(--bg-surface)] border border-[var(--border-subtle)]/70 shadow-2xs hover:border-[var(--accent-gold)]/50'
+                      }`}
                     >
-                      {displayedScansion.afailList[idx] || patternToClassicalRukn(grp) || `رکن ${idx + 1}`}
-                    </span>
-                    <div dir="rtl" className="flex items-center justify-center gap-1 mt-1">
-                      {symbols.map((sym, sIdx) => {
-                        const isLong = sym === '=';
-                        return (
-                          <span
-                            key={sIdx}
-                            className={`inline-flex items-center justify-center min-w-[18px] h-5 px-1 rounded text-xs font-mono font-bold leading-none select-none ${
-                              isLong
-                                ? 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 shadow-2xs'
-                                : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)]'
-                            }`}
-                            title={isLong ? 'ہجائے بلند (Long: =)' : 'ہجائے کوتاہ (Short: -)'}
-                          >
-                            {sym}
-                          </span>
-                        );
-                      })}
+                      <span
+                        style={{ fontFamily }}
+                        className="font-nastaliq font-bold text-xs text-[var(--accent-gold)] leading-relaxed"
+                      >
+                        {displayedScansion.afailList[idx] || patternToClassicalRukn(grp) || `رکن ${idx + 1}`}
+                      </span>
+                      <div dir="rtl" className="flex items-center justify-center gap-1 mt-1">
+                        {symbols.map((sym, sIdx) => {
+                          const isLong = sym === '=';
+                          const globalSyllableIdx = globalOffset + sIdx;
+                          const isSyllableActive =
+                            activeBeatTick?.syllableGlobalIndex === globalSyllableIdx;
+
+                          return (
+                            <span
+                              key={sIdx}
+                              className={`inline-flex items-center justify-center min-w-[18px] h-5 px-1 rounded text-xs font-mono font-bold leading-none select-none transition-all ${
+                                isSyllableActive
+                                  ? 'bg-[var(--accent-gold)] text-[var(--text-on-gold)] border border-[var(--accent-gold)] scale-125 shadow-sm font-extrabold'
+                                  : isLong
+                                  ? 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border border-[var(--accent-gold)]/35 shadow-2xs hover:scale-110'
+                                  : 'bg-[var(--bg-subtle)] text-[var(--text-secondary)] border border-[var(--border-subtle)] hover:scale-110'
+                              }`}
+                              title={isLong ? 'ہجائے بلند (Long: =)' : 'ہجائے کوتاہ (Short: -)'}
+                            >
+                              {sym}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           {/* RTL Line Rhythm Summary */}

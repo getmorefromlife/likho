@@ -179,7 +179,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             className="group p-3.5 rounded-xl border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] bg-[var(--bg-surface)]/60 hover:bg-[var(--accent-gold)]/10 cursor-pointer transition-all flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-slate-500/10 text-slate-500 border border-slate-500/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-slate-500/10 text-slate-700 dark:text-slate-300 border border-slate-500/30 flex items-center justify-center">
                 <FileText className="w-5 h-5" />
               </div>
               <div>
