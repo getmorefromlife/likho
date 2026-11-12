@@ -46,9 +46,9 @@ const LazyDiwanBookletExportModal = lazy(() =>
     default: m.DiwanBookletExportModal,
   }))
 );
-const LazyVoiceRecitationStudioModal = lazy(() =>
-  import('./components/studio/VoiceRecitationStudioModal').then((m) => ({
-    default: m.VoiceRecitationStudioModal,
+const LazyVoiceRecitationStudioPage = lazy(() =>
+  import('./components/studio/VoiceRecitationStudioPage').then((m) => ({
+    default: m.VoiceRecitationStudioPage,
   }))
 );
 
@@ -170,6 +170,19 @@ export function App() {
   const showCompanion = prefs.companionOpen && !prefs.isZenMode;
   const showTopNav = !isCustomMode || prefs.customConfig.showTopNavBar;
   const showQafiyaBar = !isCustomMode && !prefs.isZenMode;
+
+  if (isVoiceStudioOpen) {
+    return (
+      <Suspense fallback={null}>
+        <LazyVoiceRecitationStudioPage
+          draft={currentDraft}
+          fontFamily={prefs.fontFamily}
+          onSaveVoiceRecording={setVoiceRecording}
+          onExit={() => setIsVoiceStudioOpen(false)}
+        />
+      </Suspense>
+    );
+  }
 
   if (prefs.activePreset === 'quiet' || prefs.activePreset === 'quiet_rhymes') {
     return (
@@ -510,19 +523,6 @@ export function App() {
             onClose={() => setIsBookletModalOpen(false)}
             initialTitle={currentDraft.title ? `دیوانِ ${currentDraft.poet || 'قلم و قافیہ'}` : 'دیوانِ قلم و قافیہ'}
             initialPoetName={currentDraft.poet || ''}
-          />
-        </Suspense>
-      )}
-
-      {/* 5c. Voice Recitation & Tarannum Studio (صوتی ترنم و مشاعرہ اسٹوڈیو) */}
-      {isVoiceStudioOpen && (
-        <Suspense fallback={null}>
-          <LazyVoiceRecitationStudioModal
-            isOpen={isVoiceStudioOpen}
-            onClose={() => setIsVoiceStudioOpen(false)}
-            draft={currentDraft}
-            fontFamily={prefs.fontFamily}
-            onSaveVoiceRecording={setVoiceRecording}
           />
         </Suspense>
       )}

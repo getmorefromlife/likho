@@ -37,7 +37,7 @@ try {
   const { formatDurationMMSS, toUrduNumerals } = await import(
     pathToFileURL(join(temporary, 'voiceRecitationService.js'))
   );
-  const { voiceDspService, VOCAL_PROFILE_PRESETS, REVERB_PRESET_LABELS } = await import(
+  const { voiceDspService, VOCAL_PROFILE_PRESETS, REVERB_PRESET_LABELS, ECHO_PRESETS } = await import(
     pathToFileURL(join(temporary, 'voiceDspService.js'))
   );
   const { StorageService } = await import(
@@ -85,6 +85,13 @@ try {
   test('REVERB_PRESET_LABELS provides authenticated Urdu labels for all spaces', () => {
     assert.equal(REVERB_PRESET_LABELS.dry.urdu, 'بغیر گونج کے بالکل صاف');
     assert.equal(REVERB_PRESET_LABELS.mushaira.urdu, 'بڑے مشاعرے کے پنڈال جیسی شاہانہ فضا');
+  });
+
+  test('ECHO_PRESETS provides distinct mushaira, slapback, and valley echo times', () => {
+    assert.equal(ECHO_PRESETS.off.delayTime, 0);
+    assert.ok(ECHO_PRESETS.mushaira.delayTime >= 0.2);
+    assert.ok(ECHO_PRESETS.slapback.delayTime >= 0.1 && ECHO_PRESETS.slapback.delayTime < 0.2);
+    assert.ok(ECHO_PRESETS.valley.delayTime >= 0.4);
   });
 
   test('VoiceDspEngine generates synthetic convolution impulse buffers mathematically', () => {

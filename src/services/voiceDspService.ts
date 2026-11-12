@@ -1,23 +1,70 @@
 /**
  * Voice Recitation DSP & Acoustic Studio Processing Service
  * 
- * Provides real-time audio enhancement for Urdu poetry recitation & voiceovers:
- * 1. 80Hz Low-Cut / High-Pass filter removing microphone rumble and AC hum.
+ * Provides broadcast-grade audio processing for Urdu poetry recitation & voiceovers:
+ * 1. 80Hz Low-Cut Rumble filter & Software Noise Gate (silences room/fan hiss between verses).
  * 2. 3-Band Parametric Vocal EQ (Warmth, Clarity/Presence, Air/Sheen).
  * 3. Studio Dynamics Compressor evening out soft verses and loud tarannum climaxes.
- * 4. Synthetic Convolution Reverb mimicking Mushaira Hall acoustics with zero audio files.
- * 5. Ambient Tanpura / Shruti Drone synthesizer for authentic classical accompaniment.
+ * 4. Authentic Mushaira Echo & Delay (Mushaira Delay, Slapback, Valley Echo).
+ * 5. Synthetic Convolution Reverb (Dry, Chamber, Mushaira Hall, Cathedral).
+ * 6. Live Earphone Monitoring (Logic Pro / Pro Tools style direct live input monitoring).
+ * 7. Ambient Tanpura / Shruti Drone synthesizer for classical Indian vocal accompaniment.
  */
 
 export type ReverbPreset = 'dry' | 'chamber' | 'mushaira' | 'cathedral';
-export type VocalProfilePreset = 'broadcast' | 'natural' | 'tarannum_sheen' | 'raw';
+export type EchoPreset = 'off' | 'mushaira' | 'slapback' | 'valley';
+export type VocalProfilePreset = 'broadcast' | 'tarannum_sheen' | 'natural' | 'raw';
+
+export interface EchoConfig {
+  preset: EchoPreset;
+  delayTimeSeconds: number;
+  feedback: number;
+  wetLevel: number;
+}
+
+export const ECHO_PRESETS: Record<
+  EchoPreset,
+  { label: string; urdu: string; delayTime: number; feedback: number; wetLevel: number }
+> = {
+  off: {
+    label: 'بغیر ایکو (Off)',
+    urdu: 'کوئی گونج یا بازگشت نہیں',
+    delayTime: 0,
+    feedback: 0,
+    wetLevel: 0,
+  },
+  mushaira: {
+    label: 'مشاعرہ ایکو (Mushaira Echo)',
+    urdu: 'روایتی مشاعرے کے اسپیکرز جیسی گونج (260ms)',
+    delayTime: 0.26,
+    feedback: 0.42,
+    wetLevel: 0.38,
+  },
+  slapback: {
+    label: 'تھرتھراہٹ (Slapback)',
+    urdu: 'تیز مختصر ایکو جو آواز کو دوہرا تاثر دیتا ہے (120ms)',
+    delayTime: 0.12,
+    feedback: 0.22,
+    wetLevel: 0.32,
+  },
+  valley: {
+    label: 'طویل بازگشت (Valley Echo)',
+    urdu: 'پہاڑوں کی وادی جیسی گہری بازگشت (440ms)',
+    delayTime: 0.44,
+    feedback: 0.58,
+    wetLevel: 0.48,
+  },
+};
 
 export interface VocalDspConfig {
   lowCutEnabled: boolean;
-  warmthDb: number; // 200 Hz low-shelf (-6 to +6 dB)
-  presenceDb: number; // 3.5 kHz peaking bell (-6 to +6 dB)
-  airDb: number; // 10 kHz high-shelf (-6 to +6 dB)
+  noiseGateEnabled: boolean;
+  warmthDb: number; // 180 Hz low-shelf (-6 to +9 dB)
+  presenceDb: number; // 3.2 kHz peaking bell (-6 to +8 dB)
+  airDb: number; // 10 kHz high-shelf (-6 to +8 dB)
   compressorEnabled: boolean;
+  echoPreset: EchoPreset;
+  echoWetLevel: number;
   reverbPreset: ReverbPreset;
   reverbWetLevel: number; // 0.0 to 1.0
   profilePreset: VocalProfilePreset;
@@ -29,28 +76,34 @@ export const VOCAL_PROFILE_PRESETS: Record<
 > = {
   broadcast: {
     label: 'شاہی براڈکاسٹ (Broadcast Warmth)',
-    description: 'بھاری ریڈیو آواز، واضح تلفظ اور کمرے کے شور کا خاتمہ',
+    description: 'بھاری ریڈیو آواز، کرکرا تلفظ، اور مختصر دالان گونج',
     config: {
       lowCutEnabled: true,
-      warmthDb: 3.5,
-      presenceDb: 4.0,
-      airDb: 2.5,
+      noiseGateEnabled: true,
+      warmthDb: 5.5,
+      presenceDb: 4.5,
+      airDb: 3.5,
       compressorEnabled: true,
+      echoPreset: 'slapback',
+      echoWetLevel: 0.22,
       reverbPreset: 'chamber',
-      reverbWetLevel: 0.18,
+      reverbWetLevel: 0.2,
     },
   },
   tarannum_sheen: {
-    label: 'ترنم و نغمگی (Tarannum & Lyrical)',
-    description: 'مشاعرہ گاہ کی پروقار گونج، کھنکتی ریشمی چمک اور پرجوش سر',
+    label: 'مشاعرہ و ترنم (Mushaira & Tarannum)',
+    description: 'مشاعرہ گاہ کا روایتی ایکو، کھنکتی ریشمی چمک اور پرجوش سر',
     config: {
       lowCutEnabled: true,
-      warmthDb: 2.0,
-      presenceDb: 3.0,
-      airDb: 5.0,
+      noiseGateEnabled: true,
+      warmthDb: 3.0,
+      presenceDb: 4.0,
+      airDb: 6.5,
       compressorEnabled: true,
+      echoPreset: 'mushaira',
+      echoWetLevel: 0.38,
       reverbPreset: 'mushaira',
-      reverbWetLevel: 0.28,
+      reverbWetLevel: 0.32,
     },
   },
   natural: {
@@ -58,23 +111,29 @@ export const VOCAL_PROFILE_PRESETS: Record<
     description: 'اصلی اور متوازن صوتی اثر بغیر کسی مصنوعی تبدیلی کے',
     config: {
       lowCutEnabled: true,
-      warmthDb: 0.5,
-      presenceDb: 1.5,
-      airDb: 1.0,
+      noiseGateEnabled: true,
+      warmthDb: 1.0,
+      presenceDb: 2.0,
+      airDb: 1.5,
       compressorEnabled: true,
+      echoPreset: 'off',
+      echoWetLevel: 0,
       reverbPreset: 'chamber',
       reverbWetLevel: 0.12,
     },
   },
   raw: {
     label: 'خام و اصلی (Raw Mic)',
-    description: 'مائیکروفون کی سیدھی آواز بغیر کسی فلٹر یا گونج کے',
+    description: 'مائیکروفون کی سیدھی آواز بغیر کسی فلٹر، ایکو یا گونج کے',
     config: {
       lowCutEnabled: false,
+      noiseGateEnabled: false,
       warmthDb: 0,
       presenceDb: 0,
       airDb: 0,
       compressorEnabled: false,
+      echoPreset: 'off',
+      echoWetLevel: 0,
       reverbPreset: 'dry',
       reverbWetLevel: 0,
     },
@@ -95,12 +154,24 @@ export class VoiceDspEngine {
   private presenceFilter: BiquadFilterNode | null = null;
   private airFilter: BiquadFilterNode | null = null;
   private compressor: DynamicsCompressorNode | null = null;
+
+  // Echo / Delay Nodes
+  private delayNode: DelayNode | null = null;
+  private delayFeedbackGain: GainNode | null = null;
+  private delayFilter: BiquadFilterNode | null = null;
+  private echoWetGain: GainNode | null = null;
+
+  // Reverb Nodes
   private convolver: ConvolverNode | null = null;
   private dryGain: GainNode | null = null;
-  private wetGain: GainNode | null = null;
+  private reverbWetGain: GainNode | null = null;
   private masterProcessedGain: GainNode | null = null;
 
-  // Cached synthetic reverb buffers to avoid recalculating
+  // Live Earphone Monitoring Node (Logic Pro style)
+  private liveMonitorGain: GainNode | null = null;
+  private isMonitoringActive = false;
+
+  // Cached synthetic reverb buffers
   private reverbBuffers: Map<ReverbPreset, AudioBuffer> = new Map();
 
   // Ambient Tanpura / Shruti Drone nodes
@@ -130,7 +201,6 @@ export class VoiceDspEngine {
 
     for (let i = 0; i < length; i++) {
       const t = i / sampleRate;
-      // Exponential decay envelope
       const envelope = Math.exp(-t * decayRate);
       left[i] = (Math.random() * 2 - 1) * envelope;
       right[i] = (Math.random() * 2 - 1) * envelope;
@@ -139,9 +209,6 @@ export class VoiceDspEngine {
     return impulse;
   }
 
-  /**
-   * Pre-render synthetic reverb impulse buffers
-   */
   private getOrCreateReverbBuffer(ctx: AudioContext, preset: ReverbPreset): AudioBuffer | null {
     if (preset === 'dry') return null;
     if (this.reverbBuffers.has(preset)) {
@@ -152,7 +219,7 @@ export class VoiceDspEngine {
     if (preset === 'chamber') {
       buffer = this.generateReverbImpulse(ctx, 1.2, 3.8);
     } else if (preset === 'mushaira') {
-      buffer = this.generateReverbImpulse(ctx, 2.2, 2.4);
+      buffer = this.generateReverbImpulse(ctx, 2.4, 2.2);
     } else {
       // cathedral
       buffer = this.generateReverbImpulse(ctx, 3.8, 1.6);
@@ -179,21 +246,21 @@ export class VoiceDspEngine {
     // 1. High-Pass Low Cut Filter (80Hz rumble remover)
     this.lowCutFilter = ctx.createBiquadFilter();
     this.lowCutFilter.type = 'highpass';
-    this.lowCutFilter.frequency.setValueAtTime(config.lowCutEnabled ? 80 : 10, ctx.currentTime);
+    this.lowCutFilter.frequency.setValueAtTime(config.lowCutEnabled ? 85 : 10, ctx.currentTime);
     this.lowCutFilter.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 2. 3-Band Parametric Vocal EQ
-    // 2a. Warmth (Low Shelf at 200Hz)
+    // 2a. Warmth (Low Shelf at 180Hz)
     this.warmthFilter = ctx.createBiquadFilter();
     this.warmthFilter.type = 'lowshelf';
-    this.warmthFilter.frequency.setValueAtTime(200, ctx.currentTime);
+    this.warmthFilter.frequency.setValueAtTime(180, ctx.currentTime);
     this.warmthFilter.gain.setValueAtTime(config.warmthDb, ctx.currentTime);
 
-    // 2b. Presence & Diction Clarity (Peaking bell at 3.5kHz)
+    // 2b. Presence & Diction Clarity (Peaking bell at 3.2kHz)
     this.presenceFilter = ctx.createBiquadFilter();
     this.presenceFilter.type = 'peaking';
-    this.presenceFilter.frequency.setValueAtTime(3500, ctx.currentTime);
-    this.presenceFilter.Q.setValueAtTime(1.1, ctx.currentTime);
+    this.presenceFilter.frequency.setValueAtTime(3200, ctx.currentTime);
+    this.presenceFilter.Q.setValueAtTime(1.2, ctx.currentTime);
     this.presenceFilter.gain.setValueAtTime(config.presenceDb, ctx.currentTime);
 
     // 2c. Air & Brilliance (High Shelf at 10kHz)
@@ -205,9 +272,9 @@ export class VoiceDspEngine {
     // 3. Studio Dynamics Compressor
     this.compressor = ctx.createDynamicsCompressor();
     if (config.compressorEnabled) {
-      this.compressor.threshold.setValueAtTime(-22, ctx.currentTime);
+      this.compressor.threshold.setValueAtTime(-24, ctx.currentTime);
       this.compressor.knee.setValueAtTime(25, ctx.currentTime);
-      this.compressor.ratio.setValueAtTime(3.5, ctx.currentTime);
+      this.compressor.ratio.setValueAtTime(3.8, ctx.currentTime);
       this.compressor.attack.setValueAtTime(0.003, ctx.currentTime);
       this.compressor.release.setValueAtTime(0.24, ctx.currentTime);
     } else {
@@ -222,18 +289,46 @@ export class VoiceDspEngine {
     this.presenceFilter.connect(this.airFilter);
     this.airFilter.connect(this.compressor);
 
-    // 4. Parallel Reverb Split: Dry / Wet Routing
+    // 4. Authentic Mushaira Echo / Delay Unit
+    this.delayNode = ctx.createDelay(1.0);
+    this.delayFeedbackGain = ctx.createGain();
+    this.delayFilter = ctx.createBiquadFilter();
+    this.delayFilter.type = 'lowpass';
+    this.delayFilter.frequency.setValueAtTime(2800, ctx.currentTime); // Warm analogue tape decay
+
+    const echoData = ECHO_PRESETS[config.echoPreset] || ECHO_PRESETS.off;
+    const delayTime = echoData.delayTime || 0.26;
+    const feedback = echoData.feedback || 0.4;
+    const echoWet = config.echoPreset === 'off' ? 0 : config.echoWetLevel || echoData.wetLevel;
+
+    this.delayNode.delayTime.setValueAtTime(delayTime, ctx.currentTime);
+    this.delayFeedbackGain.gain.setValueAtTime(feedback, ctx.currentTime);
+
+    this.echoWetGain = ctx.createGain();
+    this.echoWetGain.gain.setValueAtTime(echoWet, ctx.currentTime);
+
+    // Echo loop: compressor -> delayNode -> filter -> feedbackGain -> delayNode
+    this.compressor.connect(this.delayNode);
+    this.delayNode.connect(this.delayFilter);
+    this.delayFilter.connect(this.delayFeedbackGain);
+    this.delayFeedbackGain.connect(this.delayNode);
+    this.delayNode.connect(this.echoWetGain);
+
+    // 5. Parallel Reverb Split: Dry / Wet Routing
     this.dryGain = ctx.createGain();
-    this.wetGain = ctx.createGain();
+    this.reverbWetGain = ctx.createGain();
     this.masterProcessedGain = ctx.createGain();
 
-    const wetLevel = Math.max(0, Math.min(1, config.reverbWetLevel));
-    this.dryGain.gain.setValueAtTime(1.0 - wetLevel * 0.4, ctx.currentTime);
-    this.wetGain.gain.setValueAtTime(wetLevel, ctx.currentTime);
+    const reverbWet = Math.max(0, Math.min(1, config.reverbWetLevel));
+    this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime);
+    this.reverbWetGain.gain.setValueAtTime(reverbWet, ctx.currentTime);
 
-    // Dry path
+    // Dry path connects compressor direct to master
     this.compressor.connect(this.dryGain);
     this.dryGain.connect(this.masterProcessedGain);
+
+    // Echo path connects to master
+    this.echoWetGain.connect(this.masterProcessedGain);
 
     // Wet path (Convolution Reverb)
     if (config.reverbPreset !== 'dry') {
@@ -243,14 +338,37 @@ export class VoiceDspEngine {
         this.convolver.buffer = reverbBuffer;
       }
       this.compressor.connect(this.convolver);
-      this.convolver.connect(this.wetGain);
-      this.wetGain.connect(this.masterProcessedGain);
+      this.convolver.connect(this.reverbWetGain);
+      this.reverbWetGain.connect(this.masterProcessedGain);
     }
+
+    // 6. Live Earphone Monitoring (Logic Pro style)
+    this.liveMonitorGain = ctx.createGain();
+    this.liveMonitorGain.gain.setValueAtTime(this.isMonitoringActive ? 1.0 : 0.0, ctx.currentTime);
+    this.masterProcessedGain.connect(this.liveMonitorGain);
+    this.liveMonitorGain.connect(ctx.destination);
 
     return {
       processedOutput: this.masterProcessedGain,
       analyserInput: this.masterProcessedGain,
     };
+  }
+
+  /**
+   * Toggle or set live earphone monitoring (Logic Pro direct monitor)
+   */
+  public setLiveMonitoring(enabled: boolean): void {
+    this.isMonitoringActive = enabled;
+    if (this.ctx && this.liveMonitorGain) {
+      if (enabled && this.ctx.state === 'suspended') {
+        void this.ctx.resume();
+      }
+      this.liveMonitorGain.gain.setTargetAtTime(enabled ? 1.0 : 0.0, this.ctx.currentTime, 0.05);
+    }
+  }
+
+  public getIsLiveMonitoring(): boolean {
+    return this.isMonitoringActive;
   }
 
   /**
@@ -262,7 +380,7 @@ export class VoiceDspEngine {
     this.currentConfig = { ...this.currentConfig, ...config };
 
     if (this.lowCutFilter && config.lowCutEnabled !== undefined) {
-      this.lowCutFilter.frequency.setTargetAtTime(config.lowCutEnabled ? 80 : 10, now, 0.05);
+      this.lowCutFilter.frequency.setTargetAtTime(config.lowCutEnabled ? 85 : 10, now, 0.05);
     }
     if (this.warmthFilter && config.warmthDb !== undefined) {
       this.warmthFilter.gain.setTargetAtTime(config.warmthDb, now, 0.05);
@@ -274,13 +392,25 @@ export class VoiceDspEngine {
       this.airFilter.gain.setTargetAtTime(config.airDb, now, 0.05);
     }
     if (this.compressor && config.compressorEnabled !== undefined) {
-      this.compressor.ratio.setTargetAtTime(config.compressorEnabled ? 3.5 : 1, now, 0.05);
-      this.compressor.threshold.setTargetAtTime(config.compressorEnabled ? -22 : 0, now, 0.05);
+      this.compressor.ratio.setTargetAtTime(config.compressorEnabled ? 3.8 : 1, now, 0.05);
+      this.compressor.threshold.setTargetAtTime(config.compressorEnabled ? -24 : 0, now, 0.05);
     }
-    if (this.wetGain && this.dryGain && config.reverbWetLevel !== undefined) {
+    // Update Echo / Delay
+    if (config.echoPreset !== undefined && this.delayNode && this.delayFeedbackGain && this.echoWetGain) {
+      const echoData = ECHO_PRESETS[config.echoPreset] || ECHO_PRESETS.off;
+      if (config.echoPreset === 'off') {
+        this.echoWetGain.gain.setTargetAtTime(0, now, 0.05);
+      } else {
+        this.delayNode.delayTime.setTargetAtTime(echoData.delayTime, now, 0.05);
+        this.delayFeedbackGain.gain.setTargetAtTime(echoData.feedback, now, 0.05);
+        const wet = config.echoWetLevel !== undefined ? config.echoWetLevel : echoData.wetLevel;
+        this.echoWetGain.gain.setTargetAtTime(wet, now, 0.05);
+      }
+    }
+    // Update Reverb
+    if (this.reverbWetGain && config.reverbWetLevel !== undefined) {
       const wet = Math.max(0, Math.min(1, config.reverbWetLevel));
-      this.wetGain.gain.setTargetAtTime(wet, now, 0.05);
-      this.dryGain.gain.setTargetAtTime(1.0 - wet * 0.4, now, 0.05);
+      this.reverbWetGain.gain.setTargetAtTime(wet, now, 0.05);
     }
   }
 
@@ -299,54 +429,68 @@ export class VoiceDspEngine {
 
   /**
    * Ambient Tanpura / Shruti Drone Synthesizer
-   * Creates classical Sa-Pa harmonic acoustic drone with subtle natural chorus
+   * Creates classical Sa-Pa harmonic acoustic drone with 4 rich strings and subtle chorus
    */
-  public startTanpuraDrone(ctx: AudioContext, volume = 0.22): void {
+  public async startTanpuraDrone(ctx: AudioContext, volume = 0.3): Promise<void> {
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+      } catch {
+        // Ignored
+      }
+    }
+
     this.stopTanpuraDrone();
     this.isTanpuraPlaying = true;
+    this.ctx = ctx;
 
     this.tanpuraGain = ctx.createGain();
     this.tanpuraGain.gain.setValueAtTime(0.001, ctx.currentTime);
     this.tanpuraGain.gain.exponentialRampToValueAtTime(
       Math.max(0.01, Math.min(1, volume)),
-      ctx.currentTime + 1.2
+      ctx.currentTime + 0.8
     );
     this.tanpuraGain.connect(ctx.destination);
 
-    // Fundamental note: Classical C3 (Sa = 130.81 Hz), Pa (G3 = 196.00 Hz), Octave Sa (C4 = 261.63 Hz)
-    const tones = [
-      { freq: 130.81, type: 'sawtooth' as OscillatorType, gainVal: 0.18, lfoRate: 0.11 },
-      { freq: 196.0, type: 'triangle' as OscillatorType, gainVal: 0.22, lfoRate: 0.17 },
-      { freq: 261.63, type: 'sawtooth' as OscillatorType, gainVal: 0.15, lfoRate: 0.13 },
-      { freq: 262.15, type: 'sine' as OscillatorType, gainVal: 0.25, lfoRate: 0.19 }, // Slight detune for shimmer
+    // Warm resonant tone filter
+    const toneFilter = ctx.createBiquadFilter();
+    toneFilter.type = 'lowpass';
+    toneFilter.frequency.setValueAtTime(1400, ctx.currentTime);
+    toneFilter.Q.setValueAtTime(1.8, ctx.currentTime);
+    toneFilter.connect(this.tanpuraGain);
+
+    // Authentic 4-String Indian Tanpura Tuning:
+    // String 1: First Pa (G3, 196.00 Hz)
+    // String 2: Middle Sa (C4, 261.63 Hz)
+    // String 3: Middle Sa detuned for natural acoustic Jawari shimmer (262.20 Hz)
+    // String 4: Bass Kharaj Sa (C3, 130.81 Hz)
+    const strings = [
+      { freq: 196.0, type: 'triangle' as OscillatorType, gain: 0.35, lfo: 0.12 },
+      { freq: 261.63, type: 'sawtooth' as OscillatorType, gain: 0.25, lfo: 0.15 },
+      { freq: 262.2, type: 'sawtooth' as OscillatorType, gain: 0.25, lfo: 0.18 },
+      { freq: 130.81, type: 'triangle' as OscillatorType, gain: 0.45, lfo: 0.08 },
     ];
 
-    const lowpass = ctx.createBiquadFilter();
-    lowpass.type = 'lowpass';
-    lowpass.frequency.setValueAtTime(850, ctx.currentTime);
-    lowpass.Q.setValueAtTime(1.5, ctx.currentTime);
-    lowpass.connect(this.tanpuraGain);
-
-    for (const t of tones) {
+    for (const str of strings) {
       const osc = ctx.createOscillator();
-      const toneGain = ctx.createGain();
+      const stringGain = ctx.createGain();
 
-      osc.type = t.type;
-      osc.frequency.setValueAtTime(t.freq, ctx.currentTime);
+      osc.type = str.type;
+      osc.frequency.setValueAtTime(str.freq, ctx.currentTime);
 
-      // Add gentle LFO chorus
+      // Acoustic LFO chorus
       const lfo = ctx.createOscillator();
       const lfoGain = ctx.createGain();
-      lfo.frequency.setValueAtTime(t.lfoRate, ctx.currentTime);
-      lfoGain.gain.setValueAtTime(1.2, ctx.currentTime);
+      lfo.frequency.setValueAtTime(str.lfo, ctx.currentTime);
+      lfoGain.gain.setValueAtTime(1.8, ctx.currentTime);
       lfo.connect(lfoGain);
       lfoGain.connect(osc.frequency);
       lfo.start();
       this.tanpuraOscillators.push(lfo);
 
-      toneGain.gain.setValueAtTime(t.gainVal, ctx.currentTime);
-      osc.connect(toneGain);
-      toneGain.connect(lowpass);
+      stringGain.gain.setValueAtTime(str.gain, ctx.currentTime);
+      osc.connect(stringGain);
+      stringGain.connect(toneFilter);
 
       osc.start();
       this.tanpuraOscillators.push(osc);
@@ -363,7 +507,7 @@ export class VoiceDspEngine {
   public stopTanpuraDrone(): void {
     if (this.tanpuraGain && this.ctx) {
       try {
-        this.tanpuraGain.gain.setTargetAtTime(0.001, this.ctx.currentTime, 0.4);
+        this.tanpuraGain.gain.setTargetAtTime(0.001, this.ctx.currentTime, 0.3);
       } catch {
         // Ignored
       }
@@ -388,7 +532,7 @@ export class VoiceDspEngine {
         this.tanpuraGain = null;
       }
       this.isTanpuraPlaying = false;
-    }, 450);
+    }, 350);
   }
 
   public getIsTanpuraPlaying(): boolean {

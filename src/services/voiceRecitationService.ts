@@ -73,6 +73,28 @@ class VoiceRecitationService {
     return this.state;
   }
 
+  public async ensureAudioContext(): Promise<AudioContext | null> {
+    if (typeof window === 'undefined') return null;
+    if (!this.audioContext) {
+      try {
+        const AudioCtx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        this.audioContext = new AudioCtx();
+      } catch {
+        return null;
+      }
+    }
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      try {
+        await this.audioContext.resume();
+      } catch {
+        // Ignored
+      }
+    }
+    return this.audioContext;
+  }
+
   public getAudioContext(): AudioContext | null {
     if (!this.audioContext && typeof window !== 'undefined') {
       try {
@@ -102,10 +124,11 @@ class VoiceRecitationService {
     this.cancelRecording();
 
     try {
+      const useHardwareNoise = dspConfig ? dspConfig.noiseGateEnabled : true;
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
-          noiseSuppression: false,
+          noiseSuppression: useHardwareNoise,
           autoGainControl: false,
         },
         video: false,
