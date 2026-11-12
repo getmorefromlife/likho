@@ -21,6 +21,10 @@ import {
 } from 'lucide-react';
 import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont } from '../../types/workspace';
 import type { PersistenceState } from '../../hooks/usePoemEditor';
+import {
+  licenseVerificationService,
+  ActiveLicense,
+} from '../../services/licenseVerificationService';
 
 interface TopNavBarProps {
   prefs: WorkspacePrefs;
@@ -61,6 +65,13 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 }) => {
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
   const [showPresetMenu, setShowPresetMenu] = useState(false);
+  const [activeLicense, setActiveLicense] = useState<ActiveLicense | null>(() =>
+    licenseVerificationService.getActiveLicense()
+  );
+
+  useEffect(() => {
+    return licenseVerificationService.subscribe(setActiveLicense);
+  }, []);
 
   // Close dropdowns and drawers on Escape
   useEffect(() => {
@@ -251,30 +262,45 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
         {/* Left Side: Commercial SaaS Elements & Consolidated Studio Actions         */}
         {/* ========================================================================= */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Free Trial Countdown Pill */}
-          {onOpenUpgrade && (
+          {/* Commercial SaaS Elements: Verified Pro Badge OR Trial & Upgrade */}
+          {activeLicense ? (
             <button
               type="button"
               onClick={onOpenUpgrade}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 hover:bg-amber-500/20 transition-all leading-[2.2] shadow-2xs"
-              title="مفت آزمائشی میعاد — مکمل پرو ورژن کی تفصیلات کے لیے کلک کریں"
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-200 hover:bg-amber-500/25 transition-all leading-[2.2] shadow-2xs cursor-pointer"
+              title="آپ کا قلم و قافیہ پرو لائف ٹائم لائسنس تصدیق شدہ اور فعال ہے — تفصیلات کے لیے کلک کریں"
             >
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-              <span>مفت آزمائش: {trialDaysRemaining} دن باقی</span>
+              <Crown className="w-3.5 h-3.5 text-[var(--accent-gold)] flex-shrink-0" />
+              <span>👑 پرو مصدقہ</span>
             </button>
-          )}
+          ) : (
+            <>
+              {/* Free Trial Countdown Pill */}
+              {onOpenUpgrade && (
+                <button
+                  type="button"
+                  onClick={onOpenUpgrade}
+                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 hover:bg-amber-500/20 transition-all leading-[2.2] shadow-2xs cursor-pointer"
+                  title="مفت آزمائشی میعاد — مکمل پرو ورژن کی تفصیلات کے لیے کلک کریں"
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span>مفت آزمائش: {trialDaysRemaining} دن باقی</span>
+                </button>
+              )}
 
-          {/* High-Converting Golden Shimmer Upgrade / Buy Button */}
-          {onOpenUpgrade && (
-            <button
-              type="button"
-              onClick={onOpenUpgrade}
-              className="btn-gold-shimmer text-black font-bold font-nastaliq px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform leading-[2.2]"
-              title="قلم و قافیہ پرو — تاحیات لائسنس، لامحدود عروضی تقطیع اور مکمل لغت"
-            >
-              <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black flex-shrink-0" />
-              <span>پرو حاصل کریں</span>
-            </button>
+              {/* High-Converting Golden Shimmer Upgrade / Buy Button */}
+              {onOpenUpgrade && (
+                <button
+                  type="button"
+                  onClick={onOpenUpgrade}
+                  className="btn-gold-shimmer text-black font-bold font-nastaliq px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform leading-[2.2] cursor-pointer"
+                  title="قلم و قافیہ پرو — تاحیات لائسنس، لامحدود عروضی تقطیع اور مکمل لغت"
+                >
+                  <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black flex-shrink-0" />
+                  <span>پرو حاصل کریں</span>
+                </button>
+              )}
+            </>
           )}
 
           <div className="h-6 w-px bg-[var(--border-subtle)] mx-0.5 hidden sm:block"></div>

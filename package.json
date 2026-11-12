@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test:prosody": "node tests/prosody.test.mjs",
+    "test:license": "node tests/license.test.mjs",
     "test:benchmark": "node tests/benchmark.test.mjs",
     "validate:benchmark": "node scripts/validate-benchmark.mjs",
     "test:e2e": "playwright test",
