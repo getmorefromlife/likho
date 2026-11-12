@@ -25,10 +25,9 @@ When the owner requests further learning work, expand source-checked meter refer
 - **Objective:** Connect the poet's current draft with the 10 classical masters' corpus.
 - **Implemented Behavior:** `src/services/zameenMatcherService.ts` and `src/components/companion/ClassicalZameenModal.tsx` automatically detect the poet's active meter, radif, and qafiya, classifying matches across all 10 classical masters into 4 tiers (`exact_zameen`, `same_radif_qafiya`, `same_radif`, `same_meter`). Integrated live into both `PoetryCanvas.tsx` (metadata pill) and `RhymeTreasuryTab.tsx` (banner), with 1-click loading of classical master Qawafi into the poet's rhyme tray and couplet copy for *Tazmeen*. Cleaned and enriched all 307 Ghalib works in `diwanGhalibComplete.json` with authentic extracted radifs and qafiya samples (`76/76` prosody checks passing).
 
-#### Feature 2: Progressive Web App (PWA 1-Click Installation — 15 mins)
+#### ✅ Feature 2: Progressive Web App (PWA 1-Click Installation — COMPLETED November 12, 2026)
 - **Objective:** Allow poets to install Likho as a standalone native desktop (Mac/Windows) and mobile app with a single click.
-- **Behavior:** Shows an elegant "ایپ انسٹال کریں" button in the navbar/modal. Launches in full-screen windowed mode with the royal gold seal icon on desktop dock/homescreen.
-- **Implementation:** Standard `manifest.webmanifest`, service worker registration, and app icon links. Operates 100% offline.
+- **Implemented Behavior:** Added `public/manifest.webmanifest`, `public/manifest.json`, `public/sw.js`, brand icons (`pwa-192x192.png`, `pwa-512x512.png`, `pwa-maskable-512x512.png`, `apple-touch-icon.png`), `src/services/pwaService.ts`, and 1-click install prompt in `TopNavBar.tsx` + Settings Drawer. Operates offline.
 
 #### ✅ Feature 3: Cryptographic Offline License Key System (لائسنس کی تصدیق و ایکٹیویشن — COMPLETED November 12, 2026)
 - **Objective:** Enable immediate software sales and monetized customer activation without needing a backend server or waiting for payment processor approval.

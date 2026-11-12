@@ -408,6 +408,32 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
   - Integrated into `ExportModal.tsx` as a premier export card and into `PortfolioTab.tsx` as a direct header action.
 - **Verification:** `npm run test:booklet` (**5/5 passed**); `npm run test:license` (**6/6 passed**); `npm run test:prosody` (**78/78 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**); `npm run build` (**passed** in 5.31s, `0` errors).
 
+---
+
+## 23. Publishing Formats, Cloud Backup, Dropdown Navbar & Audio Studio Phases 1–3 — November 13, 2026
+
+- **WhatsApp 9:16 HD Portrait PDF & Classical Book Formats (`src/services/diwanBookletService.ts`, `src/components/export/DiwanBookletExportModal.tsx`):**
+  - Added WhatsApp Mobile HD Portrait (`9:16`), classical Urdu publishing book sizes, and prose paragraph wrapping in PDF/HTML booklet export.
+- **Karachi Book Printing & Publishing Desk (`src/components/commercial/KarachiPublishingModal.tsx`):**
+  - Added interactive Karachi book printing quotation calculator (PKR) with format, page count, paper/binding options, and direct submission flow.
+- **Organized Dropdown Navbar (`src/components/navbar/TopNavBar.tsx`):**
+  - Consolidated crowded top-level navbar actions into clean, keyboard-accessible RTL Urdu dropdown menus.
+- **Google Drive Backup & Google Docs 1-Click Export (`src/services/googleDriveService.ts`, `src/components/cloud/GoogleDriveBackupModal.tsx`):**
+  - Added Google Drive JSON portfolio backup/restore compatible with `StorageService` schema and 1-click RTL Urdu export for Google Docs / Word.
+- **Audio & Mushaira Studio Phases 1–3 (`src/services/voiceDspService.ts`, `src/services/mushairaReelService.ts`, `src/components/studio/InteractiveWaveform.tsx`, `src/components/studio/VoiceRecitationStudioPage.tsx`):**
+  - **Phase 1:** Auto Audio Ducking sidechain (`DuckingEnvelopeFollower` with Subtle `-6 dB`, Balanced `-12 dB`, Deep `-18 dB`, and Fast/Cinematic recovery), Background Music Mixer (upload, loop, volume), and Offline Mastered WAV Export (`renderMasteredWav`).
+  - **Phase 2:** Non-destructive audio trimming (`trimStartSeconds` / `trimEndSeconds` persisted on `VoiceRecordingMeta`) with `±0.2s` keyboard-accessible nudge controls, and Multi-Take Comping Slots (up to 5 takes per session).
+  - **Phase 3:** Interactive clickable/keyboard-seekable Canvas/Bar Waveform (`InteractiveWaveform.tsx`, `extractWaveformPeaks`) and client-side **9:16 HD Portrait Mushaira Video Reel Export** (`renderMushairaVideoReel`, `.webm`) with 3 visual themes (`شبِ مشاعرہ`, `کاغذِ طلائی`, `سبزۂ سخن`).
+- **Verification (November 13, 2026):**
+  - `npm run build`: **passed** in 5.41s (`0` errors).
+  - `npm run test:voice`: **12/12 passed**.
+  - `npm run test:storage`: **15/15 passed**.
+  - `npm run test:license`: **6/6 passed**.
+  - `npm run test:booklet`: **8/8 passed**.
+  - `npm run test:gdrive`: **6/6 passed**.
+  - `npm run test:prosody`: **78/78 passed**.
+
+
 
 
 
