@@ -400,6 +400,7 @@ export function App() {
               onPaste={handlePaste}
               onSelect={handleSelect}
               onToggleLiveScansion={toggleLiveScansion}
+              onSelectMeter={setMeter}
             />
           </div>
 

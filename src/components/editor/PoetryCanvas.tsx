@@ -48,6 +48,7 @@ interface PoetryCanvasProps {
   onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   onSelect: (e: React.SyntheticEvent<HTMLTextAreaElement>) => void;
   onToggleLiveScansion: () => void;
+  onSelectMeter?: (meterName: string, meterRukn: string) => void;
 }
 
 export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
@@ -68,6 +69,7 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
   onPaste,
   onSelect,
   onToggleLiveScansion,
+  onSelectMeter,
 }) => {
   const [textAlign, setTextAlign] = useState<TextAlignment>('center');
   const [showErabToolbar, setShowErabToolbar] = useState(true);
@@ -752,6 +754,9 @@ export const PoetryCanvas: React.FC<PoetryCanvasProps> = ({
                         fontFamily={prefs.fontFamily}
                         lineText={line}
                         lineIndex={idx}
+                        poemMeterName={currentDraft.meterName}
+                        poemMeterRukn={currentDraft.meterRukn}
+                        onEnforcePoemMeter={onSelectMeter}
                         radif={activeRadif}
                         rhymeAnchorWord={activeRhymeAnchor}
                         onApplyLineChange={handleLineChange}

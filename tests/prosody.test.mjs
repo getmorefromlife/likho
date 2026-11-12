@@ -638,5 +638,46 @@ try {
     assert.ok(ghalibMatch.poem.qafiyaSample.includes('شمشیر'));
     assert.ok(report.poetSummary.some((p) => p.poetId === 'ghalib' && p.count >= 1));
   });
+  await test('poet-enforced bahar rule supports custom arkan meters and deduces word weights for unrecognized words', async () => {
+    // 1. Parse a custom 3-foot Mutadarak Bahar outside the 50 catalog forms
+    const customMeter = e.parseCustomBaharSpec('فاعلن فاعلن فاعلن', 'بحرِ متدارک مسدس سالم');
+    assert.ok(customMeter);
+    assert.equal(customMeter.fullRawPattern, '=-==-==-=');
+    assert.deepEqual(customMeter.afailList, ['فَاعِلُن', 'فَاعِلُن', 'فَاعِلُن']);
+
+    // 2. Deduce exact expected weight (-== / فعولن) for an unrecognized word ("الفب") in Mutaqarib
+    const unknownLine = 'مرا دل مرا دل مرا دل الفب';
+    const deduction = e.deduceWordPatternFromEnforcedBahar(unknownLine, 6, meter);
+    assert.ok(deduction);
+    assert.equal(deduction.deducedPattern, '-==');
+    assert.equal(deduction.ruknLabel, 'فَعُولُن');
+    assert.equal(deduction.isExactLineMatch, true);
+
+    // 3. Word intention menu surfaces the enforced-bahar reading on the unrecognized word
+    const menu = e.getWordIntentionMenuData(unknownLine, 6, '', undefined, meter);
+    assert.ok(menu);
+    assert.ok(menu.enforcedBaharDeduction);
+    assert.equal(menu.enforcedBaharDeduction.deducedPattern, '-==');
+    assert.ok(menu.directReadings.some((r) => r.pattern === '-==' && r.sourceIds.includes('poet:enforced-bahar')));
+
+    // 4. Pinning the deduced pattern or enabling strictEnforceBahar resolves the line with rule 'poet-enforced-bahar'
+    const baseScan = e.scanPoetryLine(unknownLine, meter);
+    const baseDiag = e.diagnoseAndRepairMeter(unknownLine, meter);
+    assert.equal(baseScan.isMatched, false);
+
+    const enforcedEval = e.evaluateWithPinnedReadings(
+      unknownLine,
+      baseScan,
+      baseDiag,
+      {},
+      meter,
+      { strictEnforceBahar: true }
+    );
+    assert.equal(enforcedEval.scansion.isMatched, true);
+    assert.equal(enforcedEval.report.isCompliant, true);
+    assert.equal(enforcedEval.report.defects.length, 0);
+    assert.equal(enforcedEval.report.wordSpans[6].syllables, '-==');
+    assert.ok(enforcedEval.report.wordSpans[6].readingRules.includes(e.POET_ENFORCED_BAHAR_RULE));
+  });
   console.log(`${passed} prosody checks passed.`);
 } finally { await rm(temporary,{recursive:true,force:true}); }

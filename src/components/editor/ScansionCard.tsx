@@ -23,6 +23,11 @@ import {
 import {
   getWordIntentionMenuData,
   evaluateWithPinnedReadings,
+  resolveActiveMeter,
+  parseCustomBaharSpec,
+  ARKAN_TO_PATTERN,
+  POET_ENFORCED_BAHAR_RULE,
+  POET_ENFORCED_BAHAR_LABEL,
   CompoundSplitChoice,
   PoeticSpellingChoice,
   WordReadingChoice,
@@ -36,6 +41,9 @@ interface ScansionCardProps {
   lineText?: string;
   lineIndex?: number;
   preferredMeterId?: string;
+  poemMeterName?: string;
+  poemMeterRukn?: string;
+  onEnforcePoemMeter?: (meterName: string, meterRukn: string) => void;
   radif?: string;
   rhymeAnchorWord?: string;
   repairContext?: RepairContextOptions;
@@ -43,12 +51,32 @@ interface ScansionCardProps {
   onApplyLineChange?: (lineIndex: number, repairedLine: string) => void;
 }
 
+const CUSTOM_BAHAR_SELECT_VALUE = '__CUSTOM_POET_BAHAR__';
+const QUICK_ARKAN_CHIPS = [
+  'فعولن',
+  'فاعلن',
+  'فاعلاتن',
+  'مفاعیلن',
+  'مستفعلن',
+  'مفعول',
+  'فاعلات',
+  'مفاعیل',
+  'مفاعلن',
+  'فعلاتن',
+  'فعلن',
+  'مفتعلن',
+  'فع',
+];
+
 const ScansionCardInner: React.FC<ScansionCardProps> = ({
   scansion,
   fontFamily,
   lineText = '',
   lineIndex,
   preferredMeterId,
+  poemMeterName,
+  poemMeterRukn,
+  onEnforcePoemMeter,
   radif,
   rhymeAnchorWord,
   repairContext,
@@ -58,7 +86,40 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
   const [lexiconRevision, setLexiconRevision] = useState(AroozLexiconService.getRevision());
   useEffect(() => AroozLexiconService.subscribe(() => setLexiconRevision(AroozLexiconService.getRevision())), []);
   const [selectedMeterId, setSelectedMeterId] = useState('');
-  const activeMeterId = selectedMeterId || preferredMeterId;
+  const [isCustomBaharOpen, setIsCustomBaharOpen] = useState(false);
+  const [customBaharInput, setCustomBaharInput] = useState(poemMeterRukn || '');
+  const [customBaharName, setCustomBaharName] = useState(poemMeterName || '');
+  const [strictEnforceBahar, setStrictEnforceBahar] = useState(false);
+  const [savedWordToast, setSavedWordToast] = useState<string | null>(null);
+
+  // Resolve poem-level or card-level enforced meter (catalog or custom poet-defined Arkan)
+  const resolvedEnforcedMeter = useMemo(
+    () =>
+      resolveActiveMeter(
+        selectedMeterId || preferredMeterId,
+        poemMeterName,
+        poemMeterRukn
+      ),
+    [selectedMeterId, preferredMeterId, poemMeterName, poemMeterRukn]
+  );
+
+  const catalogMeterId = useMemo(() => {
+    if (selectedMeterId && CLASSICAL_BUHUR.some((m) => m.id === selectedMeterId)) {
+      return selectedMeterId;
+    }
+    if (preferredMeterId && CLASSICAL_BUHUR.some((m) => m.id === preferredMeterId)) {
+      return preferredMeterId;
+    }
+    if (
+      resolvedEnforcedMeter &&
+      CLASSICAL_BUHUR.some((m) => m.id === resolvedEnforcedMeter.id)
+    ) {
+      return resolvedEnforcedMeter.id;
+    }
+    return undefined;
+  }, [selectedMeterId, preferredMeterId, resolvedEnforcedMeter]);
+
+  const activeMeterId = selectedMeterId || preferredMeterId || resolvedEnforcedMeter?.id;
   const [pinnedWordPatterns, setPinnedWordPatterns] = useState<Record<number, string>>({});
   const [activeWordMenuIdx, setActiveWordMenuIdx] = useState<number | null>(null);
   const [correctingWord, setCorrectingWord] = useState<string | null>(null);
@@ -67,16 +128,16 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
   const effectiveRhymeAnchor = rhymeAnchorWord ?? repairContext?.rhymeAnchorWord;
 
   const baseScansion = useMemo(
-    () => (lineText || !scansion ? scanPoetryLine(lineText, activeMeterId) : scansion),
-    [lineText, activeMeterId, scansion, lexiconRevision]
+    () => (lineText || !scansion ? scanPoetryLine(lineText, catalogMeterId) : scansion),
+    [lineText, catalogMeterId, scansion, lexiconRevision]
   );
   const baseDiagnosticReport: MeterDiagnosticReport = useMemo(() => {
     const ctx: RepairContextOptions | undefined =
       effectiveRadif || effectiveRhymeAnchor
         ? { radif: effectiveRadif, rhymeAnchorWord: effectiveRhymeAnchor }
         : undefined;
-    return diagnoseAndRepairMeter(lineText, activeMeterId, ctx);
-  }, [lineText, activeMeterId, effectiveRadif, effectiveRhymeAnchor, lexiconRevision]);
+    return diagnoseAndRepairMeter(lineText, catalogMeterId, ctx);
+  }, [lineText, catalogMeterId, effectiveRadif, effectiveRhymeAnchor, lexiconRevision]);
 
   const { scansion: displayedScansion, report: diagnosticReport } = useMemo(
     () =>
@@ -85,17 +146,44 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
         baseScansion,
         baseDiagnosticReport,
         pinnedWordPatterns,
-        activeMeterId
+        catalogMeterId,
+        {
+          customMeter: resolvedEnforcedMeter,
+          strictEnforceBahar,
+        }
       ),
-    [lineText, baseScansion, baseDiagnosticReport, pinnedWordPatterns, activeMeterId]
+    [
+      lineText,
+      baseScansion,
+      baseDiagnosticReport,
+      pinnedWordPatterns,
+      catalogMeterId,
+      resolvedEnforcedMeter,
+      strictEnforceBahar,
+    ]
   );
 
-  // Compute menu possibilities for all words in the line so we can badge chips that have compound splits or multiple readings
+  const activeMeterObjectForDeduction = useMemo(
+    () =>
+      resolvedEnforcedMeter ||
+      CLASSICAL_BUHUR.find((m) => m.id === diagnosticReport.meterId) ||
+      null,
+    [resolvedEnforcedMeter, diagnosticReport.meterId]
+  );
+
+  // Compute menu possibilities for all words in the line (including enforced-Bahar deduced readings)
   const allWordMenus = useMemo(() => {
     return diagnosticReport.wordSpans.map((span, idx) =>
-      getWordIntentionMenuData(lineText, idx, span.syllables, pinnedWordPatterns[idx])
+      getWordIntentionMenuData(
+        lineText,
+        idx,
+        span.syllables,
+        pinnedWordPatterns[idx],
+        activeMeterObjectForDeduction,
+        pinnedWordPatterns
+      )
     );
-  }, [lineText, diagnosticReport.wordSpans, pinnedWordPatterns]);
+  }, [lineText, diagnosticReport.wordSpans, pinnedWordPatterns, activeMeterObjectForDeduction]);
 
   const activeWordMenu =
     activeWordMenuIdx !== null ? allWordMenus[activeWordMenuIdx] ?? null : null;
@@ -291,40 +379,290 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
       </div>
 
       <div dir="rtl" className="my-2 space-y-2 font-nastaliq leading-[2.4] text-[var(--text-secondary)]">
-        <label className="flex flex-wrap items-center gap-2">
-          <span>مطلوبہ بحر:</span>
-          <select aria-label="مطلوبہ بحر" value={activeMeterId || ''}
-            onChange={e => { setSelectedMeterId(e.target.value); setAppliedSuggestionId(null); }}
-            className="max-w-full min-w-0 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-1">
-            <option value="">قریب ترین بحر (تجویز)</option>
-            {CLASSICAL_BUHUR.map(meter => <option key={meter.id} value={meter.id}>{meter.nameUrdu}</option>)}
-          </select>
-        </label>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label className="flex flex-wrap items-center gap-2">
+            <span>مطلوبہ بحر:</span>
+            <select
+              aria-label="مطلوبہ بحر"
+              value={
+                isCustomBaharOpen
+                  ? CUSTOM_BAHAR_SELECT_VALUE
+                  : activeMeterId?.startsWith('custom:')
+                    ? CUSTOM_BAHAR_SELECT_VALUE
+                    : activeMeterId || ''
+              }
+              onChange={(e) => {
+                const val = e.target.value;
+                setAppliedSuggestionId(null);
+                if (val === CUSTOM_BAHAR_SELECT_VALUE) {
+                  setIsCustomBaharOpen(true);
+                } else {
+                  setIsCustomBaharOpen(false);
+                  setSelectedMeterId(val);
+                  if (onEnforcePoemMeter) {
+                    const found = CLASSICAL_BUHUR.find((m) => m.id === val);
+                    if (found) {
+                      onEnforcePoemMeter(found.nameUrdu, found.afailList.join(' '));
+                    } else if (!val) {
+                      onEnforcePoemMeter('', '');
+                    }
+                  }
+                }
+              }}
+              className="max-w-full min-w-0 rounded border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-2 py-1"
+            >
+              <option value="">قریب ترین بحر (تجویز)</option>
+              <option value={CUSTOM_BAHAR_SELECT_VALUE}>
+                ✍️ اپنی مخصوص بحر / ارکان خود نافذ کریں...
+              </option>
+              {CLASSICAL_BUHUR.map((meter) => (
+                <option key={meter.id} value={meter.id}>
+                  {meter.nameUrdu}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* Poet-Enforced Bahar Controls */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              data-testid="toggle-strict-enforced-bahar"
+              onClick={() => setStrictEnforceBahar((prev) => !prev)}
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all cursor-pointer border ${
+                strictEnforceBahar
+                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-xs'
+                  : 'bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] border-[var(--accent-gold)]/30 hover:bg-[var(--accent-gold)]/20'
+              }`}
+              title="جب نظام کسی لفظ یا بحر کو نہ پہچانے تو شاعر کی نافذ کردہ بحر کے مطابق خودکار وزن متعین کریں"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>
+                {strictEnforceBahar
+                  ? '✓ شاعر کی بحر نافذ ہے (حرفِ آخر)'
+                  : 'شاعر کی بحر نافذ کریں'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              data-testid="open-custom-bahar-builder"
+              onClick={() => setIsCustomBaharOpen((prev) => !prev)}
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] transition-all cursor-pointer border ${
+                isCustomBaharOpen
+                  ? 'bg-[var(--accent-gold)] text-black font-bold border-[var(--accent-gold)]'
+                  : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/40'
+              }`}
+              title="اگر آپ کی بحر فہرست میں نہیں تو اپنے ارکان خود درج کریں"
+            >
+              <Edit3 className="w-3 h-3" />
+              <span>اپنی بحر / ارکان</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Custom Poet-Enforced Bahar Builder Panel */}
+        {isCustomBaharOpen && (
+          <div
+            data-testid="custom-bahar-builder-panel"
+            dir="rtl"
+            className="p-3 rounded-xl border border-[var(--accent-gold)]/40 bg-[var(--bg-surface)] space-y-2.5 text-xs shadow-sm"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-bold text-[var(--accent-gold)]">
+                ✍️ شاعر کی اپنی نافذ کردہ بحر (ارکان یا علامات درج فرمائیں):
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsCustomBaharOpen(false)}
+                className="px-2 py-0.5 rounded text-[10px] bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              >
+                بند کریں ✕
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-[11px] text-[var(--text-muted)] ml-1">فوری ارکان:</span>
+              {QUICK_ARKAN_CHIPS.map((rukn) => (
+                <button
+                  key={rukn}
+                  type="button"
+                  onClick={() =>
+                    setCustomBaharInput((prev) =>
+                      prev.trim() ? `${prev.trim()} ${rukn}` : rukn
+                    )
+                  }
+                  className="px-2 py-0.5 rounded-md bg-[var(--bg-card)] hover:bg-[var(--accent-gold)]/15 text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/40 text-[11px] cursor-pointer transition-all"
+                >
+                  + {rukn} ({ARKAN_TO_PATTERN[rukn]?.pattern})
+                </button>
+              ))}
+              {customBaharInput && (
+                <button
+                  type="button"
+                  onClick={() => setCustomBaharInput('')}
+                  className="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[10px] cursor-pointer"
+                >
+                  صاف کریں
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input
+                type="text"
+                dir="rtl"
+                value={customBaharInput}
+                onChange={(e) => setCustomBaharInput(e.target.value)}
+                placeholder="مثلاً: فاعلاتن فاعلاتن فاعلن یا =-== / =-== / =-="
+                aria-label="اپنی بحر کے ارکان"
+                className="sm:col-span-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent-gold)]"
+              />
+              <input
+                type="text"
+                dir="rtl"
+                value={customBaharName}
+                onChange={(e) => setCustomBaharName(e.target.value)}
+                placeholder="بحر کا نام (اختیاری)"
+                aria-label="بحر کا نام"
+                className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent-gold)]"
+              />
+            </div>
+
+            {(() => {
+              const parsed = parseCustomBaharSpec(customBaharInput, customBaharName);
+              return (
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  {parsed ? (
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-emerald-600 dark:text-emerald-400">
+                      <span>✓ شناخت شدہ ارکان: {parsed.afailList.join(' · ')}</span>
+                      <ProsodicPatternView pattern={parsed.fullRawPattern} size="xs" />
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-[var(--text-muted)]">
+                      اوپر دیے گئے ارکان پر کلک کریں یا `-` اور `=` علامات درج کریں۔
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    disabled={!parsed}
+                    onClick={() => {
+                      if (!parsed) return;
+                      setSelectedMeterId(parsed.id);
+                      setStrictEnforceBahar(true);
+                      if (onEnforcePoemMeter) {
+                        onEnforcePoemMeter(
+                          parsed.nameUrdu,
+                          parsed.afailList.join(' ')
+                        );
+                      }
+                      setIsCustomBaharOpen(false);
+                    }}
+                    className="px-3 py-1 rounded-lg bg-[var(--accent-gold)] text-black font-bold text-xs disabled:opacity-40 cursor-pointer hover:opacity-90 transition-all"
+                  >
+                    یہ بحر نافذ کریں
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         <p>ماخذِ تلفظ و تقطیع: لغتِ قلم و قافیہ (مستقل بالذات علمی و عروضی لغت — ۱۰۴،۰۰۰+ الفاظ) · الفاظ پر کلک کر کے تمام ممکنہ قرأتیں، اوزان اور مرکب املا منتخب کریں۔</p>
         {diagnosticReport.meterNotes.length > 0 && <p className="text-[var(--accent-gold)]">
           {diagnosticReport.meterNotes.map(note => ({ 'terminal-short': 'آخر میں زائد ہجائے کوتاہ', 'caesura-short': 'وقفے سے پہلے زائد ہجائے کوتاہ', 'initial-short': 'پہلے ہجے کی جائز تخفیف' }[note] || note)).join('، ')}
         </p>}
+        {savedWordToast && (
+          <div className="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+            ✓ {savedWordToast}
+          </div>
+        )}
         {diagnosticReport.uncertainWords.length > 0 && (
-          <div role="status" className="flex flex-wrap items-center gap-2 text-amber-600 dark:text-amber-400">
-            <span>
-              ان الفاظ کے تلفظ کی تصدیق درکار ہے: {diagnosticReport.uncertainWords.join('، ')}۔ خودکار اصلاح روک دی گئی ہے۔
-            </span>
-            {allWordMenus.some((m) => m && m.source === 'unresolved' && m.compoundSplits.length > 0) && (
-              <button
-                type="button"
-                onClick={() => {
-                  const idx = allWordMenus.findIndex(
-                    (m) => m && m.source === 'unresolved' && m.compoundSplits.length > 0
-                  );
-                  if (idx >= 0) setActiveWordMenuIdx(activeWordMenuIdx === idx ? null : idx);
-                }}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/25 transition-all"
-              >
-                <Sparkles className="w-3 h-3" />
-                <span>مرکب لفظ کے امکانات دیکھیں (جیسے اسپیس کے ساتھ)</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-            )}
+          <div role="status" className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2 text-amber-600 dark:text-amber-400">
+              <span>
+                ان الفاظ کے تلفظ کی تصدیق درکار ہے: {diagnosticReport.uncertainWords.join('، ')}۔ خودکار اصلاح روک دی گئی ہے۔
+              </span>
+              {allWordMenus.some((m) => m && m.source === 'unresolved' && m.compoundSplits.length > 0) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const idx = allWordMenus.findIndex(
+                      (m) => m && m.source === 'unresolved' && m.compoundSplits.length > 0
+                    );
+                    if (idx >= 0) setActiveWordMenuIdx(activeWordMenuIdx === idx ? null : idx);
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/25 transition-all"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>مرکب لفظ کے امکانات دیکھیں (جیسے اسپیس کے ساتھ)</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            {/* 1-Click Poet-Enforced Bahar Deduction Banner for Unrecognized Words */}
+            {allWordMenus
+              .filter(
+                (m): m is NonNullable<typeof m> =>
+                  Boolean(
+                    m &&
+                      (m.source === 'unresolved' || !m.currentPattern) &&
+                      m.enforcedBaharDeduction
+                  )
+              )
+              .map((m) => {
+                const ded = m.enforcedBaharDeduction!;
+                return (
+                  <div
+                    key={`deduce-banner-${m.wordIndex}`}
+                    data-testid="enforced-bahar-deduction-banner"
+                    className="flex flex-wrap items-center justify-between gap-2 p-2 rounded-lg border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/10 text-xs"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-[var(--accent-gold)] shrink-0" />
+                      <span className="text-[var(--text-primary)]">
+                        بحر <strong>({ded.meterNameUrdu})</strong> کے مطابق لفظ{' '}
+                        <strong>«{m.word}»</strong> کا متوقع وزن:{' '}
+                        <strong className="text-[var(--accent-gold)]">{ded.ruknLabel}</strong>
+                      </span>
+                      <ProsodicPatternView pattern={ded.deducedPattern} size="xs" />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        data-testid="apply-enforced-bahar-word"
+                        onClick={() => handlePinReading(m.wordIndex, ded.deducedPattern)}
+                        className="px-2.5 py-0.5 rounded-md bg-[var(--accent-gold)] text-black font-bold text-[11px] cursor-pointer hover:opacity-90 transition-all"
+                      >
+                        ✓ اس مصرعے میں نافذ کریں
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="save-enforced-bahar-word"
+                        onClick={() => {
+                          void AroozLexiconService.saveProposal({
+                            word: m.word,
+                            pattern: ded.deducedPattern,
+                            status: 'approved',
+                            notes: `${POET_ENFORCED_BAHAR_LABEL} (${ded.meterNameUrdu})`,
+                          }).then((res) => {
+                            if (res.success) {
+                              setSavedWordToast(
+                                `لفظ «${m.word}» کا وزن (${ded.ruknLabel} / ${ded.deducedPattern}) لغت میں مستقل محفوظ کر دیا گیا!`
+                              );
+                              setTimeout(() => setSavedWordToast(null), 3500);
+                            }
+                          });
+                        }}
+                        className="px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/40 font-bold text-[11px] cursor-pointer hover:bg-emerald-500/30 transition-all"
+                      >
+                        + لغت میں مستقل محفوظ کریں
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         )}
         {diagnosticReport.wordSpans.length > 0 && (
@@ -333,6 +671,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
               const menu = allWordMenus[idx];
               const isOpen = activeWordMenuIdx === idx;
               const isPinned = Boolean(pinnedWordPatterns[idx]);
+              const isPoetEnforcedRule = span.readingRules.includes(POET_ENFORCED_BAHAR_RULE);
               const hasCompoundSplits = (menu?.compoundSplits.length || 0) > 0;
               const totalChoices =
                 (menu?.directReadings.length || 0) +
@@ -358,7 +697,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                       ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)]/15 shadow-xs'
                       : isUnresolved && hasCompoundSplits
                         ? 'border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/20'
-                        : isPinned
+                        : isPinned || isPoetEnforcedRule
                           ? 'border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/15'
                           : 'border-[var(--border-subtle)] bg-[var(--bg-surface)]/70 hover:border-[var(--accent-gold)]/50 hover:bg-[var(--bg-surface)]'
                   }`}
@@ -378,12 +717,12 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
                       تجویز موجود
                     </span>
                   )}
-                  {isPinned && (
+                  {(isPinned || isPoetEnforcedRule) && (
                     <span className="px-1 py-0.2 rounded text-[9px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 leading-tight">
-                      مقررہ
+                      {isPoetEnforcedRule ? 'بحرِ نافذہ' : 'مقررہ'}
                     </span>
                   )}
-                  {totalChoices > 1 && !isUnresolved && !isPinned && (
+                  {totalChoices > 1 && !isUnresolved && !isPinned && !isPoetEnforcedRule && (
                     <span className="text-[10px] font-mono text-[var(--text-muted)]">
                       ({totalChoices})
                     </span>
@@ -643,7 +982,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
         <div className="space-y-1 pt-2">
           {diagnosticReport.wordSpans.map(span => <div key={span.charStart} className="rounded border border-[var(--border-subtle)] px-2 break-words">
             <strong>{span.word}</strong> — {span.pronunciation || 'تلفظ دستیاب نہیں'}
-            {span.readingRules.length > 0 && <p>{span.readingRules.map(readingRuleLabel).join('، ')}</p>}
+            {span.readingRules.length > 0 && <p>{span.readingRules.map(r => r === POET_ENFORCED_BAHAR_RULE ? POET_ENFORCED_BAHAR_LABEL : readingRuleLabel(r)).join('، ')}</p>}
             <span dir="ltr" className="block font-mono text-[10px] text-[var(--text-muted)]">{span.sourceIds.join(' · ') || 'unresolved'}</span>
           </div>)}
         </div>
