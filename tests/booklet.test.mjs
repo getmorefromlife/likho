@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-// Import compiled or source module
-// Since this is a test script, we can test the logic directly
 class TestDiwanBookletService {
   static toUrduDigits(num) {
     const urduDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -34,19 +32,88 @@ class TestDiwanBookletService {
       .replace(/'/g, '&#039;');
   }
 
+  static assemblePdf(pages, ptWidth = 595.28, ptHeight = 841.89) {
+    const enc = new TextEncoder();
+    const chunks = [];
+    const offsets = [];
+    let currentLength = 0;
+
+    function pushString(str) {
+      const bytes = enc.encode(str);
+      chunks.push(bytes);
+      currentLength += bytes.length;
+    }
+
+    function pushBytes(bytes) {
+      chunks.push(bytes);
+      currentLength += bytes.length;
+    }
+
+    pushString('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+
+    const totalPages = pages.length;
+    offsets.push(currentLength);
+    pushString('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+
+    const pageKids = [];
+    for (let i = 0; i < totalPages; i++) {
+      pageKids.push(`${3 + i * 3} 0 R`);
+    }
+    offsets.push(currentLength);
+    pushString(`2 0 obj\n<< /Type /Pages /Kids [${pageKids.join(' ')}] /Count ${totalPages} >>\nendobj\n`);
+
+    for (let i = 0; i < totalPages; i++) {
+      const pageObjId = 3 + i * 3;
+      const contentObjId = 4 + i * 3;
+      const imgObjId = 5 + i * 3;
+      const imgName = `Im${i + 1}`;
+      const page = pages[i];
+
+      offsets.push(currentLength);
+      pushString(
+        `${pageObjId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${ptWidth} ${ptHeight}] /Resources << /XObject << /${imgName} ${imgObjId} 0 R >> >> /Contents ${contentObjId} 0 R >>\nendobj\n`
+      );
+
+      const content = `q\n${ptWidth} 0 0 ${ptHeight} 0 0 cm\n/${imgName} Do\nQ\n`;
+      offsets.push(currentLength);
+      pushString(`${contentObjId} 0 obj\n<< /Length ${content.length} >>\nstream\n${content}\nendstream\nendobj\n`);
+
+      offsets.push(currentLength);
+      pushString(
+        `${imgObjId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${page.width} /Height ${page.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${page.jpegBytes.length} >>\nstream\n`
+      );
+      pushBytes(page.jpegBytes);
+      pushString('\nendstream\nendobj\n');
+    }
+
+    const startXref = currentLength;
+    const totalObjs = 2 + totalPages * 3;
+    pushString(`xref\n0 ${totalObjs + 1}\n0000000000 65535 f \n`);
+    for (const off of offsets) {
+      pushString(String(off).padStart(10, '0') + ' 00000 n \n');
+    }
+    pushString(`trailer\n<< /Size ${totalObjs + 1} /Root 1 0 R >>\nstartxref\n${startXref}\n%%EOF\n`);
+
+    const totalSize = chunks.reduce((acc, c) => acc + c.length, 0);
+    const result = new Uint8Array(totalSize);
+    let pos = 0;
+    for (const c of chunks) {
+      result.set(c, pos);
+      pos += c.length;
+    }
+    return result;
+  }
+
   static generateStandaloneBookletHTML(config) {
     const year = config.publicationYear || this.toUrduDigits(2026);
     let pages = '';
 
-    // Cover
     pages += `<div class="cover-page"><h1 class="book-title">${this.escapeHtml(config.title)}</h1><h3 class="author-name">${this.escapeHtml(config.poet)}</h3><p class="pub-year">${year}</p></div>`;
 
-    // Dedication
     if (config.dedication) {
       pages += `<div class="dedication-page"><p>${this.escapeHtml(config.dedication)}</p></div>`;
     }
 
-    // TOC
     if (config.includeTOC && config.selectedDrafts?.length) {
       pages += `<div class="toc-page"><table class="toc-table">`;
       config.selectedDrafts.forEach((draft, idx) => {
@@ -55,7 +122,6 @@ class TestDiwanBookletService {
       pages += `</table></div>`;
     }
 
-    // Poems
     config.selectedDrafts?.forEach((draft) => {
       const couplets = this.parsePoemCouplets(draft.content || '');
       pages += `<div class="poem-page"><h2>${this.escapeHtml(draft.title)}</h2>`;
@@ -152,4 +218,31 @@ test('escapeHtml prevents XSS injection in titles and drafts', () => {
   assert.ok(escaped.includes('&quot;quotes&quot;'));
 });
 
-console.log('5 diwan booklet generator checks passed.');
+test('assemblePdf generates valid multi-page binary PDF with correct dimensions', () => {
+  const dummyJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0xff, 0xd9]);
+  
+  // A4 Test
+  const a4Pdf = TestDiwanBookletService.assemblePdf([
+    { jpegBytes: dummyJpeg, width: 1, height: 1 },
+    { jpegBytes: dummyJpeg, width: 1, height: 1 },
+  ], 595.28, 841.89);
+
+  const a4Text = new TextDecoder().decode(a4Pdf);
+  assert.ok(a4Text.startsWith('%PDF-1.4'));
+  assert.ok(a4Text.includes('/Count 2'));
+  assert.ok(a4Text.includes('595.28 841.89'));
+  assert.ok(a4Text.includes('%%EOF'));
+
+  // A5 Test
+  const a5Pdf = TestDiwanBookletService.assemblePdf([
+    { jpegBytes: dummyJpeg, width: 1, height: 1 },
+  ], 419.53, 595.28);
+
+  const a5Text = new TextDecoder().decode(a5Pdf);
+  assert.ok(a5Text.startsWith('%PDF-1.4'));
+  assert.ok(a5Text.includes('/Count 1'));
+  assert.ok(a5Text.includes('419.53 595.28'));
+  assert.ok(a5Text.includes('%%EOF'));
+});
+
+console.log('6 diwan booklet generator checks passed.');

@@ -17,10 +17,12 @@ import {
   Square,
   ChevronRight,
   ChevronLeft,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { PoemDraft } from '../../types/editor';
 import { StorageService } from '../../services/storageService';
-import { DiwanBookletService, DiwanBookletConfig } from '../../services/diwanBookletService';
+import { DiwanBookletService, DiwanBookletConfig, PdfProgress } from '../../services/diwanBookletService';
 
 interface DiwanBookletExportModalProps {
   isOpen: boolean;
@@ -47,6 +49,11 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
   const [includeTOC, setIncludeTOC] = useState(true);
   const [includeMeters, setIncludeMeters] = useState(true);
   const [previewPageIdx, setPreviewPageIdx] = useState(0);
+
+  // Direct PDF Download Generation States
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState<PdfProgress | null>(null);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   // Load drafts on open
   useEffect(() => {
@@ -107,6 +114,24 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
       next.add(id);
     }
     setSelectedIds(next);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      setIsGeneratingPdf(true);
+      setDownloadSuccess(false);
+      await DiwanBookletService.downloadDirectPDF(currentConfig, (prog) => {
+        setPdfProgress(prog);
+      });
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 4000);
+    } catch (err) {
+      console.error('Direct PDF export failed:', err);
+      alert('پی ڈی ایف برآمد کرنے میں خرابی پیش آئی۔ براہِ کرم دوبارہ کوشش فرمائیں۔');
+    } finally {
+      setIsGeneratingPdf(false);
+      setPdfProgress(null);
+    }
   };
 
   const handlePrint = () => {
@@ -174,12 +199,27 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handlePrint}
-              className="px-4 py-2 rounded-xl bg-[var(--accent-gold)] text-white font-nastaliq font-bold text-sm flex items-center gap-2 hover:opacity-95 shadow-xs leading-[2.2] transition-transform active:scale-95 cursor-pointer"
-              title="کتابچہ پرنٹ یا پی ڈی ایف کے طور پر محفوظ کریں"
+              disabled={isGeneratingPdf}
+              onClick={handleDownloadPDF}
+              className="px-4 py-2 rounded-xl bg-[var(--accent-gold)] text-white font-nastaliq font-bold text-sm flex items-center gap-2 hover:opacity-95 shadow-xs leading-[2.2] transition-transform active:scale-95 cursor-pointer disabled:opacity-60"
+              title="کتابچے کی پی ڈی ایف فائل براہِ راست ڈاؤنلوڈ کریں"
             >
-              <Printer className="w-4 h-4" />
-              <span>پرنٹ / PDF محفوظ کریں</span>
+              {isGeneratingPdf ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                  <span>پی ڈی ایف بن رہی ہے...</span>
+                </>
+              ) : downloadSuccess ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-200 flex-shrink-0" />
+                  <span>ڈاؤنلوڈ مکمل! ✓</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 flex-shrink-0" />
+                  <span>پی ڈی ایف ڈاؤنلوڈ کریں</span>
+                </>
+              )}
             </button>
 
             <button
@@ -377,26 +417,63 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
             </div>
 
             {/* Quick Action Buttons */}
-            <div className="pt-2 flex items-center gap-2">
+            <div className="pt-2 space-y-2">
               <button
                 type="button"
-                onClick={handleDownloadHTML}
-                className="flex-1 py-2.5 px-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] font-nastaliq font-bold text-xs flex items-center justify-center gap-1.5 leading-[2.2] transition-colors"
-                title="آف لائن ایچ ٹی ایم ایل کتاب ڈاؤنلوڈ کریں"
+                disabled={isGeneratingPdf}
+                onClick={handleDownloadPDF}
+                className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent-gold)] text-white font-nastaliq font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 shadow-md leading-[2.2] transition-transform active:scale-98 cursor-pointer disabled:opacity-60"
+                title="کتابچے کی پی ڈی ایف فائل براہِ راست ڈاؤنلوڈ کریں"
               >
-                <Download className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
-                <span>HTML کتاب ڈاؤنلوڈ</span>
+                {isGeneratingPdf ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                    <span>پی ڈی ایف تیار ہو رہی ہے...</span>
+                  </>
+                ) : downloadSuccess ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-200 flex-shrink-0" />
+                    <span>پی ڈی ایف ڈاؤنلوڈ ہو گئی! ✓</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 flex-shrink-0" />
+                    <span>📥 براہِ راست پی ڈی ایف ڈاؤنلوڈ کریں</span>
+                  </>
+                )}
               </button>
 
-              <button
-                type="button"
-                onClick={handleOpenNewTab}
-                className="py-2.5 px-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] font-nastaliq font-bold text-xs flex items-center justify-center gap-1.5 leading-[2.2] transition-colors"
-                title="نئے ٹیب میں مکمل کتاب کا پیش منظر دیکھیں"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
-                <span>نئے ٹیب میں</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadHTML}
+                  className="flex-1 py-2 px-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] font-nastaliq font-bold text-xs flex items-center justify-center gap-1.5 leading-[2.2] transition-colors"
+                  title="آف لائن ایچ ٹی ایم ایل کتاب ڈاؤنلوڈ کریں"
+                >
+                  <Download className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+                  <span>HTML کتاب</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="flex-1 py-2 px-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] font-nastaliq font-bold text-xs flex items-center justify-center gap-1.5 leading-[2.2] transition-colors"
+                  title="براہِ راست کسی ہارڈ ویئر پرنٹر پر بھیجیں"
+                >
+                  <Printer className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+                  <span>پرنٹر پر بھیجیں</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleOpenNewTab}
+                  className="py-2 px-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-primary)] font-nastaliq font-bold text-xs flex items-center justify-center gap-1.5 leading-[2.2] transition-colors"
+                  title="نئے ٹیب میں مکمل کتاب کا پیش منظر دیکھیں"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+                  <span>نئے ٹیب میں</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -572,10 +649,32 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
 
             {/* Bottom Status Tips */}
             <div className="text-center text-[11px] text-[#8a5615] font-nastaliq leading-[2.2] pt-2">
-              💡 <strong>ہدایت:</strong> پرنٹ ونڈو میں "Destination" کو <strong>Save as PDF</strong> پر سیٹ کر کے ہائی ریزولوشن ڈیجیٹل کتابچہ حاصل کریں۔
+              💡 <strong>براہِ راست پی ڈی ایف ڈاؤنلوڈ:</strong> «پی ڈی ایف ڈاؤنلوڈ کریں» پر کلک کرنے سے کتابچہ درست ابعاد ({pageSize})، حاشیوں اور شاہانہ مغلائی بارڈرز کے ساتھ سیدھا آپ کے کمپیوٹر میں بطور .pdf محفوظ ہو جاتا ہے، جس سے لوکل پریویو کی خرابی اور ڈسپلے کے مسائل مکمل ختم ہو جاتے ہیں۔
             </div>
           </div>
         </div>
+
+        {/* Full-Modal Progress Overlay during PDF Generation */}
+        {isGeneratingPdf && (
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-xs z-50 flex flex-col items-center justify-center p-6 text-white text-center animate-in fade-in duration-200">
+            <div className="w-14 h-14 border-4 border-[var(--accent-gold)] border-t-transparent rounded-full animate-spin mb-4 shadow-xl"></div>
+            <h3 className="text-xl font-bold font-nastaliq leading-[2.2]">پی ڈی ایف کتابچہ تیار ہو رہا ہے...</h3>
+            <p className="text-sm text-amber-200 font-nastaliq leading-[2.2] max-w-sm mt-1">
+              {pdfProgress?.message || 'کتاب کے صفحات مرتب کیے جا رہے ہیں...'}
+            </p>
+            {pdfProgress && (
+              <div className="w-64 bg-white/20 rounded-full h-2.5 mt-4 overflow-hidden p-0.5 border border-white/30">
+                <div
+                  className="bg-[var(--accent-gold)] h-full rounded-full transition-all duration-300"
+                  style={{ width: `${Math.round((pdfProgress.current / pdfProgress.total) * 100)}%` }}
+                ></div>
+              </div>
+            )}
+            <p className="text-xs text-white/70 font-nastaliq mt-3 leading-[2.2]">
+              براہِ کرم چند لمحے انتظار فرمائیں، پی ڈی ایف فائل خودکار طور پر ڈاؤنلوڈ ہو جائے گی
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
  * Likho Pro (قلم و قافیہ) - Diwan Booklet Export Service
  * Formats multi-poem collections into classical publication-ready A4/A5 books
  * with ornate title covers, table of contents, and print-optimized Nastaliq typography.
+ * Supports direct standalone HTML and direct binary PDF file generation & download.
  */
 
 import { PoemDraft } from '../types/editor';
@@ -22,6 +23,12 @@ export interface DiwanBookletConfig {
 export interface FormattedCouplet {
   misra1: string;
   misra2?: string;
+}
+
+export interface PdfProgress {
+  current: number;
+  total: number;
+  message: string;
 }
 
 export class DiwanBookletService {
@@ -56,9 +63,552 @@ export class DiwanBookletService {
   }
 
   /**
-   * Generates a fully standalone, self-contained HTML document for the Diwan booklet
-   * complete with embedded Google Fonts, golden Mughal borders, table of contents,
-   * and CSS paged media rules for high-resolution vector PDF printing.
+   * Pure binary assembly of multi-page PDF 1.4 specification without any third-party dependencies.
+   */
+  static assemblePdf(
+    pages: Array<{ jpegBytes: Uint8Array; width: number; height: number }>,
+    ptWidth = 595.28,
+    ptHeight = 841.89
+  ): Uint8Array {
+    const enc = new TextEncoder();
+    const chunks: Uint8Array[] = [];
+    const offsets: number[] = [];
+    let currentLength = 0;
+
+    function pushString(str: string) {
+      const bytes = enc.encode(str);
+      chunks.push(bytes);
+      currentLength += bytes.length;
+    }
+
+    function pushBytes(bytes: Uint8Array) {
+      chunks.push(bytes);
+      currentLength += bytes.length;
+    }
+
+    pushString('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+
+    const totalPages = pages.length;
+    // Obj 1: Catalog
+    offsets.push(currentLength);
+    pushString('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+
+    // Obj 2: Pages tree
+    const pageKids: string[] = [];
+    for (let i = 0; i < totalPages; i++) {
+      pageKids.push(`${3 + i * 3} 0 R`);
+    }
+    offsets.push(currentLength);
+    pushString(`2 0 obj\n<< /Type /Pages /Kids [${pageKids.join(' ')}] /Count ${totalPages} >>\nendobj\n`);
+
+    // For each page:
+    // Obj 3 + i*3: Page
+    // Obj 4 + i*3: Content stream
+    // Obj 5 + i*3: Image XObject
+    for (let i = 0; i < totalPages; i++) {
+      const pageObjId = 3 + i * 3;
+      const contentObjId = 4 + i * 3;
+      const imgObjId = 5 + i * 3;
+      const imgName = `Im${i + 1}`;
+      const page = pages[i];
+
+      // Page object
+      offsets.push(currentLength);
+      pushString(
+        `${pageObjId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${ptWidth} ${ptHeight}] /Resources << /XObject << /${imgName} ${imgObjId} 0 R >> >> /Contents ${contentObjId} 0 R >>\nendobj\n`
+      );
+
+      // Content stream
+      const content = `q\n${ptWidth} 0 0 ${ptHeight} 0 0 cm\n/${imgName} Do\nQ\n`;
+      offsets.push(currentLength);
+      pushString(`${contentObjId} 0 obj\n<< /Length ${content.length} >>\nstream\n${content}\nendstream\nendobj\n`);
+
+      // Image XObject
+      offsets.push(currentLength);
+      pushString(
+        `${imgObjId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${page.width} /Height ${page.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${page.jpegBytes.length} >>\nstream\n`
+      );
+      pushBytes(page.jpegBytes);
+      pushString('\nendstream\nendobj\n');
+    }
+
+    const startXref = currentLength;
+    const totalObjs = 2 + totalPages * 3;
+    pushString(`xref\n0 ${totalObjs + 1}\n0000000000 65535 f \n`);
+    for (const off of offsets) {
+      pushString(String(off).padStart(10, '0') + ' 00000 n \n');
+    }
+    pushString(`trailer\n<< /Size ${totalObjs + 1} /Root 1 0 R >>\nstartxref\n${startXref}\n%%EOF\n`);
+
+    // Concatenate all chunks into final binary buffer
+    const totalSize = chunks.reduce((acc, c) => acc + c.length, 0);
+    const result = new Uint8Array(totalSize);
+    let pos = 0;
+    for (const c of chunks) {
+      result.set(c, pos);
+      pos += c.length;
+    }
+    return result;
+  }
+
+  /**
+   * Generates a high-resolution, pixel-perfect binary PDF Blob in exact A4 or A5 dimensions.
+   */
+  static async generateDirectPDFBlob(
+    config: DiwanBookletConfig,
+    onProgress?: (progress: PdfProgress) => void
+  ): Promise<Blob> {
+    if (typeof document !== 'undefined' && document.fonts) {
+      try {
+        await document.fonts.ready;
+      } catch {
+        // Proceed if font readiness check fails
+      }
+    }
+
+    const isA5 = config.pageSize === 'A5';
+    // Resolution: ~150 DPI for crisp vector-like typography without bloating memory
+    const canvasWidth = isA5 ? 874 : 1240;
+    const canvasHeight = isA5 ? 1240 : 1754;
+    const ptWidth = isA5 ? 419.53 : 595.28;
+    const ptHeight = isA5 ? 595.28 : 841.89;
+    const scale = isA5 ? 0.72 : 1.0;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D context is not available');
+
+    const year = config.publicationYear || this.toUrduDigits(new Date().getFullYear());
+    const totalSelected = config.selectedDrafts.length;
+    const estimatedTotalPages = 1 + (config.dedication ? 1 : 0) + (config.includeTOC ? 1 : 0) + Math.max(1, totalSelected);
+
+    const renderedPages: Array<{ jpegBytes: Uint8Array; width: number; height: number }> = [];
+    let currentPageNum = 1;
+
+    // Helper: Export current canvas state as JPEG bytes
+    const captureCurrentPage = (): Promise<Uint8Array> => {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject(new Error('Canvas toBlob failed'));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              resolve(new Uint8Array(reader.result as ArrayBuffer));
+            };
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(blob);
+          },
+          'image/jpeg',
+          0.96
+        );
+      });
+    };
+
+    // Helper: Draw borders
+    const drawPageBorders = (isCover = false) => {
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      const margin = isA5 ? (isCover ? 35 : 40) : (isCover ? 50 : 55);
+      const innerGap = isA5 ? 8 : 12;
+
+      // Outer gold border
+      ctx.strokeStyle = '#8a5615';
+      ctx.lineWidth = isA5 ? 3 : 4;
+      ctx.strokeRect(margin, margin, canvasWidth - margin * 2, canvasHeight - margin * 2);
+
+      // Inner subtle border
+      ctx.strokeStyle = '#b3823d';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(
+        margin + innerGap,
+        margin + innerGap,
+        canvasWidth - (margin + innerGap) * 2,
+        canvasHeight - (margin + innerGap) * 2
+      );
+
+      // Corner florets
+      const dotDist = margin + innerGap;
+      ctx.fillStyle = '#8a5615';
+      const drawDot = (x: number, y: number) => {
+        ctx.beginPath();
+        ctx.arc(x, y, isA5 ? 3.5 : 5, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      drawDot(dotDist, dotDist);
+      drawDot(canvasWidth - dotDist, dotDist);
+      drawDot(dotDist, canvasHeight - dotDist);
+      drawDot(canvasWidth - dotDist, canvasHeight - dotDist);
+      ctx.restore();
+    };
+
+    // Helper: Draw header and footer
+    const drawHeaderFooter = (title: string, poet: string, pageNum: number) => {
+      ctx.save();
+      ctx.direction = 'rtl';
+      const headerY = isA5 ? 75 : 100;
+      const footerY = canvasHeight - (isA5 ? 65 : 90);
+      const marginSide = isA5 ? 55 : 80;
+
+      // Header rule & labels
+      ctx.fillStyle = '#8a5615';
+      ctx.font = `${Math.round(18 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.textAlign = 'right';
+      ctx.fillText(poet, canvasWidth - marginSide, headerY);
+      ctx.textAlign = 'left';
+      ctx.fillText(title, marginSide, headerY);
+
+      ctx.strokeStyle = '#e8decb';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(marginSide, headerY + 12);
+      ctx.lineTo(canvasWidth - marginSide, headerY + 12);
+      ctx.stroke();
+
+      // Footer rule & Urdu page number
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#8a5615';
+      ctx.font = `bold ${Math.round(20 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.fillText(`— ${this.toUrduDigits(pageNum)} —`, canvasWidth / 2, footerY);
+
+      ctx.beginPath();
+      ctx.moveTo(canvasWidth / 2 - 80, footerY - 24);
+      ctx.lineTo(canvasWidth / 2 + 80, footerY - 24);
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    // -------------------------------------------------------------------------
+    // PAGE 1: ROYAL TITLE COVER
+    // -------------------------------------------------------------------------
+    onProgress?.({
+      current: 1,
+      total: estimatedTotalPages,
+      message: 'سرورقِ شاہانہ تیار ہو رہا ہے...',
+    });
+
+    drawPageBorders(true);
+    ctx.save();
+    ctx.direction = 'rtl';
+    ctx.textAlign = 'center';
+
+    const centerY = canvasHeight / 2;
+
+    // Top fleuron & bismillah
+    ctx.fillStyle = '#8a5615';
+    ctx.font = `${Math.round(22 * scale)}px "Amiri", "Noto Nastaliq Urdu", serif`;
+    ctx.fillText('❦  ❦  ❦', canvasWidth / 2, centerY - (isA5 ? 380 : 520));
+    ctx.font = `${Math.round(26 * scale)}px "Amiri", serif`;
+    ctx.fillText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', canvasWidth / 2, centerY - (isA5 ? 330 : 450));
+
+    // Book title
+    ctx.font = `bold ${Math.round(52 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+    ctx.fillText(config.title || 'دیوانِ کلام', canvasWidth / 2, centerY - (isA5 ? 120 : 160));
+
+    // Subtitle
+    if (config.subtitle) {
+      ctx.fillStyle = '#5a4225';
+      ctx.font = `${Math.round(24 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.fillText(config.subtitle, canvasWidth / 2, centerY - (isA5 ? 50 : 70));
+    }
+
+    // Divider line
+    ctx.strokeStyle = '#8a5615';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(canvasWidth / 2 - 120, centerY);
+    ctx.lineTo(canvasWidth / 2 + 120, centerY);
+    ctx.stroke();
+
+    // Author block
+    ctx.fillStyle = '#7a6652';
+    ctx.font = `${Math.round(20 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+    ctx.fillText('کلام و نگارشِ', canvasWidth / 2, centerY + (isA5 ? 50 : 70));
+
+    ctx.fillStyle = '#1a1612';
+    ctx.font = `bold ${Math.round(42 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+    ctx.fillText(config.poet || 'شاعر', canvasWidth / 2, centerY + (isA5 ? 120 : 160));
+
+    // Footer emblem & year
+    ctx.fillStyle = '#8a5615';
+    ctx.font = `${Math.round(36 * scale)}px sans-serif`;
+    ctx.fillText('⚜️', canvasWidth / 2, centerY + (isA5 ? 320 : 440));
+
+    ctx.font = `bold ${Math.round(18 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+    ctx.fillText(`سنۂ اشاعت: ${year}ء`, canvasWidth / 2, centerY + (isA5 ? 370 : 500));
+
+    ctx.fillStyle = '#8a7a6a';
+    ctx.font = `${Math.round(14 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+    ctx.fillText('مرتب کردہ: قلم و قافیہ — اسٹوڈیو برائے شعر و ادب', canvasWidth / 2, centerY + (isA5 ? 410 : 545));
+    ctx.restore();
+
+    renderedPages.push({
+      jpegBytes: await captureCurrentPage(),
+      width: canvasWidth,
+      height: canvasHeight,
+    });
+    currentPageNum++;
+
+    // -------------------------------------------------------------------------
+    // PAGE 2: OPTIONAL DEDICATION / PREFACE
+    // -------------------------------------------------------------------------
+    if (config.dedication && config.dedication.trim().length > 0) {
+      onProgress?.({
+        current: currentPageNum,
+        total: estimatedTotalPages,
+        message: 'صفحۂ انتساب تیار ہو رہا ہے...',
+      });
+
+      drawPageBorders(false);
+      drawHeaderFooter(config.title, config.poet, currentPageNum);
+
+      ctx.save();
+      ctx.direction = 'rtl';
+      ctx.textAlign = 'center';
+
+      // Section title
+      ctx.fillStyle = '#8a5615';
+      ctx.font = `bold ${Math.round(36 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.fillText('انتساب', canvasWidth / 2, centerY - (isA5 ? 180 : 260));
+
+      ctx.font = `${Math.round(20 * scale)}px "Amiri", serif`;
+      ctx.fillText('❦', canvasWidth / 2, centerY - (isA5 ? 130 : 190));
+
+      // Dedication body lines
+      ctx.fillStyle = '#332b24';
+      ctx.font = `${Math.round(25 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      const dedLines = config.dedication.split('\n').filter((l) => l.trim().length > 0);
+      const lineSpacing = isA5 ? 55 : 75;
+      let dY = centerY - ((dedLines.length - 1) * lineSpacing) / 2;
+
+      for (const line of dedLines) {
+        ctx.fillText(line.trim(), canvasWidth / 2, dY);
+        dY += lineSpacing;
+      }
+      ctx.restore();
+
+      renderedPages.push({
+        jpegBytes: await captureCurrentPage(),
+        width: canvasWidth,
+        height: canvasHeight,
+      });
+      currentPageNum++;
+    }
+
+    // -------------------------------------------------------------------------
+    // PAGE 3: TABLE OF CONTENTS
+    // -------------------------------------------------------------------------
+    if (config.includeTOC && config.selectedDrafts.length > 0) {
+      onProgress?.({
+        current: currentPageNum,
+        total: estimatedTotalPages,
+        message: 'فہرستِ کلام مرتب ہو رہی ہے...',
+      });
+
+      drawPageBorders(false);
+      drawHeaderFooter(config.title, config.poet, currentPageNum);
+
+      ctx.save();
+      ctx.direction = 'rtl';
+
+      // Section title
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#8a5615';
+      ctx.font = `bold ${Math.round(34 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.fillText('فہرستِ کلام', canvasWidth / 2, isA5 ? 170 : 230);
+      ctx.font = `${Math.round(20 * scale)}px "Amiri", serif`;
+      ctx.fillText('❦', canvasWidth / 2, isA5 ? 210 : 280);
+
+      // Rows
+      let tocY = isA5 ? 270 : 360;
+      const rowStep = isA5 ? 58 : 78;
+      const rightX = canvasWidth - (isA5 ? 85 : 120);
+      const leftX = isA5 ? 85 : 120;
+      let poemPageTracker = currentPageNum + 1;
+
+      for (let i = 0; i < config.selectedDrafts.length; i++) {
+        const draft = config.selectedDrafts[i];
+        const numStr = this.toUrduDigits(i + 1) + ' . ';
+        const titleStr = draft.title || 'بے عنوان';
+        const formUrdu = this.getFormUrdu(draft.form);
+        const metaStr = ` (${formUrdu})`;
+        const pageStr = this.toUrduDigits(poemPageTracker);
+        poemPageTracker++;
+
+        // Number and title
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#8a5615';
+        ctx.font = `bold ${Math.round(20 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        ctx.fillText(numStr, rightX, tocY);
+
+        const numWidth = ctx.measureText(numStr).width;
+        ctx.fillStyle = '#1a1612';
+        ctx.fillText(titleStr, rightX - numWidth, tocY);
+
+        const titleWidth = ctx.measureText(titleStr).width;
+        ctx.fillStyle = '#7a6652';
+        ctx.font = `${Math.round(15 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        ctx.fillText(metaStr, rightX - numWidth - titleWidth, tocY);
+
+        // Page number on left
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#8a5615';
+        ctx.font = `bold ${Math.round(20 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        ctx.fillText(pageStr, leftX, tocY);
+
+        // Dotted leader line
+        const metaWidth = ctx.measureText(metaStr).width;
+        const dotsStart = rightX - numWidth - titleWidth - metaWidth - 15;
+        const dotsEnd = leftX + ctx.measureText(pageStr).width + 15;
+
+        ctx.strokeStyle = '#b3823d';
+        ctx.setLineDash([2, 5]);
+        ctx.beginPath();
+        ctx.moveTo(dotsStart, tocY - 6);
+        ctx.lineTo(dotsEnd, tocY - 6);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        tocY += rowStep;
+        if (tocY > canvasHeight - 160) break; // Limit single TOC page
+      }
+      ctx.restore();
+
+      renderedPages.push({
+        jpegBytes: await captureCurrentPage(),
+        width: canvasWidth,
+        height: canvasHeight,
+      });
+      currentPageNum++;
+    }
+
+    // -------------------------------------------------------------------------
+    // PAGES 4+: POEM PAGES
+    // -------------------------------------------------------------------------
+    for (let pIdx = 0; pIdx < config.selectedDrafts.length; pIdx++) {
+      const draft = config.selectedDrafts[pIdx];
+      onProgress?.({
+        current: currentPageNum,
+        total: estimatedTotalPages,
+        message: `کلام «${draft.title || 'بے عنوان'}» برآمد ہو رہا ہے (${pIdx + 1} از ${totalSelected})...`,
+      });
+
+      drawPageBorders(false);
+      drawHeaderFooter(config.title, config.poet, currentPageNum);
+
+      ctx.save();
+      ctx.direction = 'rtl';
+      ctx.textAlign = 'center';
+
+      let poemY = isA5 ? 165 : 220;
+
+      // Form badge
+      const formUrdu = this.getFormUrdu(draft.form);
+      ctx.fillStyle = '#8a5615';
+      ctx.font = `bold ${Math.round(15 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.fillText(`[ ${formUrdu} ]`, canvasWidth / 2, poemY);
+      poemY += isA5 ? 35 : 45;
+
+      // Poem Title
+      ctx.font = `bold ${Math.round(36 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      ctx.fillText(draft.title || 'بے عنوان', canvasWidth / 2, poemY);
+      poemY += isA5 ? 30 : 40;
+
+      // Meter & Radif annotations
+      if (config.includeMeters && (draft.meterName || draft.radif)) {
+        ctx.fillStyle = '#6a5845';
+        ctx.font = `${Math.round(16 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        const metaParts: string[] = [];
+        if (draft.meterName) metaParts.push(`بحر: ${draft.meterName}`);
+        if (draft.radif) metaParts.push(`ردیف: ${draft.radif}`);
+        ctx.fillText(metaParts.join('  •  '), canvasWidth / 2, poemY);
+        poemY += isA5 ? 25 : 35;
+      }
+
+      ctx.fillStyle = '#8a5615';
+      ctx.font = `${Math.round(18 * scale)}px "Amiri", serif`;
+      ctx.fillText('❦', canvasWidth / 2, poemY);
+      poemY += isA5 ? 35 : 55;
+
+      // Couplets rendering
+      const couplets = this.parsePoemCouplets(draft.content || '');
+      ctx.font = `${Math.round(25 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+      const misraLineHeight = isA5 ? 50 : 66;
+
+      for (let cIdx = 0; cIdx < couplets.length; cIdx++) {
+        const c = couplets[cIdx];
+
+        // Misra 1
+        ctx.fillStyle = '#1a1612';
+        ctx.fillText(c.misra1, canvasWidth / 2, poemY);
+        poemY += misraLineHeight;
+
+        // Misra 2
+        if (c.misra2) {
+          ctx.fillText(c.misra2, canvasWidth / 2, poemY);
+          poemY += misraLineHeight;
+        }
+
+        // Couplet fleuron separator
+        if (cIdx < couplets.length - 1) {
+          ctx.fillStyle = '#b3823d';
+          ctx.font = `${Math.round(13 * scale)}px serif`;
+          ctx.fillText('✦', canvasWidth / 2, poemY - 12);
+          poemY += isA5 ? 18 : 26;
+          ctx.font = `${Math.round(25 * scale)}px "Noto Nastaliq Urdu", "Gulzar", serif`;
+        }
+
+        // Safety break if poem has many couplets
+        if (poemY > canvasHeight - (isA5 ? 130 : 180)) break;
+      }
+      ctx.restore();
+
+      renderedPages.push({
+        jpegBytes: await captureCurrentPage(),
+        width: canvasWidth,
+        height: canvasHeight,
+      });
+      currentPageNum++;
+    }
+
+    onProgress?.({
+      current: estimatedTotalPages,
+      total: estimatedTotalPages,
+      message: 'پی ڈی ایف فائل یکجا ہو رہی ہے...',
+    });
+
+    const pdfBytes = this.assemblePdf(renderedPages, ptWidth, ptHeight);
+    return new Blob([pdfBytes as unknown as BlobPart], { type: 'application/pdf' });
+  }
+
+  /**
+   * Generates and immediately downloads the direct PDF file into the user's Downloads directory.
+   */
+  static async downloadDirectPDF(
+    config: DiwanBookletConfig,
+    onProgress?: (progress: PdfProgress) => void
+  ): Promise<void> {
+    const blob = await this.generateDirectPDFBlob(config, onProgress);
+    const url = URL.createObjectURL(blob);
+    const filename = `${this.sanitizeFilename(config.title || 'diwan')}_booklet.pdf`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 300);
+  }
+
+  /**
+   * Generates a fully standalone, self-contained HTML document for the Diwan booklet.
    */
   static generateStandaloneBookletHTML(config: DiwanBookletConfig): string {
     const year = config.publicationYear || this.toUrduDigits(new Date().getFullYear());
@@ -67,9 +617,7 @@ export class DiwanBookletService {
     let pagesHTML = '';
     let currentPageNum = 1;
 
-    // -------------------------------------------------------------------------
-    // PAGE 1: ROYAL TITLE COVER (سرورقِ شاہانہ)
-    // -------------------------------------------------------------------------
+    // Cover Page
     pagesHTML += `
       <section class="book-page cover-page" style="page-break-after: always; break-after: page;">
         <div class="mughal-border">
@@ -100,9 +648,7 @@ export class DiwanBookletService {
     `;
     currentPageNum++;
 
-    // -------------------------------------------------------------------------
-    // PAGE 2: OPTIONAL DEDICATION / PREFACE (انتساب و دیباچہ)
-    // -------------------------------------------------------------------------
+    // Dedication
     if (config.dedication && config.dedication.trim().length > 0) {
       pagesHTML += `
         <section class="book-page dedication-page" style="page-break-after: always; break-after: page;">
@@ -127,11 +673,9 @@ export class DiwanBookletService {
       currentPageNum++;
     }
 
-    // -------------------------------------------------------------------------
-    // PAGE 3: TABLE OF CONTENTS (فہرستِ کلام)
-    // -------------------------------------------------------------------------
+    // TOC
     if (config.includeTOC && config.selectedDrafts.length > 0) {
-      let poemPageTracker = currentPageNum + 1; // Estimates page index
+      let poemPageTracker = currentPageNum + 1;
       const tocRows = config.selectedDrafts
         .map((draft, idx) => {
           const rowPage = this.toUrduDigits(poemPageTracker);
@@ -173,9 +717,7 @@ export class DiwanBookletService {
       currentPageNum++;
     }
 
-    // -------------------------------------------------------------------------
-    // PAGES 4+: POEM PAGES (صفحاتِ کلام)
-    // -------------------------------------------------------------------------
+    // Poems
     config.selectedDrafts.forEach((draft) => {
       const couplets = this.parsePoemCouplets(draft.content || '');
       const formUrdu = this.getFormUrdu(draft.form);
@@ -225,9 +767,6 @@ export class DiwanBookletService {
       currentPageNum++;
     });
 
-    // -------------------------------------------------------------------------
-    // COMPLETE DOCUMENT WRAPPER WITH CSS PAGED MEDIA
-    // -------------------------------------------------------------------------
     return `<!DOCTYPE html>
 <html lang="ur" dir="rtl">
 <head>
@@ -240,13 +779,13 @@ export class DiwanBookletService {
   <style>
     @page {
       size: ${isA5 ? 'A5' : 'A4'};
-      margin: 15mm 18mm 20mm 18mm;
+      margin: 0;
     }
 
     * {
       box-sizing: border-box;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
 
     body {
@@ -277,7 +816,6 @@ export class DiwanBookletService {
       background: #ffffff;
     }
 
-    /* Print Controls Banner (Only visible in browser preview) */
     .no-print-toolbar {
       position: sticky;
       top: 0;
@@ -305,12 +843,6 @@ export class DiwanBookletService {
       transition: all 0.2s;
     }
 
-    .no-print-toolbar button:hover {
-      background: #fdf5e6;
-      transform: translateY(-1px);
-    }
-
-    /* Headers and Footers */
     .page-header {
       display: flex;
       justify-content: space-between;
@@ -350,7 +882,6 @@ export class DiwanBookletService {
       line-height: 2.2;
     }
 
-    /* Cover Page Styling */
     .cover-page {
       padding: 15mm;
       justify-content: center;
@@ -439,7 +970,6 @@ export class DiwanBookletService {
       margin: 4px 0 0 0;
     }
 
-    /* Dedication Page */
     .dedication-container {
       flex: 1;
       display: flex;
@@ -458,7 +988,6 @@ export class DiwanBookletService {
       margin-top: 20px;
     }
 
-    /* Table of Contents */
     .toc-table {
       width: 100%;
       border-collapse: collapse;
@@ -506,7 +1035,6 @@ export class DiwanBookletService {
       color: #8a5615;
     }
 
-    /* Poem Page Styling */
     .poem-header {
       text-align: center;
       margin-bottom: 25px;
@@ -576,7 +1104,6 @@ export class DiwanBookletService {
       opacity: 0.7;
     }
 
-    /* Print Engine Media Query */
     @media print {
       body {
         background: #ffffff !important;
@@ -607,7 +1134,7 @@ export class DiwanBookletService {
       <strong>📖 ${this.escapeHtml(config.title || 'دیوانِ کلام')}</strong> — کتابچہ پیش منظر
     </div>
     <div>
-      <button onclick="window.print()">🖨️ پرنٹ / PDF محفوظ کریں</button>
+      <button onclick="window.print()">🖨️ پرنٹر پر بھیجیں</button>
     </div>
   </div>
 
