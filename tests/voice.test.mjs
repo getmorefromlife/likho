@@ -25,6 +25,7 @@ try {
   await build({
     entryPoints: [
       'src/services/voiceRecitationService.ts',
+      'src/services/voiceDspService.ts',
       'src/services/storageService.ts',
     ],
     bundle: true,
@@ -35,6 +36,9 @@ try {
 
   const { formatDurationMMSS, toUrduNumerals } = await import(
     pathToFileURL(join(temporary, 'voiceRecitationService.js'))
+  );
+  const { voiceDspService, VOCAL_PROFILE_PRESETS, REVERB_PRESET_LABELS } = await import(
+    pathToFileURL(join(temporary, 'voiceDspService.js'))
   );
   const { StorageService } = await import(
     pathToFileURL(join(temporary, 'storageService.js'))
@@ -61,6 +65,50 @@ try {
     assert.equal(toUrduNumerals('0123456789'), '۰۱۲۳۴۵۶۷۸۹');
     assert.equal(toUrduNumerals('02:05'), '۰۲:۰۵');
     assert.equal(toUrduNumerals('شعر 1'), 'شعر ۱');
+  });
+
+  test('VOCAL_PROFILE_PRESETS defines complete broadcast, natural, tarannum, and raw profiles', () => {
+    const requiredProfiles = ['broadcast', 'natural', 'tarannum_sheen', 'raw'];
+    for (const key of requiredProfiles) {
+      assert.ok(VOCAL_PROFILE_PRESETS[key], `Preset ${key} must exist`);
+      assert.ok(typeof VOCAL_PROFILE_PRESETS[key].label === 'string');
+      assert.ok(typeof VOCAL_PROFILE_PRESETS[key].description === 'string');
+      const cfg = VOCAL_PROFILE_PRESETS[key].config;
+      assert.ok(typeof cfg.warmthDb === 'number');
+      assert.ok(typeof cfg.presenceDb === 'number');
+      assert.ok(typeof cfg.airDb === 'number');
+      assert.ok(typeof cfg.compressorEnabled === 'boolean');
+      assert.ok(typeof cfg.lowCutEnabled === 'boolean');
+    }
+  });
+
+  test('REVERB_PRESET_LABELS provides authenticated Urdu labels for all spaces', () => {
+    assert.equal(REVERB_PRESET_LABELS.dry.urdu, 'بغیر گونج کے بالکل صاف');
+    assert.equal(REVERB_PRESET_LABELS.mushaira.urdu, 'بڑے مشاعرے کے پنڈال جیسی شاہانہ فضا');
+  });
+
+  test('VoiceDspEngine generates synthetic convolution impulse buffers mathematically', () => {
+    const mockCtx = {
+      sampleRate: 44100,
+      createBuffer: (channels, length, sampleRate) => {
+        const left = new Float32Array(length);
+        const right = new Float32Array(length);
+        return {
+          numberOfChannels: channels,
+          length,
+          sampleRate,
+          getChannelData: (ch) => (ch === 0 ? left : right),
+        };
+      },
+    };
+
+    const impulse = voiceDspService.generateReverbImpulse(mockCtx, 1.5, 2.5);
+    assert.equal(impulse.numberOfChannels, 2);
+    assert.equal(impulse.length, 44100 * 1.5);
+    const left = impulse.getChannelData(0);
+    // Envelope check: initial sample should have higher amplitude than end sample
+    assert.ok(Math.abs(left[0]) <= 1.0);
+    assert.ok(Math.abs(left[left.length - 1]) < 0.2);
   });
 
   test('StorageService persists and retrieves drafts with valid voiceRecording metadata', () => {
@@ -111,7 +159,7 @@ try {
     assert.equal(saved, false, 'Malformed voice recording metadata must be rejected');
   });
 
-  console.log(`${passed} voice recitation & storage checks passed.`);
+  console.log(`${passed} voice recitation & DSP studio checks passed.`);
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }

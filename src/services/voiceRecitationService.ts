@@ -1,4 +1,5 @@
 import type { VoiceRecordingMeta } from '../types/editor';
+import { voiceDspService, VocalDspConfig } from './voiceDspService';
 
 /**
  * Supported MIME types across modern browsers (Chromium, Firefox, Safari iOS/macOS)
@@ -72,11 +73,26 @@ class VoiceRecitationService {
     return this.state;
   }
 
+  public getAudioContext(): AudioContext | null {
+    if (!this.audioContext && typeof window !== 'undefined') {
+      try {
+        const AudioCtx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        this.audioContext = new AudioCtx();
+      } catch {
+        // Ignored
+      }
+    }
+    return this.audioContext;
+  }
+
   /**
-   * Start microphone recording with live amplitude visualizer callback
+   * Start microphone recording with live amplitude visualizer callback and optional DSP configuration
    */
   public async startRecording(
-    onAmplitudeUpdate?: (levels: number[]) => void
+    onAmplitudeUpdate?: (levels: number[]) => void,
+    dspConfig?: VocalDspConfig
   ): Promise<void> {
     if (!this.isSupported()) {
       throw new Error('براؤزر میں مائیکروفون ریکارڈنگ کی سہولت دستیاب نہیں ہے۔');
@@ -89,25 +105,15 @@ class VoiceRecitationService {
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
+          noiseSuppression: false,
+          autoGainControl: false,
         },
         video: false,
       });
 
-      const mimeType = getSupportedMimeType();
-      const options: MediaRecorderOptions = mimeType ? { mimeType } : {};
-      this.mediaRecorder = new MediaRecorder(this.mediaStream, options);
+      let recordStream = this.mediaStream;
 
-      this.recordedChunks = [];
-
-      this.mediaRecorder.ondataavailable = (event: BlobEvent) => {
-        if (event.data && event.data.size > 0) {
-          this.recordedChunks.push(event.data);
-        }
-      };
-
-      // Set up Web Audio Analyser for live visualizer
+      // Set up Web Audio DSP chain and Analyser
       try {
         const AudioCtx =
           window.AudioContext ||
@@ -118,10 +124,20 @@ class VoiceRecitationService {
         }
 
         const source = this.audioContext.createMediaStreamSource(this.mediaStream);
+        const config = dspConfig || voiceDspService.currentConfig;
+        const dspGraph = voiceDspService.buildDspGraph(this.audioContext, source, config);
+
         this.analyser = this.audioContext.createAnalyser();
         this.analyser.fftSize = 64; // Gives 32 frequency bins
         this.analyser.smoothingTimeConstant = 0.8;
-        source.connect(this.analyser);
+        dspGraph.analyserInput.connect(this.analyser);
+
+        // Route processed studio audio to MediaStreamDestination so MediaRecorder captures the broadcast sound
+        if (typeof this.audioContext.createMediaStreamDestination === 'function') {
+          const destination = this.audioContext.createMediaStreamDestination();
+          dspGraph.processedOutput.connect(destination);
+          recordStream = destination.stream;
+        }
 
         const bufferLength = this.analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -143,8 +159,20 @@ class VoiceRecitationService {
 
         this.animationFrameId = requestAnimationFrame(pollVisualizer);
       } catch (audioCtxError) {
-        console.warn('Web Audio visualizer could not be initialized:', audioCtxError);
+        console.warn('Web Audio DSP graph could not be initialized:', audioCtxError);
       }
+
+      const mimeType = getSupportedMimeType();
+      const options: MediaRecorderOptions = mimeType ? { mimeType } : {};
+      this.mediaRecorder = new MediaRecorder(recordStream, options);
+
+      this.recordedChunks = [];
+
+      this.mediaRecorder.ondataavailable = (event: BlobEvent) => {
+        if (event.data && event.data.size > 0) {
+          this.recordedChunks.push(event.data);
+        }
+      };
 
       this.startTime = Date.now();
       this.pausedDuration = 0;
@@ -300,6 +328,8 @@ class VoiceRecitationService {
   }
 
   private cleanup(): void {
+    voiceDspService.stopTanpuraDrone();
+
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
