@@ -79,11 +79,35 @@ textarea.leading-\[2\.4\],
   padding-bottom: 0.75rem !important;
 }
 
-/* Global input anti-clipping resets for Nastaliq text */
+/* -------------------------------------------------------------
+   GOLDEN SHIMMER & COMMERCIAL PRO ANIMATIONS
+------------------------------------------------------------- */
+@keyframes goldShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.btn-gold-shimmer {
+  background: linear-gradient(90deg, #c59a27 0%, #f4e39b 45%, #ffffff 50%, #f4e39b 55%, #c59a27 100%);
+  background-size: 250% 100%;
+  animation: goldShimmer 5s infinite linear;
+}
+
+.btn-gold-shimmer:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 0 16px rgba(197, 154, 39, 0.45);
+}
+
+/* Global input and button anti-clipping resets for Nastaliq text */
 input.font-nastaliq,
 .font-nastaliq input {
   padding-top: 0.5rem !important;
   padding-bottom: 0.5rem !important;
+  overflow: visible !important;
+}
+
+button.font-nastaliq,
+.font-nastaliq button {
   overflow: visible !important;
 }
 

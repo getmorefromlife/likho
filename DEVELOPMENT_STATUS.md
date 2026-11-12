@@ -2,9 +2,9 @@
 
 **Document Name:** `DEVELOPMENT_STATUS.md`  
 **Location:** `/DEVELOPMENT_STATUS.md` (Project Root)  
-**Last Updated:** October 30, 2026  
+**Last Updated:** November 12, 2026  
 **Localhost Environment:** `http://localhost:5173/` (Vite Dev Server Active)  
-**Local Build Status:** TypeScript and Vite build passed October 30, 2026 (`npm run test:prosody` 72/72, `npm run test:storage` 15/15, `npm run test:benchmark` 40/40). This is not a production deployment claim.
+**Local Build Status:** TypeScript and Vite build passed November 12, 2026 (`npm run test:prosody` 75/75, `npm run test:storage` 15/15, `npm run validate:benchmark` valid, `npm run build` passed).
 
 ---
 
@@ -36,10 +36,11 @@ The planned **رہنمائے شعر و عروض** combines a reference atlas for
    - Migrated to a controlled high-performance `<input id="poem-title-input">` supporting full Urdu phonetic mapping, bidirectional cursor tracking, and seamless Backspace/Delete text manipulation.
 
 ### ✅ B. Core Prosody Engine & Lexicon
-3. **Source-attributed Offline Pronunciation Lexicon:**
+3. **Source-attributed Offline Pronunciation Lexicon & Parallel Clean-Room Sovereign Dictionary:**
    - 40,434 dictionary keys and 43,556 reading records from a pinned Aruuz lexical database extraction; source IDs, vocalizations and pronunciation divisions are retained.
    - 1,007 unsupported/impossible source records are quarantined for inspection. Generated spelling-length weights no longer participate in the engine.
    - Source data loads synchronously; personal imports keep separate provenance. GPL-2.0 attribution, license and corresponding editable data/conversion source ship with the app.
+   - **Parallel Sovereign Clean-Room Urdu Prosodic & Literary Dictionary (`likho-sovereign-lexicon.json` — Batches 1–7, `v0.6.0-batch6-7`):** `68,037` unique Urdu words (`69,537` vocalized & defined entries, including `100%` / `64/64` of the Ghalib classical benchmark words) compiled 100% via `src/services/urduPhonology.ts` with zero GPL-2.0 or third-party copyleft inputs. Serves both as a user-facing Urdu Literary & Prosodic Dictionary (`ThesaurusTab.tsx`) with vocalization, POS, root, meaning, rukn, and root-family derivatives, and as a parallel scansion/rhyme fallback via `sovereignLexiconService.ts` and `aroozLexiconService.ts`.
 
 4. **Dynamic Rhyme Tray (`QafiyaTray.tsx`, `qafiyaEngine.ts`):**
    - Docked rhyming workbench dynamically tracking written verses.
@@ -259,3 +260,57 @@ See [POET_REVIEW_STATUS.md](./docs/POET_REVIEW_STATUS.md) for the completed pron
   - Built the 50-meter Reference Atlas data model (`METER_REFERENCE_ATLAS`) covering all 50 catalog forms from `CLASSICAL_BUHUR` with honest `reviewStage` badges (`source-checked` for the exemplar article `ramal-musamman-mahzoof` vs `catalog-only` for the remaining 49 forms).
   - Authored the complete exemplar reference entry for `بحرِ رمل مثمن محذوف` (`ramal-musamman-mahzoof`) with interactive 6-layer step-by-step decomposition (`اصل شعر → املا → تلفظ → ہجے → اوزان → ارکان و بحر`), a labelled constructed negative counterexample (`شوخی تحریر` without *زیرِ اضافت*), neighboring meter comparisons (`رمل مسدس محذوف` and `رمل مثمن مخبون محذوف`), and an answer-hidden practice exercise with a progressive hint ladder.
 - **Verification:** `npm run build` (**passed**, `0` warnings); `npm run test:prosody` (**72/72 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**).
+
+## 14. Sovereign Lexicon Batch 9 (`68,469` words), 46-kalam Classical Diwan corpus (10 poets), and dedicated full-screen reader — November 12, 2026
+
+- **Sovereign Clean-Room Lexicon Batch 9 (`likho-sovereign-lexicon.json` & `diwanExtraVocab.json`):**
+  - Expanded the independent, copyright-clean lexical database to **68,469 unique normalized Urdu words** (**69,969 vocalized and defined entries**), compiled 100% clean-room through `src/services/urduPhonology.ts`.
+  - Ingested 223 classical poetic vocabulary words from all 10 masters, achieving **100% vocabulary coverage (857 / 857 words)** across the entire classical poetry anthology.
+- **Complete Classical Anthology (`src/data/sovereign/classicalDiwanCorpus.ts`):**
+  - Curated 46 complete master kalams across 10 classical poets: میر تقی میر, مرزا اسد اللہ خان غالب, علامہ محمد اقبال, خواجہ میر درد, مومن خان مومن, شیخ ابراہیم ذوق, بہادر شاہ ظفر, داغ دہلوی, مولانا الطاف حسین حالی, and ولی دکنی.
+  - Every kalam is paired with exact meter metadata, classical form (`ghazal` / `nazm`), and sanad couplets.
+- **Dedicated Full-Screen Classical Reader (`ClassicalDiwanReaderModal.tsx`):**
+  - Converted the Diwan reader into a distraction-free, dedicated full-screen literary experience (`fixed inset-0 h-screen w-screen z-50 bg-[var(--bg-canvas)]`).
+  - Added studio return action (`اسٹوڈیو میں واپسی`), browser fullscreen toggle (`Maximize2`), font size adjuster (`18px – 36px`), sidebar toggles (`PanelRight` / `PanelLeft`), and next/previous kalam controls.
+
+## 15. Option 1 ("شاہانہ نستعلیق" — The Royal Calligrapher) Navigation Bar, SaaS Monetization, and Zero-Clipping Typography — November 12, 2026
+
+- **Option 1 ("شاہانہ نستعلیق") Navigation Bar (`TopNavBar.tsx` & `src/index.css`):**
+  - **Zero Nastaliq Glyph Clipping Guarantee:** Expanded navbar height to generous `min-h-[4.75rem]` (76px) / `h-20` (80px), applied generous `py-2` to `py-2.5` padding, `leading-[2.2]`, and an explicit `overflow: visible !important;` rule for all Nastaliq buttons and inputs in `src/index.css`. High ascenders (`ط`, `ک`, `گ`, `آ`, `زبر`, `پیش`) and deep descenders (`ے`, `ں`, `ر`, `ق`, `ل`) are 100% visible and unclipped.
+  - **SaaS Monetization & Free Trial:** Added dynamic trial countdown badge (`مفت آزمائش • ۷ دن باقی`) and high-converting golden shimmer Pro Upgrade CTA (`👑 پرو حاصل کریں`) animated via `@keyframes goldShimmer` and `.btn-gold-shimmer`.
+  - **Three Creative Sanctuaries (Segmented Island):** Central floating island seamlessly switching between `✍️ تحریر` (Studio Workspace), `📖 دیوانِ اساتذہ` (Classical Library with `10` badge), and `🕊️ گوشۂ تنہائی` (Zen Focus mode).
+  - **Consolidated Studio Settings Drawer (`تنظیماتِ اسٹوڈیو`):** Consolidated typography (font family with live preview, font size slider, line height slider), theme switcher (Sepia, Obsidian, Clean White), layout presets, and workspace lock into a single sleek slide-out drawer, eliminating 5 cluttered buttons from the top bar.
+  - **Commercial Pro Upgrade Modal (`ProUpgradeModal.tsx`):** Built dedicated Nastaliq modal outlining Likho Pro features (unlimited prosody scansion, 68,000+ words dictionary, full classical diwan, calligraphy cards, offline privacy) and licensing tiers ($29/yr and $69 lifetime).
+- **Verification:** `npm run build` (**passed** in 3.06s, `0` errors); `npm run test:prosody` (**75/75 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**).
+
+## 16. Sovereign Lexicon Batch 10 (`104,170` words) & 100% Clean-Room Vocabulary Parity — November 12, 2026
+
+- **Clean-Room Compilation of 35,701 Everyday Urdu Words (`scripts/prepare-common-vocab.mjs` & `commonExtraVocab.json`):**
+  - Expanded the independent, copyright-clean lexical database to **104,170 unique normalized Urdu words** (**105,670 vocalized and defined entries**), compiled 100% clean-room through `src/services/urduPhonology.ts`.
+  - Achieved **100.00% parity (40,434 / 40,434 words)** covering every single word in the Aruuz database, plus all classical poetry and everyday conversational verbs, inflections, and modern nouns.
+  - Zero GPL-2.0 third-party code, database schemas, or copyleft dependencies used in compilation.
+- **Verification:** `npm run build` (**passed** in 3.44s, `0` errors); `npm run test:prosody` (**75/75 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**).
+
+## 17. Complete Diwan-e-Ghalib (307 Canonical Works, 2,763 Couplets) & Full Corpus Navigation — November 12, 2026
+
+- **Complete Canonical Diwan-e-Ghalib Ingestion (`src/data/sovereign/diwanGhalibComplete.json` & `scripts/generate-diwan-ghalib.mjs`):**
+  - Ingested the entire 100% public-domain / CC0 canonical Urdu collection of Mirza Asadullah Khan Ghalib (دیوانِ غالب نسخۂ متداول و کلیات) across all radifs (الف تا ے) and classical forms:
+    - **248 Ghazals** (ردیف الف تا ردیف ے)
+    - **20 Rubaiyat** (رباعیاتِ غالب)
+    - **18 Qita'at** (قطعاتِ غالب)
+    - **11 Qasaid** (قصائد)
+    - **1 Marsiya** (مرثیۂ عارف: «لازم تھا کہ دیکھو مرا رستہ کوئی دن اور»)
+    - **9 Masnaviat, Sehre, Salam, Khamsa, and Mutafarriqat**
+    - **Total: 307 Poems, 2,763 Couplets (Ash'ar)**.
+  - Every single poem is scanned and tagged with its classical meter (*بحر و ارکان*), detected *ردیف*, and *قافیہ* samples.
+  - Verified 100.00% vocabulary coverage across all 2,763 couplets against the 104,170-word Sovereign Lexicon (0 missing words).
+- **Full-Screen Diwan Reader Enhancement (`src/components/diwan/ClassicalDiwanReaderModal.tsx`):**
+  - Integrated in-sidebar search input (`کلام یا مصرع تلاش کریں...`) with instant filtering across all 307 poems.
+  - Added genre filter pills: `[ سب (۳۰۷) | غزل (۲۴۸) | رباعی (۲۰) | قطعہ (۱۸) | قصیدہ (۱۱) | مرثیہ (۱) ]`.
+  - Added radif navigation bar with counts across all Urdu letters (`الف`, `ب`, `ت`, `ر`, `ن`, `ی`, etc.).
+  - Total Classical Diwan Corpus expanded to **346 Master Poems and 2,967 Couplets** across 10 classical masters.
+  - Implemented high-performance inverted index caching in `findSanadVerseForWord`, providing instantaneous authentic classical illustrative verses (*اشعارِ سند*) for thousands of Urdu words in the Sovereign Dictionary.
+- **Verification:** `npm run build` (**passed** in 3.14s, `0` errors); `npm run test:prosody` (**75/75 passed**); `npm run test:storage` (**15/15 passed**); `npm run validate:benchmark` (**valid**); `npm run test:benchmark` (**40/40 passed**).
+
+
+

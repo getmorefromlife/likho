@@ -160,15 +160,43 @@ export function expandFlexiblePattern(pattern: string): string[] {
     symbol === 'x' ? [path + '=', path + '-'] : [path + symbol]), ['']);
 }
 
+export interface SovereignLexiconReading {
+  pattern: string;
+  rukn: string;
+  vocalized: string;
+  syllables: string[];
+  pos: string;
+  root: string;
+  meaning: string;
+  rawi: string;
+  source: string;
+}
+
 class AroozLexiconServiceImpl {
   private custom = new Map<string, string[]>();
   private proposals = new Map<string, UserPronunciationProposal>();
   private vocabulary = new Set<string>();
+  private sovereignFallback: Record<string, SovereignLexiconReading[]> | null = null;
   private revision = 0;
   public getRevision(): number { return this.revision; }
   private initPromise: Promise<void> | null = null;
   private subscribers = new Set<() => void>();
   public readonly metadata = dictionaryMetadata;
+
+  /**
+   * Attaches the Likho Sovereign Clean-Room Urdu Prosodic & Literary Dictionary
+   * in parallel mode so any word not already in the primary dictionary is available
+   * for scansion, rhyme matching, and the Slot Rhyme Builder.
+   */
+  public attachSovereignLexicon(lexicon: Record<string, SovereignLexiconReading[]>): void {
+    if (this.sovereignFallback === lexicon) return;
+    this.sovereignFallback = lexicon;
+    this.notifySubscribers();
+  }
+
+  public hasSovereignLexicon(): boolean {
+    return this.sovereignFallback !== null;
+  }
 
   public getLexicalReadings(word: string): LexicalReading[] {
     const key = normalizeLexiconKey(word);
@@ -209,6 +237,19 @@ class AroozLexiconServiceImpl {
       ({ pattern, vocalized, divisions, language, source: 'dictionary', sourceId: `aruuz:${table}:${id}` }));
     // Handbook §2.1 explicitly records monosyllabic kyaa; the source DB also has kiyaa.
     if (key === 'کیا') records.unshift({ pattern: '=', vocalized: 'کْیا', divisions: '', language: 'ہندی', source: 'dictionary', sourceId: 'handbook:2.1:kya' });
+
+    // 5. Parallel Sovereign Clean-Room Lexicon fallback (for derived, inflected & compound forms)
+    if (records.length === 0 && this.sovereignFallback && this.sovereignFallback[key]) {
+      return this.sovereignFallback[key].map((entry) => ({
+        pattern: entry.pattern,
+        vocalized: entry.vocalized.replace(/·/g, ''),
+        divisions: entry.syllables.join('·'),
+        language: 'اردو',
+        source: 'dictionary',
+        sourceId: entry.source,
+      }));
+    }
+
     return records;
   }
 
@@ -401,6 +442,7 @@ class AroozLexiconServiceImpl {
   public getTotalWordCount(): number {
     return new Set([
       ...Object.keys(dictionary),
+      ...(this.sovereignFallback ? Object.keys(this.sovereignFallback) : []),
       ...this.custom.keys(),
       ...this.vocabulary,
       ...this.proposals.keys()
@@ -408,7 +450,15 @@ class AroozLexiconServiceImpl {
   }
 
   public getAllWordsWithScansion(): Map<string, string[]> {
-    return new Map([...new Set([...Object.keys(dictionary), ...this.custom.keys(), ...this.vocabulary, ...this.proposals.keys()])].map(w => [w, this.getScansionVariants(w) || []]));
+    return new Map([
+      ...new Set([
+        ...Object.keys(dictionary),
+        ...(this.sovereignFallback ? Object.keys(this.sovereignFallback) : []),
+        ...this.custom.keys(),
+        ...this.vocabulary,
+        ...this.proposals.keys()
+      ])
+    ].map(w => [w, this.getScansionVariants(w) || []]));
   }
 
   public exportLexiconAsJSON(): string {

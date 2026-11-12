@@ -8,7 +8,7 @@ import {
   type RefObject,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
-import { ArrowRight, Maximize2, Columns2, PanelTop, PanelLeft, Sliders } from 'lucide-react';
+import { ArrowRight, Maximize2, Columns2, PanelTop, PanelLeft, Sliders, BookOpen } from 'lucide-react';
 import type { PoemDraft } from '../../types/editor';
 import type { WorkspacePrefs } from '../../types/workspace';
 import { translateKeyToUrdu } from '../../utils/phoneticKeymap';
@@ -31,6 +31,7 @@ interface Props {
   onRhymesChange: (words: string[]) => void;
   onExit: () => void;
   onToggleSplit: () => void;
+  onOpenDiwan?: () => void;
   saveState: PersistenceState;
   onRetry: () => void;
   storageDamaged: boolean;
@@ -44,6 +45,7 @@ export function QuietWorkspace({
   onRhymesChange,
   onExit,
   onToggleSplit,
+  onOpenDiwan,
   saveState,
   onRetry,
   storageDamaged,
@@ -286,6 +288,22 @@ export function QuietWorkspace({
             <Sliders className="w-3 h-3 text-[var(--accent-gold)]" />
             <span className="font-bold">قالب ساز (Slot)</span>
           </label>
+
+          {onOpenDiwan && (
+            <>
+              <div className="h-4 w-px bg-[var(--border-subtle)] mx-1" />
+              <button
+                type="button"
+                data-testid="quiet-open-diwan-btn"
+                onClick={onOpenDiwan}
+                className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-nastaliq font-bold text-[var(--text-primary)] hover:bg-[var(--accent-gold)]/15 transition-colors"
+                title="دیوانِ اساتذہ — دس کلاسیکی اساتذۂ سخن کا مفت کلام"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+                <span>دیوانِ اساتذہ</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

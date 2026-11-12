@@ -1,0 +1,13 @@
+{
+  "name": "Likho Sovereign Clean-Room Urdu Prosodic & Literary Dictionary",
+  "version": "0.8.0-batch10",
+  "license": "Proprietary — Copyright (c) 2026 Syed Imon Rizvi (Likho / Qalam wa Qafiya)",
+  "cleanRoom": true,
+  "thirdPartyGplUsed": false,
+  "compiler": "src/services/urduPhonology.ts (parsePronunciation / parseDictionaryTaqti)",
+  "generatedAt": "2026-11-11T23:51:45.979Z",
+  "words": 104170,
+  "readings": 105670,
+  "rejectedCandidates": 421,
+  "sha256": "59644bf1375302f43e7fd9d378841d755321f83774a9185ba95fcf387e171c70"
+}

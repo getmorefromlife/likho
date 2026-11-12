@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
 const temporary = await mkdtemp(join(tmpdir(), 'likho-prosody-'));
 try {
-  await build({ stdin: { contents: `export * from './src/services/aroozEngine'; export * from './src/services/meterRepairEngine'; export * from './src/services/urduPhonology'; export * from './src/services/prosodyEngine'; export * from './src/services/fileIngestionService'; export * from './src/services/qafiyaEngine'; export * from './src/services/wordIntentionService'; export * from './src/services/slotRhymeBuilder'; export * from './src/data/meterReferenceAtlas';`, resolveDir: process.cwd() }, bundle: true, platform: 'node', format: 'esm', outfile: join(temporary, 'engine.mjs') });
+  await build({ stdin: { contents: `export * from './src/services/aroozEngine'; export * from './src/services/meterRepairEngine'; export * from './src/services/urduPhonology'; export * from './src/services/prosodyEngine'; export * from './src/services/fileIngestionService'; export * from './src/services/qafiyaEngine'; export * from './src/services/wordIntentionService'; export * from './src/services/slotRhymeBuilder'; export * from './src/services/sovereignLexiconService'; export * from './src/data/meterReferenceAtlas'; export * from './src/data/sovereign/classicalDiwanCorpus';`, resolveDir: process.cwd() }, bundle: true, platform: 'node', format: 'esm', outfile: join(temporary, 'engine.mjs') });
   const e = await import(pathToFileURL(join(temporary, 'engine.mjs')));
   let passed = 0;
   async function test(name, fn) { await fn(); passed++; console.log(`✓ ${name}`); }
@@ -562,6 +562,63 @@ try {
     const exWords = exRes.matches.map(m => m.word);
     assert.ok(!exWords.includes('شام'));
     assert.ok(exWords.includes('نام'));
+  });
+  await test('sovereign clean-room dictionary (Batches 5-7) provides 68,000+ dual-purpose entries, 100% Ghalib benchmark word coverage, and scansion/rhyme fallback', async () => {
+    const meta = e.SOVEREIGN_LEXICON_META;
+    assert.equal(meta.cleanRoom, true);
+    assert.equal(meta.thirdPartyGplUsed, false);
+    assert.ok(meta.words >= 68000);
+    assert.ok(meta.readings >= meta.words);
+    assert.match(meta.sha256, /^[a-f0-9]{64}$/);
+
+    const lex = await e.loadSovereignLexicon();
+    assert.equal(e.isSovereignLexiconLoaded(), true);
+
+    // 1. User-facing dictionary lookup (Arabic triliteral paradigm + root family)
+    const istilaam = e.lookupSovereignWord('استعلام');
+    assert.ok(istilaam);
+    assert.equal(istilaam.word, 'استعلام');
+    assert.ok(istilaam.readings.length > 0);
+    assert.equal(istilaam.readings[0].root, 'ع-ل-م');
+    assert.ok(istilaam.readings[0].meaning.includes('جاننا'));
+    assert.ok(istilaam.readings[0].pos.includes('استفعال'));
+    assert.ok(istilaam.relatedByRoot.includes('عالم'));
+
+    // 2. Poetic compound dictionary lookup + prosodic scansion fallback
+    const dilnawaz = e.lookupSovereignWord('دلنوازوں');
+    assert.ok(dilnawaz);
+    assert.equal(dilnawaz.word, 'دلنوازوں');
+    assert.equal(dilnawaz.readings[0].pattern, '=-==');
+    assert.equal(dilnawaz.readings[0].rukn, 'فَاعِلَاتُن');
+    assert.ok(e.AroozLexiconService.hasWord('دلنوازوں'));
+
+    // 3. Verify 100% coverage of Ghalib classical benchmark vocabulary (Batches 5, 6, 7)
+    for (const w of ['نقش', 'فریادی', 'ہے', 'کس', 'کی', 'شوخی', 'تحریر', 'کا', 'کاغذی', 'پیرہن', 'ہر', 'پیکر', 'تصویر', 'جذبہ', 'اختیار', 'چاہیے', 'ناداں', 'تجھے', 'ہوا', 'کیا']) {
+      assert.ok(lex[w] && lex[w].length > 0, `Expected sovereign lexicon to cover "${w}"`);
+    }
+  });
+  await test('public-domain classical diwan corpus (10 classical masters) resolves 100% of anthology words in the Sovereign Dictionary and provides sanad couplets', async () => {
+    assert.equal(e.CLASSICAL_DIWAN_POETS.length, 10);
+    const sanad = e.findSanadVerseForWord('تحریر');
+    assert.ok(sanad);
+    assert.ok(sanad.poetName.includes('غالب'));
+    assert.ok(sanad.misra1.includes('تحریر'));
+
+    for (const poet of e.CLASSICAL_DIWAN_POETS) {
+      assert.ok(poet.rightsNote.includes('ملکِ عام') || poet.rightsNote.includes('Public Domain'));
+      for (const poem of poet.poems) {
+        for (const couplet of poem.couplets) {
+          for (const line of [couplet.misra1, couplet.misra2]) {
+            for (const raw of line.split(/\s+/)) {
+              const clean = raw.replace(/[،۔؟!؛:«»"()\u200c\u200d\u0640\u0654\u064B-\u0652\u0656-\u0658\u0670]/g, '').trim();
+              if (!clean) continue;
+              const entry = e.lookupSovereignWord(clean);
+              assert.ok(entry, `Expected Sovereign Dictionary to resolve Diwan word "${clean}" in ${poet.name}`);
+            }
+          }
+        }
+      }
+    }
   });
   console.log(`${passed} prosody checks passed.`);
 } finally { await rm(temporary,{recursive:true,force:true}); }

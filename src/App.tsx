@@ -31,12 +31,25 @@ const LazyCustomStudioWorkspace = lazy(() =>
     default: m.CustomStudioWorkspace,
   }))
 );
+const LazyClassicalDiwanReaderModal = lazy(() =>
+  import('./components/diwan/ClassicalDiwanReaderModal').then((m) => ({
+    default: m.ClassicalDiwanReaderModal,
+  }))
+);
+const LazyProUpgradeModal = lazy(() =>
+  import('./components/commercial/ProUpgradeModal').then((m) => ({
+    default: m.ProUpgradeModal,
+  }))
+);
 
 export function App() {
-  // Preload and cache offline Arooz Lexicon asynchronously after initial shell mount
+  // Preload and cache offline Arooz Lexicon & Sovereign Lexicon asynchronously after initial shell mount
   useEffect(() => {
     void import('./services/aroozLexiconService').then(({ AroozLexiconService }) => {
       void AroozLexiconService.initialize();
+    });
+    void import('./services/sovereignLexiconService').then(({ loadSovereignLexicon }) => {
+      void loadSovereignLexicon();
     });
   }, []);
   const {
@@ -103,6 +116,8 @@ export function App() {
 
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [isDiwanModalOpen, setIsDiwanModalOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   // Main container ref for drag splitter calculations
   const workspaceContainerRef = useRef<HTMLDivElement | null>(null);
@@ -144,13 +159,35 @@ export function App() {
   const showQafiyaBar = !isCustomMode && !prefs.isZenMode;
 
   if (prefs.activePreset === 'quiet' || prefs.activePreset === 'quiet_rhymes') {
-    return <QuietWorkspace draft={currentDraft} prefs={prefs} textareaRef={textareaRef}
-      onChange={updateContent} onRhymesChange={setQafiyaList} onExit={() => {
-        if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
-        applyPreset('classic');
-      }}
-      onToggleSplit={() => applyPreset(prefs.activePreset === 'quiet' ? 'quiet_rhymes' : 'quiet')}
-      saveState={saveState} onRetry={retrySave} storageDamaged={!!storageIssue} />;
+    return (
+      <>
+        <QuietWorkspace
+          draft={currentDraft}
+          prefs={prefs}
+          textareaRef={textareaRef}
+          onChange={updateContent}
+          onRhymesChange={setQafiyaList}
+          onExit={() => {
+            if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+            applyPreset('classic');
+          }}
+          onToggleSplit={() => applyPreset(prefs.activePreset === 'quiet' ? 'quiet_rhymes' : 'quiet')}
+          onOpenDiwan={() => setIsDiwanModalOpen(true)}
+          saveState={saveState}
+          onRetry={retrySave}
+          storageDamaged={!!storageIssue}
+        />
+        {isDiwanModalOpen && (
+          <Suspense fallback={null}>
+            <LazyClassicalDiwanReaderModal
+              isOpen={isDiwanModalOpen}
+              onClose={() => setIsDiwanModalOpen(false)}
+              fontFamily={prefs.fontFamily}
+            />
+          </Suspense>
+        )}
+      </>
+    );
   }
 
   return (
@@ -172,6 +209,9 @@ export function App() {
         onToggleZen={toggleZenMode}
         onNewPoem={startNewPoem}
         onOpenExport={() => setIsExportModalOpen(true)}
+        onOpenDiwan={() => setIsDiwanModalOpen(true)}
+        onOpenUpgrade={() => setIsUpgradeModalOpen(true)}
+        trialDaysRemaining={7}
         saveState={saveState}
         saveError={saveError}
         onRetrySave={retrySave}
@@ -455,7 +495,30 @@ export function App() {
         </Suspense>
       )}
 
-      {/* 7. Dedicated Print Container for High-Resolution PDF Printing */}
+      {/* 7. Public-Domain Classical Poetry Reading Modal (دیوانِ اساتذہ) */}
+      {isDiwanModalOpen && (
+        <Suspense fallback={null}>
+          <LazyClassicalDiwanReaderModal
+            isOpen={isDiwanModalOpen}
+            onClose={() => setIsDiwanModalOpen(false)}
+            fontFamily={prefs.fontFamily}
+          />
+        </Suspense>
+      )}
+
+      {/* 8. Commercial Pro Upgrade Modal */}
+      {isUpgradeModalOpen && (
+        <Suspense fallback={null}>
+          <LazyProUpgradeModal
+            isOpen={isUpgradeModalOpen}
+            onClose={() => setIsUpgradeModalOpen(false)}
+            fontFamily={prefs.fontFamily}
+            trialDaysRemaining={7}
+          />
+        </Suspense>
+      )}
+
+      {/* 9. Dedicated Print Container for High-Resolution PDF Printing */}
       <div className="hidden print-poetry-container">
         <h1 className="print-poetry-title">{currentDraft.title || 'کلام'}</h1>
         <p className="print-poetry-poet">شاعر: {currentDraft.poet || 'نامعلوم'}</p>

@@ -22,11 +22,13 @@ These preserve the earlier next-steps discussion; they are priorities to coordin
 6. **Performance and offline behavior:** Initial critical-path bundle size and eager dictionary preloading are now resolved (`dist/index.html` no longer preloads `prosody-lexicon`; main shell `index.js` is `25.87 kB` gzipped; `urduLexicon.ts` uses lazy `Proxy` lookup; `ScansionCard` is memoized per line). Offline Service Worker / app-shell restart verification and formal profiling under throttled network/CPU remain open before promising complete offline operation.
 7. **Release quality:** accessibility, additional browser engines, exports and recovery. Mobile work remains deferred unless requested.
 8. **Versioned release:** review intended changes, establish release checks, then commit/push/deploy only when explicitly authorized. Local build success is not production verification.
+9. **Parallel Track — Independent Sovereign Urdu Lexicon (100% Proprietary Data Cutover):** Follow [Independent Sovereign Urdu Lexicon Plan](INDEPENDENT_SOVEREIGN_LEXICON_PLAN.md) to build Likho's own 65,000+ word clean-room prosodic & rhyme dictionary from 19th-century public-domain dictionaries (Platts 1884 / Steingass 1892), deterministic Urdu morphological inflection expansion, and reverse meter deduction on public-domain classical *Diwans*—while keeping the current dictionaries active until cutover.
 
 ## Sources of truth and handoff
 
 - [Development status](../DEVELOPMENT_STATUS.md): recorded implementation and verification; use newer sections where earlier counts differ.
 - [Full learning/reference plan](REFERENCE_GUIDE_AND_INTERACTIVE_TAQTI_PLAN.md): curriculum and atlas specification.
+- [Independent sovereign lexicon plan](INDEPENDENT_SOVEREIGN_LEXICON_PLAN.md): clean-room dictionary compilation strategy.
 - [Poet review status](POET_REVIEW_STATUS.md): review boundaries and deferred work.
 - [Prosody contract](../PROSODY_REPAIR.md): analysis, provenance and repair behavior.
 - [Broader product plan](COMPETITIVE_PRODUCT_PLAN.md): longer-term proposals; some initial findings are superseded by later fixes.

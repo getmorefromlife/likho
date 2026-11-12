@@ -1,5 +1,5 @@
 import { WordSelectionArea } from '../common/WordSelectionArea';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Sparkles,
   Lock,
@@ -26,6 +26,7 @@ import {
   applyRhymePreset,
   querySlotRhymes,
 } from '../../services/slotRhymeBuilder';
+import { loadSovereignLexicon } from '../../services/sovereignLexiconService';
 
 interface VisualSlotRhymeBuilderProps {
   initialWord?: string;
@@ -55,6 +56,19 @@ export const VisualSlotRhymeBuilder: React.FC<VisualSlotRhymeBuilderProps> = ({
   const [exactLength, setExactLength] = useState(true);
   const [meterFilter, setMeterFilter] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [sovereignReady, setSovereignReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    loadSovereignLexicon()
+      .then(() => {
+        if (active) setSovereignReady(true);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Update slots when base word is changed
   const handleBaseWordChange = (newWord: string) => {
@@ -162,12 +176,13 @@ export const VisualSlotRhymeBuilder: React.FC<VisualSlotRhymeBuilderProps> = ({
 
   // Live Query Execution
   const queryResult = useMemo(() => {
+    void sovereignReady;
     return querySlotRhymes({
       slots,
       exactLength,
       meterFilter: meterFilter || undefined,
     });
-  }, [slots, exactLength, meterFilter]);
+  }, [slots, exactLength, meterFilter, sovereignReady]);
 
   const handleLoadAll = () => {
     const words = queryResult.matches.map((m) => m.word);

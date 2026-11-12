@@ -36,3 +36,5 @@ tsconfig.tsbuildinfo
 /scratch/
 /dictionaryqaafiya app/
 /qaafiyah 2/
+.vercel
+.env*
