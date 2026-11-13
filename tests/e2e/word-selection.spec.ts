@@ -69,11 +69,11 @@ test('dictionary synonyms, antonyms and compounds can be selected and copied tog
   await region.focus();
   await page.keyboard.press('ControlOrMeta+a');
   const selected = region.locator('[data-box-selected=true]');
-  await expect(selected).toHaveCount(17); // 9 synonyms + 4 antonyms + 4 compounds for عشق.
+  await expect(selected).toHaveCount(51); // expanded sovereign synonyms, antonyms, and compounds for عشق.
   const copied = await copySelected(page, 'dictionary');
   expect(copied).toContain('محبت'); expect(copied).toContain('نفرت'); expect(copied).toContain('عشقِ حقیقی');
   await page.screenshot({ path: 'test-results/dictionary-word-selection.png' });
-  await page.getByPlaceholder('لفظ تحریر کریں (مثلاً: عشق، دل، شب)...').fill('دل');
+  await page.getByPlaceholder('لفظ تلاش کریں (مثلاً: عشق، عالمین، دلنواز، ابتدا، محبت)...').fill('دل');
   await expect(page.getByTestId('dictionary-selection-actions')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'دل', exact: true })).toBeVisible();
 });

@@ -86,7 +86,11 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
   onApplyLineChange,
 }) => {
   const [lexiconRevision, setLexiconRevision] = useState(AroozLexiconService.getRevision());
-  useEffect(() => AroozLexiconService.subscribe(() => setLexiconRevision(AroozLexiconService.getRevision())), []);
+  useEffect(() => {
+    const syncRevision = () => setLexiconRevision(AroozLexiconService.getRevision());
+    syncRevision();
+    return AroozLexiconService.subscribe(syncRevision);
+  }, []);
   const [selectedMeterId, setSelectedMeterId] = useState('');
   const [isCustomBaharOpen, setIsCustomBaharOpen] = useState(false);
   const [customBaharInput, setCustomBaharInput] = useState(poemMeterRukn || '');

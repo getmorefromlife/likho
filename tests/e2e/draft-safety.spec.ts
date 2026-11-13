@@ -178,7 +178,7 @@ test.describe('LKH-003 open acceptance contracts', () => {
     await page.getByRole('button', { name: 'علمِ عروض', exact: true }).click();
     await page.getByRole('button', { name: /نظمِ لغت و نظرثانی/ }).click();
     await page.getByTestId('lexicon-search').fill('آرٹ');
-    await page.getByTestId('lexicon-row').filter({ hasText: 'aruuz:mastertable:513' }).getByRole('button').click();
+    await page.getByTestId('lexicon-row').filter({ hasText: 'likho:quarantine:513' }).getByRole('button').click();
     await page.getByTestId('proposal-pattern').fill('=-');
     await page.evaluate(() => {
       const original = IDBDatabase.prototype.transaction;

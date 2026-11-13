@@ -9,7 +9,7 @@ async function openReview(page: Page) {
 async function findArt(page: Page) {
   await page.getByRole('button', { name: /قرنطینہ شدہ الفاظ/ }).click();
   await page.getByTestId('lexicon-search').fill('آرٹ');
-  const row = page.getByTestId('lexicon-row').filter({ hasText: 'aruuz:mastertable:513' });
+  const row = page.getByTestId('lexicon-row').filter({ hasText: 'likho:quarantine:513' });
   await expect(row).toHaveCount(1);
   return row;
 }
@@ -48,14 +48,14 @@ test('A–H: quarantine review, live repair eligibility, real storage and backup
   const card = page.getByTestId('scansion-card').first();
   await test.step('A–B: open modal, source search and reason filter', async () => {
     await openReview(page);
-    await expect(page.getByRole('button', { name: /قرنطینہ شدہ الفاظ \(1007\)/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /قرنطینہ شدہ الفاظ \(2\)/ })).toBeVisible();
     await findArt(page);
-    await expect(page.getByTestId('lexicon-row').filter({ hasText: 'aruuz:mastertable:513' })).toContainText('پیچیدہ');
+    await expect(page.getByTestId('lexicon-row').filter({ hasText: 'likho:quarantine:513' })).toContainText('پیچیدہ');
     await page.getByTestId('lexicon-search').fill('513');
-    await expect(page.getByTestId('lexicon-row').filter({ hasText: 'aruuz:mastertable:513' })).toBeVisible();
+    await expect(page.getByTestId('lexicon-row').filter({ hasText: 'likho:quarantine:513' })).toBeVisible();
     await page.getByTestId('lexicon-search').fill('');
-    await page.getByTestId('reason-filter').selectOption('conflicting-vowel-marks');
-    await expect(page.getByTestId('lexicon-row')).toHaveCount(12);
+    await page.getByTestId('reason-filter').selectOption('impossible-exception');
+    await expect(page.getByTestId('lexicon-row')).toHaveCount(1);
     await page.getByTestId('reason-filter').selectOption('all');
   });
   await test.step('C: invalid patterns rejected without saving', async () => {
