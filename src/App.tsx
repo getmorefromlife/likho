@@ -531,7 +531,7 @@ export function App() {
           <LazyDiwanBookletExportModal
             isOpen={isBookletModalOpen}
             onClose={() => setIsBookletModalOpen(false)}
-            initialTitle={currentDraft.title ? `دیوانِ ${currentDraft.poet || 'قلم و قافیہ'}` : 'دیوانِ قلم و قافیہ'}
+            initialTitle={currentDraft.title ? `دیوانِ ${currentDraft.poet || 'سخن'}` : 'دیوانِ سخن'}
             initialPoetName={currentDraft.poet || ''}
           />
         </Suspense>

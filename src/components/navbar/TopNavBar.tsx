@@ -182,7 +182,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-[var(--accent-gold)] shadow-md flex-shrink-0 bg-[#0c1017] flex items-center justify-center ring-2 ring-[var(--accent-gold)]/25">
             <img
               src="/logo.jpg"
-              alt="نشانِ قلم و قافیہ"
+              alt="نشانِ سخن"
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
@@ -194,7 +194,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                 سخن
               </h1>
               <span className="hidden sm:block text-[9px] font-sans tracking-[0.22em] uppercase text-[var(--accent-gold)] font-semibold -mt-1">
-                SUKHAN · قلم و قافیہ
+                SUKHAN STUDIO
               </span>
             </div>
             <span
@@ -259,7 +259,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
               data-testid="open-classical-diwan-btn"
               onClick={onOpenDiwan}
               className="px-4 py-2 rounded-xl text-sm font-nastaliq font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-all flex items-center gap-2 leading-[2.2]"
-              title="دیوانِ اساتذہ — ۱۰ کلاسیکی اساتذہ کا مکمل کلام مع لغتِ قلم و قافیہ"
+              title="دیوانِ اساتذہ — ۱۰ کلاسیکی اساتذہ کا مکمل کلام مع لغتِ سخن"
             >
               <BookOpen className="w-4 h-4 text-[var(--accent-gold)]" />
               <span>دیوانِ اساتذہ</span>
@@ -547,10 +547,10 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
               type="button"
               onClick={onOpenUpgrade}
               className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-nastaliq font-bold bg-amber-500/15 border border-amber-500/40 text-amber-900 dark:text-amber-200 hover:bg-amber-500/25 transition-all leading-[2.2] shadow-2xs cursor-pointer flex-shrink-0"
-              title="آپ کا قلم و قافیہ پرو لائف ٹائم لائسنس تصدیق شدہ اور فعال ہے — تفصیلات کے لیے کلک کریں"
+              title="آپ کا سخن پرو لائف ٹائم لائسنس تصدیق شدہ اور فعال ہے — تفصیلات کے لیے کلک کریں"
             >
               <Crown className="w-3.5 h-3.5 text-[var(--accent-gold)] flex-shrink-0" />
-              <span>👑 پرو مصدقہ</span>
+              <span>پرو مصدقہ</span>
             </button>
           ) : (
             onOpenUpgrade && (
@@ -571,7 +571,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                   type="button"
                   onClick={onOpenUpgrade}
                   className="btn-gold-shimmer text-black font-bold font-nastaliq px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform leading-[2.2] cursor-pointer flex-shrink-0"
-                  title="قلم و قافیہ پرو — تاحیات لائسنس، لامحدود عروضی تقطیع اور مکمل لغت"
+                  title="سخن پرو — تاحیات لائسنس، لامحدود عروضی تقطیع اور مکمل لغت"
                 >
                   <Crown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black flex-shrink-0" />
                   <span>پرو حاصل کریں</span>
@@ -784,8 +784,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
                 </div>
                 <p className="text-xs text-[var(--text-secondary)] font-nastaliq leading-[2.2]">
                   {isStandalone || isInstalled
-                    ? 'قلم و قافیہ آپ کے کمپیوٹر / موبائل پر بطور خود مختار ایپ انسٹال ہے اور بغیر انٹرنیٹ مکمل آف لائن چلتی ہے۔'
-                    : 'قلم و قافیہ کو اپنے سسٹم (Mac / Windows / Android / iOS) پر بغیر ایپ اسٹور کے ایک کلک میں انسٹال کریں۔'}
+                    ? 'سخن اسٹوڈیو آپ کے کمپیوٹر / موبائل پر بطور خود مختار ایپ انسٹال ہے اور بغیر انٹرنیٹ مکمل آف لائن چلتی ہے۔'
+                    : 'سخن اسٹوڈیو کو اپنے سسٹم (Mac / Windows / Android / iOS) پر بغیر ایپ اسٹور کے ایک کلک میں انسٹال کریں۔'}
                 </p>
                 {!isStandalone && (
                   <button

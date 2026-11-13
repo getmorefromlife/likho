@@ -1,7 +1,7 @@
 # Sukhan (سخن) — Luxury Rebrand, UI/UX Roadmap & \$300k/yr Commercial Blueprint
 
 **Brand Name:** **سخن — Sukhan**  
-**Preferred Domains:** `sukhan.ink` (primary / best renewal value) or `sukhan.studio`  
+**Preferred Domains:** `sukhanstudio.com` (primary `.com` choice at ~\$12/yr) · optional companion `sukhan.ink` / `sukhan.studio`  
 **Goal:** Transform the platform from an engineer-grade literary workbench into an elite, unforgettable, \$300,000+/year creative atelier & book-publishing suite for Urdu/Persian poets worldwide.
 
 ---
@@ -48,3 +48,4 @@
 | **Namecheap** | Deep 1st-year promo discounts (e.g. ~\$2.98 `.ink` / ~\$14.98 `.studio`), higher standard renewals (~\$43.98 `.ink` / ~\$68.48 `.studio`) | Cheapest **Year 1** entry cost if you want to test traction first | Watch Year 2 renewal jump |
 
 > **Recommendation:** Register `sukhan.ink` on **Porkbun** or **Cloudflare Registrar** if you want the lowest multi-year total cost, or grab Year 1 cheaply on **Spaceship / Namecheap** and transfer before renewal.
+

@@ -153,13 +153,13 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({
         {/* Modal Header */}
         <div className="text-center space-y-3 pt-2">
           <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden border border-[var(--accent-gold)]/40 shadow-md bg-[#0f141c]">
-            <img src="/logo.jpg" alt="قلم و قافیہ" className="w-full h-full object-cover" />
+            <img src="/logo.jpg" alt="سخن" className="w-full h-full object-cover" />
             <span className="absolute -bottom-1 -right-1 p-1 rounded-full bg-[var(--accent-gold)] text-[var(--text-on-gold)] shadow-xs">
               <Crown className="w-3.5 h-3.5" />
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] leading-[2.2]">
-            قلم و قافیہ پرو (Likho Pro)
+            سخن پرو (Sukhan Pro)
           </h2>
           <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-lg mx-auto leading-[2.2]">
             اردو شعراء، ادباء اور محققین کے لیے ایک خود مختار، سنجیدہ اور کلاؤڈ سے آزاد عروضی اسٹوڈیو

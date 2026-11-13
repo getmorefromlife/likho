@@ -44,8 +44,8 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Configuration fields
-  const [bookTitle, setBookTitle] = useState(initialTitle || 'دیوانِ قلم و قافیہ');
-  const [poetName, setPoetName] = useState(initialPoetName || 'شاعرِ قلم و قافیہ');
+  const [bookTitle, setBookTitle] = useState(initialTitle || 'دیوانِ سخن');
+  const [poetName, setPoetName] = useState(initialPoetName || 'شاعرِ سخن');
   const [subtitle, setSubtitle] = useState('طبعِ اوّل — مجموعۂ کلام');
   const [dedication, setDedication] = useState('بہ نامِ اہلِ ذوق و سخن، اور اردو شاعری کے سچے قدردانوں کے نام...');
   const [pageSize, setPageSize] = useState<DiwanPageSize>('whatsapp_hd');
@@ -765,7 +765,7 @@ export const DiwanBookletExportModal: React.FC<DiwanBookletExportModalProps> = (
                           سنۂ اشاعت: {DiwanBookletService.toUrduDigits(new Date().getFullYear())}ء
                         </p>
                         <p className="text-[10px] text-[#8a7a6a] leading-[2.2]">
-                          قلم و قافیہ — اسٹوڈیو برائے شعر و ادب
+                          سخن — اسٹوڈیو برائے شعر و ادب
                         </p>
                       </div>
                     </div>

@@ -297,7 +297,7 @@ export const GoogleDriveBackupModal: React.FC<GoogleDriveBackupModalProps> = ({
                   style={{ fontFamily }}
                 >
                   <div className="font-bold text-base text-[var(--accent-gold)] mb-1">
-                    {docsScope === 'current' ? (currentDraft.title || 'لا عنوان کلام') : 'دیوانِ قلم و قافیہ'}
+                    {docsScope === 'current' ? (currentDraft.title || 'لا عنوان کلام') : 'دیوانِ سخن'}
                   </div>
                   <div className="text-[11px] text-[var(--text-muted)] mb-3">
                     {docsScope === 'current' ? (currentDraft.meterName ? `بحر: ${currentDraft.meterName}` : '') : `${allDrafts.length} مسودات`}
@@ -407,7 +407,7 @@ export const GoogleDriveBackupModal: React.FC<GoogleDriveBackupModalProps> = ({
         <div className="px-6 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] flex items-center justify-between text-xs font-nastaliq text-[var(--text-muted)]">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-[var(--accent-gold)]" />
-            <span>قلم و قافیہ — کلاؤڈ اور دستاویزاتی تحفظ برائے شعراء</span>
+            <span>سخن — کلاؤڈ اور دستاویزاتی تحفظ برائے شعراء</span>
           </div>
           <button
             type="button"

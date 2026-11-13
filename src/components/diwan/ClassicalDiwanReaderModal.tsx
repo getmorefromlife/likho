@@ -232,7 +232,7 @@ export const ClassicalDiwanReaderModal: React.FC<ClassicalDiwanReaderModalProps>
             type="button"
             onClick={onClose}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 text-[var(--text-primary)] text-xs font-bold transition-all shadow-2xs cursor-pointer"
-            title="قلم و قافیہ اسٹوڈیو میں واپس جائیں (Esc)"
+            title="سخن اسٹوڈیو میں واپس جائیں (Esc)"
           >
             <ArrowRight className="w-4 h-4 text-[var(--accent-gold)]" />
             <span>اسٹوڈیو میں واپس</span>
@@ -258,7 +258,7 @@ export const ClassicalDiwanReaderModal: React.FC<ClassicalDiwanReaderModalProps>
               </span>
             </div>
             <p className="text-[11px] font-nastaliq text-[var(--text-secondary)] hidden md:block">
-              {stats.totalPoets} کلاسیکی اساتذہ • {stats.totalPoems} شاہکار کلام • {stats.totalCouplets} اشعار مع لغتِ قلم و قافیہ
+              {stats.totalPoets} کلاسیکی اساتذہ • {stats.totalPoems} شاہکار کلام • {stats.totalCouplets} اشعار مع لغتِ سخن
             </p>
           </div>
         </div>
@@ -332,7 +332,7 @@ export const ClassicalDiwanReaderModal: React.FC<ClassicalDiwanReaderModalProps>
                 ? 'bg-[var(--accent-gold)]/15 border-[var(--accent-gold)]/50 text-[var(--accent-gold)]'
                 : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)]'
             }`}
-            title="لغتِ قلم و قافیہ پینل چھپائیں / دکھائیں"
+            title="لغتِ سخن پینل چھپائیں / دکھائیں"
           >
             <PanelLeft className="w-4 h-4" />
           </button>
@@ -731,7 +731,7 @@ export const ClassicalDiwanReaderModal: React.FC<ClassicalDiwanReaderModalProps>
               {/* Interactive Couplets Canvas */}
               <div className="space-y-4">
                 <div className="text-xs font-nastaliq text-[var(--text-muted)] text-center py-1">
-                  کسی بھی لفظ پر کلک کریں تاکہ لغتِ قلم و قافیہ میں اس کا اعراب، معنی، مادہ اور تقطیع دیکھی جا سکے۔
+                  کسی بھی لفظ پر کلک کریں تاکہ لغتِ سخن میں اس کا اعراب، معنی، مادہ اور تقطیع دیکھی جا سکے۔
                 </div>
 
                 {activePoem.couplets.map((couplet, cIdx) => (
@@ -787,7 +787,7 @@ export const ClassicalDiwanReaderModal: React.FC<ClassicalDiwanReaderModalProps>
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-[var(--accent-gold)]" />
                 <h3 className="text-sm font-bold font-nastaliq text-[var(--text-primary)]">
-                  لغتِ قلم و قافیہ
+                  لغتِ سخن
                 </h3>
               </div>
               <span className="text-[10px] font-nastaliq px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25">
@@ -886,7 +886,7 @@ export const ClassicalDiwanReaderModal: React.FC<ClassicalDiwanReaderModalProps>
                   لفظ پر کلک کیجیے
                 </h4>
                 <p className="text-xs font-nastaliq leading-relaxed">
-                  کلام کے کسی بھی شعر کے لفظ پر کلک کریں تاکہ لغتِ قلم و قافیہ ({SOVEREIGN_LEXICON_META.words.toLocaleString('ur-PK')} الفاظ) سے اس کا مکمل اعراب، معنی اور عروضی وزن یہاں ظاہر ہو۔
+                  کلام کے کسی بھی شعر کے لفظ پر کلک کریں تاکہ لغتِ سخن ({SOVEREIGN_LEXICON_META.words.toLocaleString('ur-PK')} الفاظ) سے اس کا مکمل اعراب، معنی اور عروضی وزن یہاں ظاہر ہو۔
                 </p>
               </div>
             )}

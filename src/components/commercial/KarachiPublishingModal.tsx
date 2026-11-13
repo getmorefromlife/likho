@@ -113,7 +113,7 @@ export const KarachiPublishingModal: React.FC<KarachiPublishingModalProps> = ({
   // Pre-filled WhatsApp message for Karachi Press desk
   const generateWhatsAppMessage = () => {
     const lines = [
-      `السلام علیکم! میں Likho (قلم و قافیہ) پلیٹ فارم سے اپنی کتاب طبع کروانے کے لیے رابطہ کر رہا ہوں۔`,
+      `السلام علیکم! میں سخن اسٹوڈیو (Sukhan Studio) پلیٹ فارم سے اپنی کتاب طبع کروانے کے لیے رابطہ کر رہا ہوں۔`,
       ``,
       `📖 کتاب کا نام: ${config.title || 'دیوانِ کلام'}`,
       `✍️ مصنف / شاعر: ${config.poet || 'شاعر'}`,
@@ -453,7 +453,7 @@ export const KarachiPublishingModal: React.FC<KarachiPublishingModalProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span>قلم و قافیہ پلیٹ فارم سے براہِ راست پریس ریڈی سیٹنگ</span>
+                  <span>سخن اسٹوڈیو پلیٹ فارم سے براہِ راست پریس ریڈی سیٹنگ</span>
                 </div>
               </div>
 

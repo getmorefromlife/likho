@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Music,
   CheckCircle2,
@@ -98,6 +98,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
   const [strictEnforceBahar, setStrictEnforceBahar] = useState(false);
   const [savedWordToast, setSavedWordToast] = useState<string | null>(null);
   const [activeBeatTick, setActiveBeatTick] = useState<PlaybackTick | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   // Resolve poem-level or card-level enforced meter (catalog or custom poet-defined Arkan)
   const resolvedEnforcedMeter = useMemo(
@@ -322,6 +323,21 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
     }
   };
 
+  const prevUncertainCountRef = useRef(diagnosticReport.uncertainWords.length);
+  useEffect(() => {
+    if (prevUncertainCountRef.current > 0 && diagnosticReport.uncertainWords.length === 0) {
+      setShowDetails(true);
+    }
+    prevUncertainCountRef.current = diagnosticReport.uncertainWords.length;
+  }, [diagnosticReport.uncertainWords.length]);
+
+  const isDetailsExpanded =
+    showDetails ||
+    isRepairOpen ||
+    isCustomBaharOpen ||
+    diagnosticReport.uncertainWords.length > 0 ||
+    activeWordMenuIdx !== null;
+
   return (
     <div data-testid="scansion-card" className="my-2 py-2.5 px-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)]/90 backdrop-blur-xs shadow-2xs text-xs select-none transition-all hover:border-[var(--accent-gold)]/60">
       {/* Top Row: Identified Bahr Name & Match Confidence */}
@@ -382,6 +398,21 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
               {isRepairOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
           )}
+
+          {/* Progressive Disclosure Toggle for Full Prosody Details */}
+          <button
+            type="button"
+            onClick={() => setShowDetails((prev) => !prev)}
+            className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-nastaliq text-[11px] transition-all border cursor-pointer ${
+              isDetailsExpanded
+                ? 'bg-[var(--accent-gold)]/15 text-[var(--accent-gold)] border-[var(--accent-gold)]/40 font-bold'
+                : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/40'
+            }`}
+            title="تقطیع، الفاظ، ارکان اور صوتی تال کی تفصیل دیکھیں یا چھپائیں"
+          >
+            <span>{isDetailsExpanded ? 'تفصیل چھپائیں' : 'تقطیع و تفصیل'}</span>
+            {isDetailsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
         </div>
       </div>
 
@@ -420,7 +451,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             >
               <option value="">قریب ترین بحر (تجویز)</option>
               <option value={CUSTOM_BAHAR_SELECT_VALUE}>
-                ✍️ اپنی مخصوص بحر / ارکان خود نافذ کریں...
+                اپنی مخصوص بحر / ارکان خود نافذ کریں...
               </option>
               {CLASSICAL_BUHUR.map((meter) => (
                 <option key={meter.id} value={meter.id}>
@@ -430,7 +461,8 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             </select>
           </label>
 
-          {/* Poet-Enforced Bahar Controls */}
+          {/* Poet-Enforced Bahar Controls (shown when expanded) */}
+          {isDetailsExpanded && (
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
@@ -466,6 +498,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
               <span>اپنی بحر / ارکان</span>
             </button>
           </div>
+          )}
         </div>
 
         {/* Custom Poet-Enforced Bahar Builder Panel */}
@@ -477,7 +510,7 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
           >
             <div className="flex items-center justify-between gap-2">
               <span className="font-bold text-[var(--accent-gold)]">
-                ✍️ شاعر کی اپنی نافذ کردہ بحر (ارکان یا علامات درج فرمائیں):
+                شاعر کی اپنی نافذ کردہ بحر (ارکان یا علامات درج فرمائیں):
               </span>
               <button
                 type="button"
@@ -575,7 +608,9 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
           </div>
         )}
 
-        <p>ماخذِ تلفظ و تقطیع: لغتِ قلم و قافیہ (مستقل بالذات علمی و عروضی لغت — ۱۰۴،۰۰۰+ الفاظ) · الفاظ پر کلک کر کے تمام ممکنہ قرأتیں، اوزان اور مرکب املا منتخب کریں۔</p>
+        {isDetailsExpanded && (
+        <>
+        <p>ماخذِ تلفظ و تقطیع: لغتِ سخن (مستقل بالذات علمی و عروضی لغت — ۱۰۴،۰۰۰+ الفاظ) · الفاظ پر کلک کر کے تمام ممکنہ قرأتیں، اوزان اور مرکب املا منتخب کریں۔</p>
         {diagnosticReport.meterNotes.length > 0 && <p className="text-[var(--accent-gold)]">
           {diagnosticReport.meterNotes.map(note => ({ 'terminal-short': 'آخر میں زائد ہجائے کوتاہ', 'caesura-short': 'وقفے سے پہلے زائد ہجائے کوتاہ', 'initial-short': 'پہلے ہجے کی جائز تخفیف' }[note] || note)).join('، ')}
         </p>}
@@ -967,8 +1002,12 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             </div>
           </div>
         )}
+        </>
+        )}
       </div>
 
+      {isDetailsExpanded && (
+      <>
       {diagnosticReport.wordSpans.length > 0 && <details dir="rtl" className="mb-2 text-xs font-nastaliq leading-[2.6]">
         <summary className="cursor-pointer text-[var(--accent-gold)]">تلفظ، ماخذ اور استعمال شدہ جوازات</summary>
         <div className="space-y-1 pt-2">
@@ -1192,6 +1231,8 @@ const ScansionCardInner: React.FC<ScansionCardProps> = ({
             </div>
           </div>
         </div>
+      )}
+      </>
       )}
 
       {/* EXPANDABLE SYLLABLE DEFECT DIAGNOSTICS & 1-CLICK REPAIRS */}

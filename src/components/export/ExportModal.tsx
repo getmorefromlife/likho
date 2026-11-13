@@ -267,7 +267,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         {/* Modal Footer */}
         <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)] text-center text-xs text-[var(--text-muted)] font-nastaliq">
-          قلم و قافیہ — اردو شاعری و عروض کا نگارخانہ
+          سخن — اردو شاعری و عروض کا نگارخانہ
         </div>
       </div>
     </div>
