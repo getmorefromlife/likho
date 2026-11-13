@@ -23,6 +23,8 @@ import {
   FolderDown,
   LayoutGrid,
   Cloud,
+  Feather,
+  Maximize2,
 } from 'lucide-react';
 import { WorkspacePrefs, LayoutPreset, ThemeId, NastaliqFont } from '../../types/workspace';
 import type { PersistenceState } from '../../hooks/usePoemEditor';
@@ -186,10 +188,15 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
           </div>
 
           {/* Brand Name & Status Indicator */}
-          <div className="flex items-center gap-2 pb-0.5">
-            <h1 className="text-2xl sm:text-3xl font-bold font-nastaliq text-[var(--text-primary)] leading-[1.8] sm:leading-[1.9] tracking-tight">
-              قلم و قافیہ
-            </h1>
+          <div className="flex items-center gap-2.5 pb-0.5">
+            <div className="flex flex-col">
+              <h1 className="text-2xl sm:text-3xl font-bold font-nastaliq text-[var(--text-primary)] leading-[1.5] tracking-tight">
+                سخن
+              </h1>
+              <span className="hidden sm:block text-[9px] font-sans tracking-[0.22em] uppercase text-[var(--accent-gold)] font-semibold -mt-1">
+                SUKHAN · قلم و قافیہ
+              </span>
+            </div>
             <span
               className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0 hidden sm:inline-block"
               title="خودکار محفوظ سازی فعال ہے"
@@ -241,7 +248,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
             }`}
             title="شاعر کا بنیادی ورک اسپیس — تقطیع، قوافی اور اصلاح"
           >
-            <span>✍️ تحریر</span>
+            <Feather className="w-3.5 h-3.5" />
+            <span>تحریر</span>
           </button>
 
           {/* 2. Classical Diwan (10 Poets Public-Domain Library & Dictionary) */}
@@ -279,7 +287,8 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
               </>
             ) : (
               <>
-                <span>🕊️ گوشۂ تنہائی</span>
+                <Maximize2 className="w-3.5 h-3.5 text-[var(--accent-gold)]" />
+                <span>گوشۂ تنہائی</span>
               </>
             )}
           </button>

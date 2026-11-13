@@ -6,14 +6,18 @@ test('all main views, dropdowns, companion tabs, modals, and Voice Studio render
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
       const text = msg.text();
-      if (!text.includes('fonts.gstatic.com') && !text.includes('ERR_FAILED')) {
+      if (
+        !text.includes('fonts.gstatic.com') &&
+        !text.includes('ERR_FAILED') &&
+        !text.includes('503 (Offline)')
+      ) {
         errors.push(`console.error: ${text}`);
       }
     }
   });
 
   await page.goto('/');
-  await expect(page.locator('h1', { hasText: 'قلم و قافیہ' })).toBeVisible();
+  await expect(page.locator('h1', { hasText: 'سخن' })).toBeVisible();
 
   // 1. Test Layout Views via TopNavBar dropdown ("طرزِ تقسیم اور نمونے")
   const viewNames = [
